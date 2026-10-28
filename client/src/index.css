@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  min-height: 100vh;
+}
+
+.chinese-font {
+  font-family: 'Noto Sans SC', sans-serif;
+}
+
+/* Classical Chinese Mǐ Zì Gé (米字格) character practice grid */
+.mi-zi-ge-wrapper {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin: 0 auto;
+  border: 3px solid #dc2626;
+  border-radius: 4px;
+  background: #fffdfa;
+}
+
+.mi-zi-ge-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: 
+    linear-gradient(to right, transparent calc(50% - 0.5px), #fca5a5 calc(50% - 0.5px), #fca5a5 calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(to bottom, transparent calc(50% - 0.5px), #fca5a5 calc(50% - 0.5px), #fca5a5 calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(45deg, transparent calc(50% - 0.5px), #fecaca calc(50% - 0.5px), #fecaca calc(50% + 0.5px), transparent calc(50% + 0.5px)),
+    linear-gradient(-45deg, transparent calc(50% - 0.5px), #fecaca calc(50% - 0.5px), #fecaca calc(50% + 0.5px), transparent calc(50% + 0.5px));
+  pointer-events: none;
+}

@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hoa Văn Học Đường - Nền Tảng Học Tiếng Trung HSK (React Router)</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🇨🇳</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #e11d48;
+      --primary-hover: #be123c;
+      --bg-dark: #0f172a;
+      --card-bg: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .portal-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      max-width: 820px;
+      width: 100%;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(225, 29, 72, 0.15);
+      border: 1px solid rgba(225, 29, 72, 0.4);
+      color: #fda4af;
+      padding: 6px 16px;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+    .logo-symbol {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #f43f5e, #be123c);
+      color: #fff;
+      font-family: 'Noto Sans SC', sans-serif;
+      font-size: 32px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 18px;
+      margin: 0 auto 16px;
+      box-shadow: 0 10px 25px rgba(225, 29, 72, 0.4);
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+    }
+    p.subtitle {
+      color: #94a3b8;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .btn-launch {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #e11d48, #be123c);
+      color: #ffffff;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 16px 36px;
+      border-radius: 14px;
+      box-shadow: 0 10px 20px -5px rgba(225, 29, 72, 0.5);
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-launch:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px -5px rgba(225, 29, 72, 0.6);
+      background: linear-gradient(135deg, #f43f5e, #e11d48);
+    }
+    .routes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 36px;
+      text-align: left;
+    }
+    .route-item {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      transition: all 0.2s ease;
+    }
+    .route-item:hover {
+      border-color: rgba(225, 29, 72, 0.5);
+      background: rgba(225, 29, 72, 0.1);
+      transform: translateX(4px);
+      color: #ffffff;
+    }
+    .route-icon {
+      font-size: 1.3rem;
+    }
+    .footer-note {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="portal-card">
+    <div class="logo-symbol">汉</div>
+    <div class="badge">⚛️ Đã chuyển đổi sang React 18 & React Router</div>
+    <h1>Hoa Văn Học Đường</h1>
+    <p class="subtitle">
+      Toàn bộ mã nguồn HTML tĩnh đã được tách thành các <strong>React Components độc lập</strong> trong thư mục <code>client/src/components/</code> và điều hướng mượt mà qua <strong>React Router</strong>.
+    </p>
+
+    <a href="http://localhost:5173/#/reading" class="btn-launch" id="launch-app-btn">
+      <span>🚀</span>
+      <span>Mở Ứng Dụng React Router (Localhost:5173)</span>
+    </a>
+
+    <div class="routes-grid">
+      <a href="http://localhost:5173/#/reading" class="route-item">
+        <span class="route-icon">📖</span>
+        <div>
+          <div style="font-weight: 600;">1. Kỹ Năng Đọc</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/reading • Tra từ & Quiz</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/listening" class="route-item">
+        <span class="route-icon">🎧</span>
+        <div>
+          <div style="font-weight: 600;">2. Kỹ Năng Nghe</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/listening • Audio & Điền từ</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/speaking" class="route-item">
+        <span class="route-icon">🎙️</span>
+        <div>
+          <div style="font-weight: 600;">3. Luyện Nói AI</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/speaking • 20 câu luyện nói</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/ai-chat" class="route-item" style="border-color: rgba(244, 63, 94, 0.4); background: rgba(244, 63, 94, 0.08);">
+        <span class="route-icon">🤖</span>
+        <div>
+          <div style="font-weight: 700; color: #fda4af;">4. AI Trò Chuyện Song Song</div>
+          <div style="font-size: 0.75rem; color: #fda4af;">/ai-chat • Đàm thoại live 1-1</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/writing" class="route-item">
+        <span class="route-icon">✍️</span>
+        <div>
+          <div style="font-weight: 600;">4. Luyện Viết</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/writing • 米字格 20 chữ</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/matching" class="route-item">
+        <span class="route-icon">🧩</span>
+        <div>
+          <div style="font-weight: 600;">5. Game Ghép Từ</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/matching • Mini-game từ vựng</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/scenario" class="route-item">
+        <span class="route-icon">💬</span>
+        <div>
+          <div style="font-weight: 600;">6. Hoàn Cảnh Thực Tế</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/scenario • Ghép câu theo ngữ cảnh</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/formula" class="route-item">
+        <span class="route-icon">📐</span>
+        <div>
+          <div style="font-weight: 600;">7. Công Thức Ghép Câu</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/formula • S + 是 + N, v.v.</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/vocab1000" class="route-item">
+        <span class="route-icon">📚</span>
+        <div>
+          <div style="font-weight: 600;">8. Kho 1000 Từ HSK</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/vocab1000 • HSK 1 - 2 - 3</div>
+        </div>
+      </a>
+      <a href="http://localhost:5173/#/dashboard" class="route-item">
+        <span class="route-icon">📊</span>
+        <div>
+          <div style="font-weight: 600;">Tiến Độ & Thống Kê</div>
+          <div style="font-size: 0.75rem; color: #94a3b8;">/dashboard • Báo cáo học tập</div>
+        </div>
+      </a>
+    </div>
+
+    <div class="footer-note">
+      Chạy ứng dụng: Mở terminal chạy <code>npm run dev</code> trong thư mục <code>client/</code> hoặc nhấp đúp vào <code>run_client.bat</code>.
+    </div>
+  </div>
+
+  <script>
+    // If opened directly from file://, automatically try redirecting to local dev server if accessible
+    fetch('http://localhost:5173/', { mode: 'no-cors' })
+      .then(() => {
+        // Dev server is running, redirect seamlessly
+        window.location.href = 'http://localhost:5173/#/reading';
+      })
+      .catch(() => {
+        console.log('Vite server not active yet, keeping launcher portal active.');
+      });
+  </script>
+</body>
+</html>
