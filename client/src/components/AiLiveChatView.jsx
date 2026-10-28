@@ -2,8 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import {
   AI_PERSONAS,
   QUICK_VOICE_TOPICS,
-  analyzeSpokenChinese,
-  generatePersonaLiveResponse,
+  sendChatMessageToAi,
 } from '../data/aiChatEngine';
 
 export default function AiLiveChatView({ onGainXP }) {
@@ -12,19 +11,47 @@ export default function AiLiveChatView({ onGainXP }) {
 
   const [messages, setMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
-  const [autoTwoWay, setAutoTwoWay] = useState(true); // Continuous live conversation mode
+  // Auto-speak disabled by default to avoid unexpected auto speech
+  const [autoSpeakAi, setAutoSpeakAi] = useState(false);
   const [inputText, setInputText] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [expandedThoughts, setExpandedThoughts] = useState({});
+
+  // Real AI Configuration (stored in localStorage or loaded via .env)
+  const USER_DEFAULT_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
+  const [aiSettings, setAiSettings] = useState(() => {
+    const saved = localStorage.getItem('app_ai_settings');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.apiKey) return parsed;
+      } catch (e) {}
+    }
+    return {
+      provider: 'gemini',
+      apiKey: USER_DEFAULT_API_KEY,
+      model: 'gemini-1.5-flash',
+    };
+  });
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [tempApiKey, setTempApiKey] = useState(aiSettings.apiKey || USER_DEFAULT_API_KEY);
+  const [tempProvider, setTempProvider] = useState(aiSettings.provider || 'gemini');
+  const [tempModel, setTempModel] = useState(aiSettings.model || 'gemini-1.5-flash');
 
   const chatBottomRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // Initialize chat when persona changes
+  // Initialize chat when persona changes - KHÔNG tự động đọc khi vào
   useEffect(() => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
     }
+    setIsAiSpeaking(false);
+    setIsThinking(false);
+    setIsListening(false);
+
     const welcomeMsg = {
       id: 'msg_' + Date.now(),
       sender: 'ai',
@@ -32,18 +59,25 @@ export default function AiLiveChatView({ onGainXP }) {
       hanzi: persona.greeting,
       pinyin: persona.greetingPinyin,
       vi: persona.greetingVi,
+      thoughtProcess: {
+        intent: 'Lời chào mở đầu buổi luyện khẩu ngữ tương tác 1-1.',
+        grammarAndTone: 'Khởi tạo bối cảnh giao tiếp thân thiện theo vai trò của nhân vật.',
+        strategy: 'Tạo tâm lý thoải mái để người học tự tin nói hoặc gõ câu tiếng Trung đầu tiên.',
+      },
+      isRealAi: false,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
+
     setMessages([welcomeMsg]);
-    speakAiResponse(persona.greeting, persona.gender);
+    // TUYỆT ĐỐI KHÔNG TỰ ĐỘNG ĐỌC KHI VÀO TRANG HOẶC ĐỔI NHÂN VẬT
   }, [currentPersonaId]);
 
   // Auto scroll chat to bottom
   useEffect(() => {
     chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, interimTranscript, isAiSpeaking]);
+  }, [messages, interimTranscript, isAiSpeaking, isThinking]);
 
-  const speakAiResponse = (text, gender = 'female', onFinished = null) => {
+  const speakAiResponse = (text, gender = 'female') => {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
 
@@ -58,13 +92,6 @@ export default function AiLiveChatView({ onGainXP }) {
 
     const handleEnd = () => {
       setIsAiSpeaking(false);
-      if (onFinished) onFinished();
-      // If Auto Two-Way mode is enabled, automatically activate mic after AI finishes speaking!
-      if (autoTwoWay) {
-        setTimeout(() => {
-          startSpeechRecognition();
-        }, 500);
-      }
     };
 
     u.onend = handleEnd;
@@ -73,18 +100,43 @@ export default function AiLiveChatView({ onGainXP }) {
     window.speechSynthesis.speak(u);
   };
 
-  const handleSendUserMessage = (userSpokenText) => {
+  const stopSpeaking = () => {
+    if ('speechSynthesis' in window) {
+      window.speechSynthesis.cancel();
+    }
+    setIsAiSpeaking(false);
+  };
+
+  const toggleThought = (msgId) => {
+    setExpandedThoughts((prev) => ({
+      ...prev,
+      [msgId]: !prev[msgId],
+    }));
+  };
+
+  const saveAiSettings = () => {
+    const updated = {
+      provider: tempProvider,
+      apiKey: tempApiKey.trim(),
+      model: tempModel,
+    };
+    setAiSettings(updated);
+    localStorage.setItem('app_ai_settings', JSON.stringify(updated));
+    setShowSettingsModal(false);
+  };
+
+  const handleSendUserMessage = async (userSpokenText) => {
     const text = (userSpokenText || inputText).trim();
     if (!text) return;
 
-    // 1. Analyze user speech
-    const analysis = analyzeSpokenChinese(text);
+    if (isListening) {
+      stopSpeechRecognition();
+    }
 
     const userMsg = {
       id: 'msg_user_' + Date.now(),
       sender: 'user',
       hanzi: text,
-      analysis,
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
@@ -93,21 +145,57 @@ export default function AiLiveChatView({ onGainXP }) {
     setInterimTranscript('');
     onGainXP(15, 'Trò chuyện khẩu ngữ cùng AI');
 
-    // 2. Generate live AI response after small natural delay
-    setTimeout(() => {
-      const aiResponse = generatePersonaLiveResponse(persona.id, text);
+    // Kích hoạt trạng thái AI Suy Nghĩ (Thinking Process)
+    setIsThinking(true);
+
+    try {
+      // GỌI AI THỰC TẾ (Google Gemini / OpenAI / DeepSeek qua Backend NestJS hoặc Client)
+      const aiResult = await sendChatMessageToAi({
+        persona,
+        userText: text,
+        history: messages,
+        settings: aiSettings,
+      });
+
+      // Cập nhật phân tích ngữ pháp vào tin nhắn của user nếu AI phân tích được
+      if (aiResult.speechAnalysis) {
+        setMessages((prev) =>
+          prev.map((m) =>
+            m.id === userMsg.id ? { ...m, analysis: aiResult.speechAnalysis } : m
+          )
+        );
+      }
+
       const aiMsg = {
         id: 'msg_ai_' + Date.now(),
         sender: 'ai',
         personaId: persona.id,
-        hanzi: aiResponse.hanzi,
-        pinyin: aiResponse.pinyin,
-        vi: aiResponse.vi,
+        hanzi: aiResult.reply.hanzi,
+        pinyin: aiResult.reply.pinyin,
+        vi: aiResult.reply.vi,
+        thoughtProcess: aiResult.thoughtProcess,
+        isRealAi: aiResult.isRealAi,
+        provider: aiResult.provider,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
+
+      setIsThinking(false);
       setMessages((prev) => [...prev, aiMsg]);
-      speakAiResponse(aiResponse.hanzi, persona.gender);
-    }, 600);
+
+      // Tự động mở chi tiết suy nghĩ cho câu trả lời mới
+      setExpandedThoughts((prev) => ({
+        ...prev,
+        [aiMsg.id]: true,
+      }));
+
+      // Chỉ đọc nếu người dùng chủ động BẬT tùy chọn "Tự động phát âm"
+      if (autoSpeakAi) {
+        speakAiResponse(aiResult.reply.hanzi, persona.gender);
+      }
+    } catch (err) {
+      console.error('Lỗi khi gọi AI:', err);
+      setIsThinking(false);
+    }
   };
 
   const startSpeechRecognition = () => {
@@ -121,6 +209,7 @@ export default function AiLiveChatView({ onGainXP }) {
     if (isListening) return;
 
     try {
+      stopSpeaking();
       const rec = new SpeechRecognition();
       rec.lang = 'zh-CN';
       rec.continuous = false;
@@ -148,11 +237,10 @@ export default function AiLiveChatView({ onGainXP }) {
       };
 
       rec.onerror = (e) => {
-        console.log('Speech error:', e);
         setIsListening(false);
         setInterimTranscript('');
         if (e.error === 'not-allowed') {
-          alert('Bạn cần bấm "Cho phép" (Allow) quyền sử dụng Microphone trên trình duyệt để nói trực tiếp với AI nhé!');
+          alert('Vui lòng cấp quyền Microphone trên trình duyệt để nói trực tiếp cùng AI nhé!');
         }
       };
 
@@ -178,66 +266,94 @@ export default function AiLiveChatView({ onGainXP }) {
     if (isListening) {
       stopSpeechRecognition();
     } else {
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel();
-      }
-      setIsAiSpeaking(false);
       startSpeechRecognition();
     }
   };
 
+  const isRealAiConfigured = Boolean(aiSettings.apiKey);
+
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] min-h-[550px] max-w-5xl mx-auto space-y-4">
-      {/* Top Header & Persona Selector */}
-      <div className="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+    <div className="flex flex-col h-[calc(100vh-140px)] min-h-[580px] max-w-5xl mx-auto space-y-3.5">
+      {/* Top Bar: Title & AI Provider Status & Audio Toggle */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs">
         <div>
           <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-emerald-500 animate-ping"></span>
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <span>🤖</span> AI Giao Tiếp Song Song (AI智能对话)
+              <span>🤖</span> AI Giao Tiếp Thực Tế (Real AI Thinking)
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold uppercase tracking-wider">
-              Live Voice 1-1
-            </span>
+            <button
+              onClick={() => {
+                setTempApiKey(aiSettings.apiKey);
+                setTempProvider(aiSettings.provider);
+                setTempModel(aiSettings.model);
+                setShowSettingsModal(true);
+              }}
+              className={`px-2.5 py-1 rounded-full text-[11px] font-bold border transition-all flex items-center gap-1.5 ${
+                isRealAiConfigured
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100'
+                  : 'bg-amber-50 text-amber-800 border-amber-300 hover:bg-amber-100 animate-pulse'
+              }`}
+              title="Bấm để cấu hình API Key AI (Gemini / OpenAI / DeepSeek)"
+            >
+              <span>{isRealAiConfigured ? '🟢' : '⚙️'}</span>
+              <span>
+                {isRealAiConfigured
+                  ? `AI Thực Tế (${aiSettings.provider === 'gemini' ? 'Gemini' : aiSettings.provider})`
+                  : 'Chưa nhập API Key (Bấm cài đặt)'}
+              </span>
+            </button>
           </div>
-          <p className="text-slate-500 text-xs sm:text-sm mt-1">
-            Nói tiếng Trung trực tiếp, AI sẽ tự động phân tích ngữ pháp, chỉnh sửa cách nói bản xứ và đối đáp lại như người thật.
+          <p className="text-slate-500 text-xs sm:text-sm mt-0.5">
+            Hội thoại trực tiếp với mô hình ngôn ngữ lớn (LLM), AI thực sự suy nghĩ phân tích ngữ cảnh và phản xạ tự nhiên.
           </p>
         </div>
 
-        {/* Auto Two-Way Toggle */}
-        <div className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3.5 py-2 rounded-xl">
-          <label className="text-xs font-semibold text-slate-700 cursor-pointer flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={autoTwoWay}
-              onChange={(e) => setAutoTwoWay(e.target.checked)}
-              className="w-4 h-4 text-rose-600 rounded cursor-pointer accent-rose-600"
-            />
-            <span>Đàm thoại liên tục (Tự động mở mic)</span>
-          </label>
+        {/* Audio controls */}
+        <div className="flex items-center gap-2.5 self-end sm:self-auto">
+          {isAiSpeaking && (
+            <button
+              onClick={stopSpeaking}
+              className="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-1 transition-all animate-pulse"
+              title="Dừng phát âm hiện tại"
+            >
+              ⏹️ Dừng đọc
+            </button>
+          )}
+
+          <button
+            onClick={() => setAutoSpeakAi((prev) => !prev)}
+            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-all ${
+              autoSpeakAi
+                ? 'bg-rose-50 border-rose-300 text-rose-700 shadow-xs'
+                : 'bg-slate-100 border-slate-200 text-slate-600 hover:bg-slate-200'
+            }`}
+            title="Bật/Tắt tự động phát âm câu trả lời của AI"
+          >
+            <span>{autoSpeakAi ? '🔊' : '🔇'}</span>
+            <span>Tự đọc: <strong>{autoSpeakAi ? 'BẬT' : 'TẮT'}</strong></span>
+          </button>
         </div>
       </div>
 
-      {/* Persona Selection Pills */}
+      {/* Persona Selection Bar */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         {AI_PERSONAS.map((p) => {
-          const isSelected = p.id === persona.id;
+          const isSelected = p.id === currentPersonaId;
           return (
             <button
               key={p.id}
               onClick={() => setCurrentPersonaId(p.id)}
-              className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-3 ${
+              className={`p-3 rounded-2xl border text-left transition-all flex items-center gap-2.5 relative overflow-hidden ${
                 isSelected
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-md scale-[1.02]'
-                  : 'bg-white text-slate-800 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-rose-500/40'
+                  : 'bg-white hover:bg-slate-50 text-slate-800 border-slate-200 shadow-2xs'
               }`}
             >
-              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-2xl flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-xl flex-shrink-0 shadow-inner">
                 {p.avatar}
               </div>
-              <div className="min-w-0">
-                <div className="font-bold text-sm truncate">{p.name.split(' (')[0]}</div>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-xs sm:text-sm truncate">{p.name.split(' (')[0]}</div>
                 <div className={`text-[11px] truncate ${isSelected ? 'text-slate-300' : 'text-slate-400'}`}>
                   {p.role}
                 </div>
@@ -247,48 +363,99 @@ export default function AiLiveChatView({ onGainXP }) {
         })}
       </div>
 
-      {/* Quick Instruction Banner */}
-      <div className="bg-gradient-to-r from-amber-50 to-rose-50 border border-amber-200/80 rounded-xl px-4 py-2.5 text-xs text-slate-700 flex items-center justify-between gap-2 shadow-2xs">
-        <div className="flex items-center gap-2">
-          <span className="text-base">🎙️</span>
-          <span><strong>Cách nói chuyện trực tiếp:</strong> Bạn chỉ cần bấm vào <strong>nút Micro đỏ bên dưới</strong> và nói tiếng Trung (hoặc bấm câu gợi ý sẵn), AI sẽ lập tức phân tích và trò chuyện lại với bạn!</span>
-        </div>
-        <span className="hidden sm:inline-block text-[11px] font-bold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md flex-shrink-0">
-          Nói trực tiếp 1-1
-        </span>
-      </div>
-
       {/* Main Live Chat Stream */}
-      <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 overflow-y-auto shadow-inner space-y-5">
+      <div className="flex-1 bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 overflow-y-auto shadow-inner space-y-4">
         {messages.map((msg) => {
           if (msg.sender === 'ai') {
+            const isExpanded = expandedThoughts[msg.id] !== false; // Mặc định mở
             return (
-              <div key={msg.id} className="flex items-start gap-3 max-w-[92%] sm:max-w-[85%]">
+              <div key={msg.id} className="flex items-start gap-3 max-w-[94%] sm:max-w-[85%]">
                 <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md">
                   {persona.avatar}
                 </div>
-                <div className="bg-slate-100/90 text-slate-900 p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-2xs space-y-1.5">
-                  <div className="flex items-center justify-between gap-3 text-xs text-slate-500 pb-1 border-b border-slate-200/60">
-                    <span className="font-bold text-slate-700">{persona.name}</span>
-                    <button
-                      onClick={() => speakAiResponse(msg.hanzi, persona.gender)}
-                      className="text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1 text-xs"
-                      title="Nghe lại câu này"
-                    >
-                      🔊 Phát lại
-                    </button>
-                  </div>
-                  <div className="text-lg sm:text-xl font-bold chinese-font text-slate-900 leading-relaxed">
-                    {msg.hanzi}
-                  </div>
-                  {msg.pinyin && (
-                    <div className="text-xs sm:text-sm text-amber-600 font-medium">
-                      {msg.pinyin}
+                <div className="space-y-2 flex-1 min-w-0">
+                  {/* AI Bubble */}
+                  <div className="bg-slate-100/90 text-slate-900 p-4 rounded-2xl rounded-tl-none border border-slate-200 shadow-2xs space-y-1.5">
+                    <div className="flex items-center justify-between gap-3 text-xs text-slate-500 pb-1 border-b border-slate-200/60">
+                      <div className="flex items-center gap-2">
+                        <span className="font-bold text-slate-700">{persona.name}</span>
+                        {msg.isRealAi && (
+                          <span className="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">
+                            AI Thực Tế
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => speakAiResponse(msg.hanzi, persona.gender)}
+                        className="text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md hover:bg-rose-50 transition-colors"
+                        title="Bấm để nghe phát âm câu này"
+                      >
+                        🔊 Nghe phát âm
+                      </button>
                     </div>
-                  )}
-                  {msg.vi && (
-                    <div className="text-xs text-slate-600 pt-1 border-t border-slate-200/40">
-                      💡 {msg.vi}
+
+                    <div className="text-lg sm:text-xl font-bold chinese-font text-slate-900 leading-relaxed">
+                      {msg.hanzi}
+                    </div>
+
+                    {msg.pinyin && (
+                      <div className="text-xs sm:text-sm text-amber-600 font-medium">
+                        {msg.pinyin}
+                      </div>
+                    )}
+
+                    {msg.vi && (
+                      <div className="text-xs text-slate-600 pt-1 border-t border-slate-200/40">
+                        💡 {msg.vi}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* AI Real Thought Process Accordion */}
+                  {msg.thoughtProcess && (
+                    <div className="rounded-xl border border-purple-200/80 bg-purple-50/50 overflow-hidden text-xs text-slate-700 transition-all shadow-2xs">
+                      <button
+                        onClick={() => toggleThought(msg.id)}
+                        className="w-full px-3 py-2 flex items-center justify-between font-semibold text-purple-900 hover:bg-purple-100/60 transition-colors"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <span>🧠</span>
+                          <span>Quá trình suy nghĩ thực tế của AI (Thinking Chain)</span>
+                          {msg.provider && (
+                            <span className="text-[10px] text-purple-500 font-normal">
+                              ({msg.provider})
+                            </span>
+                          )}
+                        </span>
+                        <span className="text-[11px] text-purple-600 font-bold">
+                          {isExpanded ? '▲ Thu gọn' : '▼ Xem chi tiết'}
+                        </span>
+                      </button>
+
+                      {isExpanded && (
+                        <div className="px-3.5 pb-3 pt-1 space-y-2 border-t border-purple-200/50 bg-white/80">
+                          <div>
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
+                              <span>🎯</span> Phân tích ý định người dùng (Intent):
+                            </div>
+                            <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.intent}</p>
+                          </div>
+
+                          <div>
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
+                              <span>🧐</span> Đánh giá ngữ pháp & Sắc thái (Grammar & Tone):
+                            </div>
+                            <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.grammarAndTone}</p>
+                          </div>
+
+                          <div>
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
+                              <span>💡</span> Chiến lược đối đáp sư phạm (Strategy):
+                            </div>
+                            <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.strategy}</p>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -296,9 +463,9 @@ export default function AiLiveChatView({ onGainXP }) {
             );
           }
 
-          // User message with AI Speech Analysis Card
+          // User message with Speech Analysis Card
           return (
-            <div key={msg.id} className="flex flex-col items-end gap-1.5 ml-auto max-w-[92%] sm:max-w-[85%]">
+            <div key={msg.id} className="flex flex-col items-end gap-1.5 ml-auto max-w-[94%] sm:max-w-[85%]">
               <div className="flex items-start gap-2.5 flex-row-reverse">
                 <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-base flex-shrink-0 shadow-md">
                   🧑
@@ -311,16 +478,16 @@ export default function AiLiveChatView({ onGainXP }) {
                 </div>
               </div>
 
-              {/* AI Live Grammar & Fluency Analysis Box */}
+              {/* Speech Analysis Card */}
               {msg.analysis && (
                 <div className="w-full bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 text-left space-y-1.5 text-xs text-slate-700 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-800 flex items-center gap-1.5">
                       <span>✨</span>
-                      <span>AI Phân Tích Câu Nói:</span>
+                      <span>AI Nhận Xét Câu Nói:</span>
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px]">
-                      {msg.analysis.fluencyScore}% Độ Tự Nhiên
+                      {msg.analysis.fluencyScore}% Điểm Lưu Loát
                     </span>
                   </div>
 
@@ -354,11 +521,35 @@ export default function AiLiveChatView({ onGainXP }) {
         {/* Interim Speech Transcript while speaking */}
         {interimTranscript && (
           <div className="flex items-start gap-2.5 flex-row-reverse ml-auto max-w-[85%]">
-            <div className="w-10 h-10 rounded-2xl bg-blue-400 text-white flex items-center justify-center font-bold text-base flex-shrink-0 animate-pulse">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold text-base flex-shrink-0 animate-pulse">
               🎙️
             </div>
-            <div className="bg-blue-100 text-blue-900 border border-blue-300 p-3 rounded-2xl rounded-tr-none text-base chinese-font italic">
+            <div className="bg-rose-50 text-rose-900 border border-rose-300 p-3.5 rounded-2xl rounded-tr-none text-base chinese-font italic shadow-xs">
               {interimTranscript} ...
+            </div>
+          </div>
+        )}
+
+        {/* AI Real Thinking Indicator */}
+        {isThinking && (
+          <div className="flex items-start gap-3 max-w-[85%] animate-fade-in">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md animate-pulse">
+              🧠
+            </div>
+            <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 text-purple-900 p-3.5 rounded-2xl rounded-tl-none shadow-xs space-y-1.5">
+              <div className="flex items-center gap-2 font-bold text-xs">
+                <span>{persona.name} đang suy nghĩ câu trả lời...</span>
+                <span className="flex gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-bounce"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-bounce [animation-delay:0.2s]"></span>
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-600 animate-bounce [animation-delay:0.4s]"></span>
+                </span>
+              </div>
+              <p className="text-[11px] text-purple-700">
+                {isRealAiConfigured
+                  ? `Mô hình AI (${aiSettings.provider}) đang phân tích ngữ cảnh và tạo tư duy suy nghĩ thực tế...`
+                  : 'Đang kết nối xử lý ngôn ngữ tự nhiên...'}
+              </p>
             </div>
           </div>
         )}
@@ -367,7 +558,7 @@ export default function AiLiveChatView({ onGainXP }) {
         {isAiSpeaking && (
           <div className="flex items-center gap-2 text-xs font-semibold text-rose-600 bg-rose-50 px-3 py-1.5 rounded-full w-fit animate-pulse border border-rose-200">
             <span className="w-2 h-2 rounded-full bg-rose-600 animate-ping"></span>
-            <span>{persona.name} đang trả lời và phát âm...</span>
+            <span>{persona.name} đang phát âm câu trả lời...</span>
           </div>
         )}
 
@@ -394,9 +585,9 @@ export default function AiLiveChatView({ onGainXP }) {
         {/* BIG MIC BUTTON */}
         <button
           onClick={toggleMic}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-white font-bold transition-all flex-shrink-0 shadow-lg ${
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-white font-bold transition-all flex-shrink-0 shadow-lg relative ${
             isListening
-              ? 'bg-rose-600 shadow-rose-600/50 scale-105 animate-bounce'
+              ? 'bg-rose-600 shadow-rose-600/50 scale-105 animate-pulse ring-4 ring-rose-300'
               : 'bg-gradient-to-br from-rose-500 to-rose-700 hover:from-rose-600 hover:to-rose-800 shadow-rose-600/30 active:scale-95'
           }`}
           title={isListening ? 'Bấm để dừng ghi âm' : 'Bấm để nói tiếng Trung'}
@@ -415,24 +606,170 @@ export default function AiLiveChatView({ onGainXP }) {
             }}
             placeholder={
               isListening
-                ? 'Đang lắng nghe giọng bạn nói bằng tiếng Trung...'
+                ? 'Đang lắng nghe giọng bạn nói bằng tiếng Trung... (Bấm nút đỏ để hoàn tất)'
                 : 'Bấm micro để nói tiếng Trung, hoặc gõ câu tại đây...'
             }
             className={`w-full px-4 py-3 rounded-xl border text-sm sm:text-base font-medium outline-none transition-all ${
               isListening
-                ? 'border-rose-500 bg-rose-50 text-rose-800 placeholder-rose-400'
+                ? 'border-rose-500 bg-rose-50 text-rose-800 placeholder-rose-500 font-semibold'
                 : 'border-slate-300 bg-slate-50 focus:bg-white focus:border-rose-500'
             }`}
           />
           <button
             onClick={() => handleSendUserMessage()}
             disabled={!inputText.trim()}
-            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-sm transition-all flex-shrink-0"
+            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-sm transition-all flex-shrink-0 shadow-xs"
           >
             Gửi
           </button>
         </div>
       </div>
+
+      {/* AI Settings Modal */}
+      {showSettingsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-slate-200 space-y-5 animate-scale-in">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">⚙️</span>
+                <h3 className="text-lg font-bold text-slate-900">
+                  Cài Đặt Kết Nối AI Thực Tế (LLM)
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowSettingsModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs sm:text-sm text-slate-700">
+              {/* Provider Selection */}
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  1. Chọn Dịch Vụ AI:
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempProvider('gemini');
+                      setTempModel('gemini-1.5-flash');
+                    }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      tempProvider === 'gemini'
+                        ? 'bg-rose-50 border-rose-500 text-rose-700 font-bold ring-2 ring-rose-500/20'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>🌟 Google Gemini</div>
+                    <div className="text-[10px] text-slate-500">Miễn phí & Nhanh</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempProvider('openai');
+                      setTempModel('gpt-4o-mini');
+                    }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      tempProvider === 'openai'
+                        ? 'bg-rose-50 border-rose-500 text-rose-700 font-bold ring-2 ring-rose-500/20'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>🤖 OpenAI</div>
+                    <div className="text-[10px] text-slate-500">GPT-4o-mini</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setTempProvider('deepseek');
+                      setTempModel('deepseek-chat');
+                    }}
+                    className={`p-2.5 rounded-xl border text-center transition-all ${
+                      tempProvider === 'deepseek'
+                        ? 'bg-rose-50 border-rose-500 text-rose-700 font-bold ring-2 ring-rose-500/20'
+                        : 'border-slate-200 hover:bg-slate-50'
+                    }`}
+                  >
+                    <div>🚀 DeepSeek</div>
+                    <div className="text-[10px] text-slate-500">R1 / V3 Chat</div>
+                  </button>
+                </div>
+              </div>
+
+              {/* API Key Input */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-bold text-slate-800">
+                    2. Nhập API Key:
+                  </label>
+                  {tempProvider === 'gemini' && (
+                    <a
+                      href="https://aistudio.google.com/app/apikey"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs text-rose-600 hover:underline font-semibold"
+                    >
+                      🔗 Lấy Key Gemini miễn phí tại đây
+                    </a>
+                  )}
+                </div>
+                <input
+                  type="password"
+                  value={tempApiKey}
+                  onChange={(e) => setTempApiKey(e.target.value)}
+                  placeholder={
+                    tempProvider === 'gemini'
+                      ? 'Dán mã AIzaSy...'
+                      : tempProvider === 'deepseek'
+                      ? 'Dán mã sk-...'
+                      : 'Dán mã sk-proj-...'
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm font-mono focus:border-rose-500 focus:bg-white outline-none"
+                />
+                <p className="text-[11px] text-slate-500 mt-1">
+                  API Key được lưu bảo mật trong trình duyệt của bạn hoặc cấu hình qua file{' '}
+                  <code className="text-rose-600 bg-rose-50 px-1 rounded">server/.env</code>.
+                </p>
+              </div>
+
+              {/* Model Choice */}
+              <div>
+                <label className="block font-bold text-slate-800 mb-1.5">
+                  3. Model Sử Dụng:
+                </label>
+                <input
+                  type="text"
+                  value={tempModel}
+                  onChange={(e) => setTempModel(e.target.value)}
+                  className="w-full px-3.5 py-2 rounded-xl border border-slate-300 text-xs font-mono outline-none"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+              <button
+                type="button"
+                onClick={() => setShowSettingsModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 font-semibold text-xs hover:bg-slate-50"
+              >
+                Hủy
+              </button>
+              <button
+                type="button"
+                onClick={saveAiSettings}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md"
+              >
+                💾 Lưu & Áp Dụng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

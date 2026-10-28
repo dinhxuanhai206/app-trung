@@ -1,14 +1,27 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { HSK_1000_VOCABULARY } from '../data/vocab1000Data';
+import axiosClient from '../api/axiosClient';
 
 export default function Vocab1000View() {
+  const [vocabList, setVocabList] = useState(HSK_1000_VOCABULARY || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 24;
 
-  const vocabList = HSK_1000_VOCABULARY || [];
+  // Connect to NestJS backend API
+  useEffect(() => {
+    axiosClient.get('/vocab?limit=1000')
+      .then((res) => {
+        if (res.data && res.data.items && res.data.items.length > 0) {
+          setVocabList(res.data.items);
+        }
+      })
+      .catch(() => {
+        // Fallback to local vocab dataset
+      });
+  }, []);
 
   // Extract unique topics
   const topics = useMemo(() => {

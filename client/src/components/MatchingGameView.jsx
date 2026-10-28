@@ -147,8 +147,44 @@ const VOCAB_TOPICS = [
   }
 ];
 
-export default function MatchingGameView({ showPinyin, onGainXP }) {
-  const [activeTopicId, setActiveTopicId] = useState('food_drink');
+export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
+  const allTopics = React.useMemo(() => {
+    const list = [];
+    if (lesson) {
+      const lessonWords = [];
+      if (lesson.vocabularies && lesson.vocabularies.length > 0) {
+        lesson.vocabularies.forEach((v, idx) => {
+          lessonWords.push({
+            id: `cur_vocab_${idx}`,
+            hanzi: v.hanzi,
+            pinyin: v.pinyin || '',
+            vi: v.vi || v.meaning || '',
+          });
+        });
+      } else if (lesson.matchingWords && lesson.matchingWords.length > 0) {
+        lesson.matchingWords.forEach((v, idx) => {
+          lessonWords.push({
+            id: `cur_match_${idx}`,
+            hanzi: v.hanzi,
+            pinyin: v.pinyin || '',
+            vi: v.vi || v.meaning || '',
+          });
+        });
+      }
+      if (lessonWords.length >= 4) {
+        list.push({
+          id: 'current_lesson',
+          name: `🎯 Từ Vựng Bài Đang Học (${lesson.title?.split(':')[0] || 'Bài ' + lesson.id})`,
+          words: lessonWords,
+        });
+      }
+    }
+    return [...list, ...VOCAB_TOPICS];
+  }, [lesson]);
+
+  const [activeTopicId, setActiveTopicId] = useState(
+    allTopics.length > 0 && allTopics[0].id === 'current_lesson' ? 'current_lesson' : 'food_drink'
+  );
   const [roundNumber, setRoundNumber] = useState(1);
   const [cards, setCards] = useState([]);
   const [selectedCard, setSelectedCard] = useState(null);
@@ -156,11 +192,13 @@ export default function MatchingGameView({ showPinyin, onGainXP }) {
   const [score, setScore] = useState(0);
   const [isWon, setIsWon] = useState(false);
 
-  const activeTopic = VOCAB_TOPICS.find((t) => t.id === activeTopicId) || VOCAB_TOPICS[0];
+  const activeTopic = allTopics.find((t) => t.id === activeTopicId) || allTopics[0];
 
   const initGame = () => {
+    if (!activeTopic || !activeTopic.words || activeTopic.words.length === 0) return;
     const shuffledPool = [...activeTopic.words].sort(() => Math.random() - 0.5);
-    const selected6 = shuffledPool.slice(0, 6);
+    const count = Math.min(6, shuffledPool.length);
+    const selected6 = shuffledPool.slice(0, count);
 
     const list = [];
     selected6.forEach((w) => {
@@ -189,7 +227,7 @@ export default function MatchingGameView({ showPinyin, onGainXP }) {
 
   useEffect(() => {
     initGame();
-  }, [activeTopicId, roundNumber]);
+  }, [activeTopicId, roundNumber, lesson]);
 
   useEffect(() => {
     if (isWon) return;
@@ -275,7 +313,7 @@ export default function MatchingGameView({ showPinyin, onGainXP }) {
           </span>
         </div>
         <div className="flex flex-wrap gap-2">
-          {VOCAB_TOPICS.map((topic) => (
+          {allTopics.map((topic) => (
             <button
               key={topic.id}
               onClick={() => {

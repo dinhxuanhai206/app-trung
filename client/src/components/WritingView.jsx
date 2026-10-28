@@ -1,4 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
+import { HANZI_RADICAL_MAP } from '../data/lessonEnricher';
 
 export default function WritingView({ lesson, onGainXP }) {
   const characters = React.useMemo(() => {
@@ -9,7 +10,14 @@ export default function WritingView({ lesson, onGainXP }) {
       if (seen.has(c.targetChar)) return;
       if (!/[\u4e00-\u9fa5]/u.test(c.targetChar)) return;
       seen.add(c.targetChar);
-      list.push(c);
+      
+      const radInfo = HANZI_RADICAL_MAP[c.targetChar] || {};
+      list.push({
+        ...c,
+        radical: c.radical || radInfo.radical || `${c.targetChar} (Gốc tự)`,
+        strokeCount: c.strokeCount || radInfo.strokeCount || 5,
+        tips: c.tips || radInfo.story || `Chữ Hán "${c.targetChar}" có bộ thủ cốt lõi ${radInfo.radical || c.targetChar}.`,
+      });
     };
 
     if (lesson.writing?.characters) lesson.writing.characters.forEach(add);
@@ -214,6 +222,24 @@ export default function WritingView({ lesson, onGainXP }) {
             >
               {showGhost ? 'Ẩn nét mẫu' : 'Hiện nét mẫu'}
             </button>
+          </div>
+
+          {/* Phân tích Bộ thủ & Chiết tự của chữ hiện tại */}
+          <div className="text-left bg-amber-50/70 border border-amber-200/60 rounded-xl p-3.5 space-y-1.5 text-xs">
+            <div className="flex items-center justify-between font-bold text-amber-900">
+              <span className="flex items-center gap-1.5">
+                <span className="text-base">🔍</span>
+                <span>Bộ thủ: <span className="font-extrabold text-rose-700">{currentChar.radical || currentChar.targetChar}</span></span>
+              </span>
+              <span className="px-2 py-0.5 rounded bg-amber-200/60 text-amber-900 font-semibold text-[11px]">
+                {currentChar.strokeCount || 6} nét
+              </span>
+            </div>
+            {currentChar.tips && (
+              <p className="text-slate-600 leading-relaxed">
+                💡 <span className="font-semibold text-slate-800">Chiết tự & Gợi nhớ:</span> {currentChar.tips}
+              </p>
+            )}
           </div>
         </div>
 

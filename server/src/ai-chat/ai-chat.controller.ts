@@ -26,21 +26,17 @@ export class AiChatController {
   }
 
   @Post('message')
-  sendMessage(
-    @Body() body: { personaId: string; userText: string },
+  async sendMessage(
+    @Body()
+    body: {
+      personaId: string;
+      userText: string;
+      history?: { sender: 'user' | 'ai'; hanzi: string }[];
+      apiKey?: string;
+      provider?: string;
+      model?: string;
+    },
   ) {
-    const analysis = this.aiChatService.analyzeSpoken(body.userText);
-    const reply = this.aiChatService.generateResponse(
-      body.personaId,
-      body.userText,
-    );
-
-    return {
-      personaId: body.personaId,
-      userText: body.userText,
-      analysis,
-      reply,
-      timestamp: new Date().toISOString(),
-    };
+    return this.aiChatService.chatWithRealAi(body);
   }
 }
