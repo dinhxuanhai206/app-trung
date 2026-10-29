@@ -259,6 +259,19 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
     return [...list, ...VOCAB_TOPICS];
   }, [lesson]);
 
+  const [gameMode, setGameMode] = useState('match_words'); // 'match_words' | 'sentence_puzzle'
+
+  const speakText = (text) => {
+    if ('speechSynthesis' in window && text) {
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = 'zh-CN';
+      u.rate = 0.85;
+      window.speechSynthesis.speak(u);
+    }
+  };
+
+  // State cho Mode 1: Match Words
   const [activeTopicId, setActiveTopicId] = useState(
     allTopics.length > 0 && allTopics[0].id === 'current_lesson' ? 'current_lesson' : 'food_drink'
   );
@@ -270,6 +283,73 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
   const [isWon, setIsWon] = useState(false);
 
   const activeTopic = allTopics.find((t) => t.id === activeTopicId) || allTopics[0];
+
+  // State & logic cho Mode 2: Sentence Building Puzzle Game
+  const sentencePuzzles = useMemo(() => {
+    const fromLesson = lesson ? getLessonSentenceBuilding(lesson.id, lesson) : [];
+    const formattedFromLesson = fromLesson.map((item, idx) => ({
+      id: `lesson_${lesson.id}_${idx}`,
+      topic: `Bài ${lesson.id || ''}: ${lesson.title?.split(':')[0] || 'Bài học'}`,
+      promptVi: item.promptVi || item.question || item.meaning,
+      tokens: [...(item.tokens || [])].sort(() => Math.random() - 0.5),
+      solution: item.targetTokens || item.solution || item.tokens,
+      targetZh: item.targetSentence || (item.targetTokens ? item.targetTokens.join('') : ''),
+      pinyin: item.pinyin || '',
+      explanation: item.explanation || '',
+    }));
+    return [...formattedFromLesson, ...LIFE_SENTENCE_PUZZLES];
+  }, [lesson]);
+
+  const [activePuzzleIdx, setActivePuzzleIdx] = useState(0);
+  const [selectedPuzzleTokens, setSelectedPuzzleTokens] = useState([]);
+  const [puzzleFeedback, setPuzzleFeedback] = useState(null); // 'correct' | 'wrong' | null
+  const [showHint, setShowHint] = useState(false);
+  const [puzzleScore, setPuzzleScore] = useState(0);
+
+  const currentPuzzle = sentencePuzzles[activePuzzleIdx] || sentencePuzzles[0];
+
+  const handleSelectToken = (token, tokenIdx) => {
+    if (selectedPuzzleTokens.some((t) => t.origIdx === tokenIdx)) return;
+    setSelectedPuzzleTokens((prev) => [...prev, { text: token, origIdx: tokenIdx }]);
+    setPuzzleFeedback(null);
+  };
+
+  const handleRemoveToken = (idxToRemove) => {
+    setSelectedPuzzleTokens((prev) => prev.filter((_, idx) => idx !== idxToRemove));
+    setPuzzleFeedback(null);
+  };
+
+  const handleResetPuzzle = () => {
+    setSelectedPuzzleTokens([]);
+    setPuzzleFeedback(null);
+    setShowHint(false);
+  };
+
+  const handleCheckPuzzle = () => {
+    if (!currentPuzzle) return;
+    const userBuilt = selectedPuzzleTokens.map((t) => t.text).join('');
+    const solutionBuilt = Array.isArray(currentPuzzle.solution)
+      ? currentPuzzle.solution.join('')
+      : (currentPuzzle.targetZh || '').replace(/\s+/g, '');
+
+    if (userBuilt === solutionBuilt || userBuilt === (currentPuzzle.targetZh || '').replace(/\s+/g, '')) {
+      setPuzzleFeedback('correct');
+      setPuzzleScore((s) => s + 25);
+      if (onGainXP) {
+        onGainXP(25, `Xếp câu đúng: ${currentPuzzle.targetZh}`);
+      }
+      speakText(currentPuzzle.targetZh);
+    } else {
+      setPuzzleFeedback('wrong');
+    }
+  };
+
+  const handleNextPuzzle = () => {
+    setActivePuzzleIdx((prev) => (prev + 1) % sentencePuzzles.length);
+    setSelectedPuzzleTokens([]);
+    setPuzzleFeedback(null);
+    setShowHint(false);
+  };
 
   const initGame = () => {
     if (!activeTopic || !activeTopic.words || activeTopic.words.length === 0) return;
