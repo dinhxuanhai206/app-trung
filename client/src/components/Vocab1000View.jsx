@@ -1,18 +1,22 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { HSK_1000_VOCABULARY } from '../data/vocab1000Data';
 import axiosClient from '../api/axiosClient';
+import { getWordRadicalAndMnemonic } from '../data/radicalHelper';
+import HandwritingModal from './HandwritingModal';
 
-export default function Vocab1000View() {
+export default function Vocab1000View({ onGainXP }) {
   const [vocabList, setVocabList] = useState(HSK_1000_VOCABULARY || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const [selectedTopic, setSelectedTopic] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeHandwritingWord, setActiveHandwritingWord] = useState(null);
   const pageSize = 24;
 
   // Connect to NestJS backend API
   useEffect(() => {
-    axiosClient.get('/vocab?limit=1000')
+    axiosClient
+      .get('/vocab?limit=1000')
       .then((res) => {
         if (res.data && res.data.items && res.data.items.length > 0) {
           setVocabList(res.data.items);
@@ -52,7 +56,7 @@ export default function Vocab1000View() {
   }, [filteredList, currentPage, pageSize]);
 
   const speakChinese = (text) => {
-    if ('speechSynthesis' in window) {
+    if ('speechSynthesis' in window && text) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'zh-CN';
@@ -70,22 +74,22 @@ export default function Vocab1000View() {
   ];
 
   return (
-    <div className="space-y-6 animate-fadeIn">
+    <div className="space-y-6 animate-fadeIn pb-12">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-bold rounded-full">
-            TỪ ĐIỂN CHUẨN
+            TỪ ĐIỂN CHUẨN KÈM BỘ THỦ & TẬP VIẾT
           </span>
-          <h2 className="text-2xl font-bold text-slate-900 mt-1">
-            📚 Kho 1,000 Từ Vựng HSK 1 - 2 - 3 Toàn Diện
+          <h2 className="text-2xl font-bold text-slate-900 mt-1 flex items-center gap-2">
+            <span>📚</span> Kho 1,000 Từ Vựng HSK 1 - 2 - 3 Toàn Diện
           </h2>
-          <p className="text-slate-500 text-sm">
-            Tra cứu đầy đủ 1,000 từ vựng cốt lõi HSK 1 (150 từ), HSK 2 (150 từ), HSK 3 (300 từ) và Giao tiếp thực tế kèm Pinyin, Hán Việt, Nghĩa và Phát âm chuẩn bản xứ.
+          <p className="text-slate-500 text-sm mt-0.5 max-w-3xl leading-relaxed">
+            Tra cứu đầy đủ 1,000 từ vựng cốt lõi kèm <strong>Phân tích Bộ Thủ</strong>, <strong>Mẹo Chiết Tự Ghi Nhớ</strong> và <strong>Công cụ Tập Viết Chữ Hán (米字格)</strong> trực tiếp trên từng thẻ từ!
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm border border-slate-200">
+        <div className="flex items-center gap-2 self-start md:self-auto">
+          <span className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-sm border border-slate-200 shadow-2xs">
             Hiển thị: {filteredList.length} / {vocabList.length} từ
           </span>
         </div>
@@ -160,52 +164,97 @@ export default function Vocab1000View() {
           🔍 Không tìm thấy từ vựng nào phù hợp với điều kiện tìm kiếm.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {currentItems.map((item) => {
             const levelColor =
               item.level === 'HSK 1'
-                ? 'bg-blue-100 text-blue-800'
+                ? 'bg-blue-100 text-blue-800 border-blue-200'
                 : item.level === 'HSK 2'
-                ? 'bg-emerald-100 text-emerald-800'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
                 : item.level === 'HSK 3'
-                ? 'bg-amber-100 text-amber-800'
-                : 'bg-purple-100 text-purple-800';
+                ? 'bg-amber-100 text-amber-800 border-amber-200'
+                : 'bg-purple-100 text-purple-800 border-purple-200';
+
+            const radicalInfo = getWordRadicalAndMnemonic(item);
 
             return (
               <div
                 key={item.id}
-                className="bg-white p-5 rounded-2xl border border-slate-200 hover:border-rose-300 hover:shadow-lg hover:-translate-y-0.5 transition-all flex flex-col justify-between group"
+                className="bg-white p-5 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-4 shadow-2xs"
               >
-                <div>
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-3xl font-extrabold text-slate-900 chinese-font">
-                        {item.hanzi}
-                      </span>
-                      <span className="text-base font-bold text-rose-600">{item.pinyin}</span>
+                <div className="space-y-3">
+                  {/* Top row: Hanzi & Pinyin & Level badges */}
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div
+                        onClick={() => setActiveHandwritingWord(item)}
+                        className="text-3xl font-extrabold text-slate-900 chinese-font hover:text-rose-600 cursor-pointer transition-colors flex items-center gap-2 group/h"
+                        title="Bấm vào để mở bảng tập viết chữ này trên ô Mễ"
+                      >
+                        <span>{item.hanzi}</span>
+                        <span className="text-xs text-rose-500 opacity-0 group-hover/h:opacity-100 transition-opacity">
+                          ✍️
+                        </span>
+                      </div>
+                      <div className="text-sm font-bold text-rose-600 mt-0.5">
+                        {item.pinyin}
+                      </div>
                     </div>
-                    <div className="flex gap-1.5">
-                      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-extrabold ${levelColor}`}>
+
+                    <div className="flex flex-col items-end gap-1">
+                      <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black border ${levelColor}`}>
                         {item.level}
                       </span>
                       {item.topic && (
-                        <span className="px-2 py-0.5 rounded-lg text-xs bg-slate-100 text-slate-600 font-medium">
+                        <span className="px-2 py-0.5 rounded-md text-[10px] bg-slate-100 text-slate-500 font-semibold truncate max-w-[120px]">
                           {item.topic}
                         </span>
                       )}
                     </div>
                   </div>
 
-                  {item.hv && (
-                    <div className="text-xs text-slate-500 mb-1">
-                      Hán Việt: <strong className="text-slate-700">{item.hv}</strong>
+                  {/* Meaning & Sino-Vietnamese (Hán Việt) */}
+                  <div className="space-y-1">
+                    {item.hv && (
+                      <div className="text-xs text-slate-500">
+                        Hán Việt: <strong className="text-slate-800">{item.hv}</strong>
+                      </div>
+                    )}
+                    <div className="text-sm font-bold text-slate-900 leading-snug">
+                      💡 {item.vi}
                     </div>
-                  )}
+                  </div>
 
-                  <div className="text-sm font-semibold text-slate-800 mb-3">{item.vi}</div>
+                  {/* Radical Info Box (Giải thích Bộ Thủ) */}
+                  <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs space-y-1 text-purple-950">
+                    <div className="flex items-center justify-between font-bold text-purple-900">
+                      <span className="flex items-center gap-1.5">
+                        <span>🧩</span>
+                        <span>{radicalInfo.radical}</span>
+                      </span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200 text-purple-800 font-bold">
+                        {radicalInfo.strokeCount} nét
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-600 leading-tight">
+                      <strong>Ý nghĩa:</strong> {radicalInfo.radicalMeaning}
+                    </p>
+                  </div>
 
+                  {/* Mnemonic Story Box (Cách Nhớ Từ Vựng & Chiết Tự) */}
+                  <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs space-y-1 text-amber-950">
+                    <div className="font-bold text-amber-900 flex items-center gap-1.5">
+                      <span>📖</span>
+                      <span>Cách nhớ từ & Chiết tự:</span>
+                    </div>
+                    <p className="text-[11px] text-amber-900 leading-relaxed italic">
+                      {radicalInfo.mnemonic}
+                    </p>
+                  </div>
+
+                  {/* Sample Sentence (if available) */}
                   {item.sample && (
-                    <div className="bg-slate-50 p-3 rounded-xl border-l-4 border-slate-300 text-xs text-slate-700 flex items-center justify-between gap-2 italic">
+                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/70 text-xs text-slate-700 flex items-center justify-between gap-2 italic">
                       <span className="chinese-font">{item.sample}</span>
                       <button
                         onClick={() => speakChinese(item.sample)}
@@ -218,14 +267,26 @@ export default function Vocab1000View() {
                   )}
                 </div>
 
-                <div className="flex justify-end pt-3 mt-3 border-t border-slate-100">
+                {/* Bottom Action Bar: Tập Viết & Phát Âm */}
+                <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
                   <button
-                    onClick={() => speakChinese(item.hanzi)}
-                    className="w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 flex items-center justify-center text-sm transition-all"
-                    title="Phát âm từ vựng"
+                    onClick={() => setActiveHandwritingWord(item)}
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95"
+                    title="Mở bảng tập viết chữ Hán trên ô Mễ"
                   >
-                    🔊
+                    <span>✍️</span>
+                    <span>Tập viết</span>
                   </button>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => speakChinese(item.hanzi)}
+                      className="w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 flex items-center justify-center text-sm font-bold transition-all shadow-2xs"
+                      title="Phát âm từ vựng"
+                    >
+                      🔊
+                    </button>
+                  </div>
                 </div>
               </div>
             );
@@ -234,7 +295,7 @@ export default function Vocab1000View() {
       )}
 
       {/* Pagination Controls */}
-      <div className="flex items-center justify-center gap-4 py-4">
+      <div className="flex items-center justify-center gap-4 py-6">
         <button
           onClick={() => {
             if (currentPage > 1) {
@@ -243,7 +304,7 @@ export default function Vocab1000View() {
             }
           }}
           disabled={currentPage <= 1}
-          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs"
         >
           ◀ Trang trước
         </button>
@@ -258,11 +319,20 @@ export default function Vocab1000View() {
             }
           }}
           disabled={currentPage >= totalPages}
-          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs"
         >
           Trang tiếp ▶
         </button>
       </div>
+
+      {/* Interactive Handwriting Practice Modal */}
+      {activeHandwritingWord && (
+        <HandwritingModal
+          word={activeHandwritingWord}
+          onClose={() => setActiveHandwritingWord(null)}
+          onGainXP={onGainXP}
+        />
+      )}
     </div>
   );
 }

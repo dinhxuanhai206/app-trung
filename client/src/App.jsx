@@ -142,7 +142,7 @@ export default function App() {
             <Route
               path="/vocab1000"
               element={
-                <Vocab1000View />
+                <Vocab1000View onGainXP={handleGainXP} />
               }
             />
             <Route
