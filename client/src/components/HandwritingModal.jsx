@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import HanziWriter from 'hanzi-writer';
 import { getWordRadicalAndMnemonic } from '../data/radicalHelper';
 
 export default function HandwritingModal({ word, onClose, onGainXP }) {
@@ -21,24 +22,25 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
     });
   }, [currentChar, word.vi]);
 
-  // Canvas drawing state
+  // Modes: 'smart' (HanziWriter AI quiz) vs 'freehand' (2D Canvas)
+  const [practiceMode, setPracticeMode] = useState('smart');
+
+  // HanziWriter state
+  const writerContainerRef = useRef(null);
+  const writerInstanceRef = useRef(null);
+  const [writerLoading, setWriterLoading] = useState(false);
+  const [showGhost, setShowGhost] = useState(true);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [currentStrokeIdx, setCurrentStrokeIdx] = useState(0);
+  const [totalStrokes, setTotalStrokes] = useState(radicalInfo?.strokeCount || 6);
+  const [mistakesCount, setMistakesCount] = useState(0);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [feedback, setFeedback] = useState(null); // { type, text }
+
+  // Canvas drawing state (Freehand)
   const canvasRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
-  const [showGhost, setShowGhost] = useState(true);
   const [hasDrawn, setHasDrawn] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-
-  // Initialize canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    ctx.strokeStyle = '#0f172a';
-    ctx.lineWidth = 10;
-    ctx.lineCap = 'round';
-    ctx.lineJoin = 'round';
-    clearCanvas();
-  }, [selectedCharIdx]);
 
   const speakText = (text) => {
     if ('speechSynthesis' in window && text) {
@@ -49,6 +51,181 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
       window.speechSynthesis.speak(u);
     }
   };
+
+  // Start HanziWriter quiz
+  const startSmartQuiz = useCallback((writer) => {
+    if (!writer) return;
+    setIsCompleted(false);
+    setMistakesCount(0);
+    setCurrentStrokeIdx(0);
+    setFeedback({
+      type: 'info',
+      text: '✍️ Hãy vẽ nét đầu tiên theo thứ tự nét chuẩn.',
+    });
+
+    writer.quiz({
+      onCorrectStroke: (data) => {
+        const nextIdx = data.strokeNum + 1;
+        const total = nextIdx + data.strokesRemaining;
+        setCurrentStrokeIdx(nextIdx);
+        setTotalStrokes(total);
+        setFeedback({
+          type: 'success',
+          text: `✅ Đúng nét ${nextIdx} / ${total}! Hãy tiếp tục viết nét kế tiếp.`,
+        });
+      },
+      onMistake: (data) => {
+        setMistakesCount(data.totalMistakes);
+        setFeedback({
+          type: 'mistake',
+          text: `❌ Sai thứ tự nét! Cần viết nét thứ ${data.strokeNum + 1} trước.`,
+        });
+      },
+      onComplete: (summary) => {
+        setIsCompleted(true);
+        setCurrentStrokeIdx(totalStrokes);
+        setFeedback({
+          type: 'complete',
+          text: `🎉 Xuất sắc! Bạn đã viết hoàn thành chữ "${currentChar}" chuẩn xác 100%!`,
+        });
+        speakText(currentChar);
+        if (onGainXP) {
+          onGainXP(15, `Luyện viết đúng chuẩn chữ: ${currentChar}`);
+        }
+      },
+    });
+  }, [currentChar, totalStrokes, onGainXP]);
+
+  // Init HanziWriter
+  useEffect(() => {
+    if (practiceMode !== 'smart') return;
+    const container = writerContainerRef.current;
+    if (!container) return;
+
+    container.innerHTML = '';
+    setWriterLoading(true);
+    setFeedback(null);
+    setIsCompleted(false);
+    setMistakesCount(0);
+    setCurrentStrokeIdx(0);
+
+    let isMounted = true;
+    try {
+      const writer = HanziWriter.create(container, currentChar, {
+        width: 274,
+        height: 274,
+        padding: 18,
+        showOutline: showGhost,
+        strokeAnimationSpeed: 1.1,
+        delayBetweenStrokes: 180,
+        strokeColor: '#0f172a',
+        radicalColor: '#dc2626',
+        outlineColor: '#fca5a5',
+        drawingColor: '#2563eb',
+        drawingWidth: 16,
+        showHintAfterMisses: 2,
+        highlightColor: '#10b981',
+        leniency: 1.25,
+        onLoadCharDataSuccess: (charData) => {
+          if (!isMounted) return;
+          setWriterLoading(false);
+          if (charData?.strokes) {
+            setTotalStrokes(charData.strokes.length);
+          }
+          startSmartQuiz(writer);
+        },
+        onLoadCharDataError: () => {
+          if (!isMounted) return;
+          setWriterLoading(false);
+          setFeedback({
+            type: 'mistake',
+            text: 'Không nạp được nét chữ này từ máy chủ. Bạn có thể chuyển sang "Vẽ Tự Do" để tập viết.',
+          });
+        },
+      });
+
+      writerInstanceRef.current = writer;
+    } catch (err) {
+      console.error('HanziWriter init error in modal:', err);
+      setWriterLoading(false);
+    }
+
+    return () => {
+      isMounted = false;
+      if (writerInstanceRef.current) {
+        try {
+          writerInstanceRef.current.cancelQuiz();
+        } catch (_) {}
+        writerInstanceRef.current = null;
+      }
+    };
+  }, [currentChar, practiceMode]);
+
+  // Toggle Outline
+  const toggleOutline = () => {
+    const next = !showGhost;
+    setShowGhost(next);
+    if (writerInstanceRef.current) {
+      if (next) {
+        writerInstanceRef.current.showOutline();
+      } else {
+        writerInstanceRef.current.hideOutline();
+      }
+    }
+  };
+
+  // Play animation
+  const playAnimation = () => {
+    if (!writerInstanceRef.current || isAnimating) return;
+    setIsAnimating(true);
+    setFeedback({
+      type: 'info',
+      text: '🎬 Đang trình chiếu thứ tự viết nét mẫu...',
+    });
+    writerInstanceRef.current.animateCharacter({
+      onComplete: () => {
+        setIsAnimating(false);
+        setFeedback({
+          type: 'info',
+          text: '👉 Đến lượt bạn! Hãy viết theo thứ tự nét vừa được hướng dẫn.',
+        });
+        startSmartQuiz(writerInstanceRef.current);
+      },
+    });
+  };
+
+  // Hint stroke
+  const giveHint = () => {
+    if (!writerInstanceRef.current) return;
+    writerInstanceRef.current.animateStroke(currentStrokeIdx, {
+      onComplete: () => {
+        setFeedback({
+          type: 'info',
+          text: `💡 Hãy vẽ theo nét thứ ${currentStrokeIdx + 1} vừa nhấp nháy!`,
+        });
+      },
+    });
+  };
+
+  // Reset Smart Quiz
+  const handleResetQuiz = () => {
+    if (writerInstanceRef.current) {
+      startSmartQuiz(writerInstanceRef.current);
+    }
+  };
+
+  // Initialize Freehand canvas
+  useEffect(() => {
+    if (practiceMode !== 'freehand') return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    ctx.strokeStyle = '#0f172a';
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    clearCanvas();
+  }, [practiceMode, selectedCharIdx]);
 
   const getCoordinates = (e) => {
     const canvas = canvasRef.current;
@@ -113,13 +290,13 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-base sm:text-lg leading-tight flex items-center gap-2">
-                <span>Tập Viết Chữ Hán (米字格)</span>
+                <span>Tập Viết Chữ Hán Thông Minh (米字格)</span>
                 <span className="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-bold text-[10px]">
                   {word.level || 'HSK'}
                 </span>
               </h3>
               <p className="text-xs text-slate-500 mt-0.5">
-                Nắn nót từng nét chữ trên ô Mễ Tự chuẩn mực thư pháp.
+                Tự hoàn thiện nét vẽ & phát hiện bắt lỗi sai thứ tự nét bút.
               </p>
             </div>
           </div>
@@ -134,7 +311,31 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
         </div>
 
         {/* Modal Content */}
-        <div className="p-5 sm:p-6 space-y-5 flex-1">
+        <div className="p-5 sm:p-6 space-y-4 flex-1">
+          {/* Practice Mode Switcher */}
+          <div className="flex items-center justify-between p-1 bg-slate-100 rounded-2xl">
+            <button
+              onClick={() => setPracticeMode('smart')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                practiceMode === 'smart'
+                  ? 'bg-white text-rose-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🤖 Luyện Viết Thông Minh (Tự Nắn Nét)
+            </button>
+            <button
+              onClick={() => setPracticeMode('freehand')}
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+                practiceMode === 'freehand'
+                  ? 'bg-white text-rose-700 shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              🖌️ Vẽ Tự Do
+            </button>
+          </div>
+
           {/* Target Word Overview Card */}
           <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-50 via-amber-50 to-orange-50 border border-rose-200 flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
@@ -181,7 +382,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
                     }}
                     className={`flex-1 py-2 px-3 rounded-xl font-bold chinese-font text-lg transition-all flex items-center justify-center gap-2 border ${
                       selectedCharIdx === idx
-                        ? 'bg-slate-900 text-white border-slate-900 shadow-md'
+                        ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
                         : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200'
                     }`}
                   >
@@ -195,54 +396,124 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
             </div>
           )}
 
-          {/* Classical Mǐ Zì Gé (米字格) Drawing Canvas */}
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="mi-zi-ge-wrapper shadow-md">
-              {showGhost && (
-                <div className="absolute inset-0 flex items-center justify-center text-[190px] font-bold text-rose-500/15 select-none pointer-events-none chinese-font">
-                  {currentChar}
-                </div>
+          {/* Feedback banner */}
+          {practiceMode === 'smart' && feedback && (
+            <div
+              className={`p-3 rounded-2xl text-xs font-bold flex items-center justify-between gap-2 transition-all ${
+                feedback.type === 'success'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                  : feedback.type === 'mistake'
+                  ? 'bg-rose-50 text-rose-800 border border-rose-300 animate-bounce'
+                  : feedback.type === 'complete'
+                  ? 'bg-amber-50 text-amber-900 border border-amber-300'
+                  : 'bg-blue-50 text-blue-800 border border-blue-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span>{feedback.type === 'mistake' ? '⚠️' : feedback.type === 'complete' ? '🏆' : '💡'}</span>
+                <span>{feedback.text}</span>
+              </div>
+              {feedback.type === 'mistake' && (
+                <button
+                  onClick={giveHint}
+                  className="px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex-shrink-0"
+                >
+                  Gợi ý
+                </button>
               )}
-              <canvas
-                ref={canvasRef}
-                width={280}
-                height={280}
-                onMouseDown={startDraw}
-                onMouseMove={draw}
-                onMouseUp={stopDraw}
-                onMouseLeave={stopDraw}
-                onTouchStart={startDraw}
-                onTouchMove={draw}
-                onTouchEnd={stopDraw}
-                className="absolute inset-0 z-10 cursor-crosshair w-full h-full touch-none"
-              />
+            </div>
+          )}
+
+          {/* Classical Mǐ Zì Gé (米字格) Drawing Area */}
+          <div className="flex flex-col items-center justify-center space-y-3">
+            <div className="mi-zi-ge-wrapper shadow-lg overflow-hidden relative">
+              {practiceMode === 'smart' ? (
+                <>
+                  {writerLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-20 gap-2">
+                      <div className="w-8 h-8 border-3 border-rose-600 border-t-transparent rounded-full animate-spin" />
+                      <span className="text-xs font-bold text-slate-600">Đang nạp nét chữ...</span>
+                    </div>
+                  )}
+                  <div
+                    ref={writerContainerRef}
+                    className="w-full h-full cursor-crosshair relative z-10 flex items-center justify-center"
+                  />
+                </>
+              ) : (
+                <>
+                  {showGhost && (
+                    <div className="absolute inset-0 flex items-center justify-center text-[190px] font-bold text-rose-500/15 select-none pointer-events-none chinese-font">
+                      {currentChar}
+                    </div>
+                  )}
+                  <canvas
+                    ref={canvasRef}
+                    width={280}
+                    height={280}
+                    onMouseDown={startDraw}
+                    onMouseMove={draw}
+                    onMouseUp={stopDraw}
+                    onMouseLeave={stopDraw}
+                    onTouchStart={startDraw}
+                    onTouchMove={draw}
+                    onTouchEnd={stopDraw}
+                    className="absolute inset-0 z-10 cursor-crosshair w-full h-full touch-none"
+                  />
+                </>
+              )}
             </div>
 
-            {/* Canvas Toolbar Buttons */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={clearCanvas}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
-              >
-                <span>🧹</span>
-                <span>Xóa vẽ lại</span>
-              </button>
-
-              <button
-                onClick={() => setShowGhost(!showGhost)}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
-              >
-                <span>{showGhost ? '👁️' : '🙈'}</span>
-                <span>{showGhost ? 'Ẩn nét mẫu' : 'Hiện nét mẫu'}</span>
-              </button>
-
-              <button
-                onClick={() => speakText(currentChar)}
-                className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
-              >
-                <span>🔊</span>
-                <span>Phát âm</span>
-              </button>
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 flex-wrap justify-center">
+              {practiceMode === 'smart' ? (
+                <>
+                  <button
+                    onClick={playAnimation}
+                    disabled={isAnimating}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  >
+                    <span>▶️</span>
+                    <span>{isAnimating ? 'Đang chiếu...' : 'Xem viết mẫu'}</span>
+                  </button>
+                  <button
+                    onClick={giveHint}
+                    disabled={isCompleted || isAnimating}
+                    className="px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
+                  >
+                    <span>💡</span>
+                    <span>Gợi ý nét</span>
+                  </button>
+                  <button
+                    onClick={handleResetQuiz}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  >
+                    <span>🧹</span>
+                    <span>Viết lại</span>
+                  </button>
+                  <button
+                    onClick={toggleOutline}
+                    className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  >
+                    <span>{showGhost ? '👁️ Ẩn nét mờ' : '👁️ Hiện nét mờ'}</span>
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    onClick={clearCanvas}
+                    className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  >
+                    <span>🧹 Xóa vẽ lại</span>
+                  </button>
+                  <button
+                    onClick={() => setShowGhost(!showGhost)}
+                    className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
+                  >
+                    <span>{showGhost ? 'Ẩn nét mẫu' : 'Hiện nét mẫu'}</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 
@@ -254,53 +525,48 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
                 <span>Bộ thủ: {radicalInfo.radical}</span>
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px]">
-                Khoảng {radicalInfo.strokeCount} nét
+                Tổng số: {totalStrokes || radicalInfo.strokeCount} nét
               </span>
             </div>
 
-            <p className="text-slate-600">
-              <strong>Ý nghĩa bộ thủ:</strong> {radicalInfo.radicalMeaning}
+            <p className="text-slate-600 leading-relaxed">
+              💡 <span className="font-semibold text-slate-900">Chiết tự & Cách nhớ:</span> {radicalInfo.mnemonic}
             </p>
-
-            <div className="pt-2 border-t border-amber-200/60 leading-relaxed text-amber-950">
-              <strong className="text-rose-700">💡 Mẹo ghi nhớ & Chiết tự:</strong>{' '}
-              {radicalInfo.mnemonic}
-            </div>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50 flex items-center justify-between gap-3">
-          <div className="text-xs text-slate-500 font-medium">
+        <div className="p-4 border-t border-slate-100 flex items-center justify-between bg-slate-50 rounded-b-3xl">
+          <div className="text-xs text-slate-500">
             {isCompleted ? (
               <span className="text-emerald-600 font-bold flex items-center gap-1">
-                <span>🎉</span>
-                <span>Đã ghi nhận luyện viết (+15 XP)!</span>
-              </span>
-            ) : hasDrawn ? (
-              <span className="text-slate-700 font-semibold">
-                Nét vẽ đẹp mắt! Bấm Hoàn thành để nhận XP.
+                <span>🎉</span> Đã hoàn thành chữ!
               </span>
             ) : (
-              'Dùng chuột hoặc ngón tay vẽ theo nét mờ trên ô.'
+              <span>Vẽ đúng toàn bộ nét để nhận +15 XP!</span>
             )}
           </div>
 
           <div className="flex items-center gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-200 text-xs font-semibold transition-all"
+              className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold transition-all"
             >
               Đóng
             </button>
-
-            <button
-              onClick={handleFinish}
-              disabled={!hasDrawn || isCompleted}
-              className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white text-xs font-bold shadow-md shadow-rose-600/30 transition-all flex items-center gap-1.5"
-            >
-              <span>{isCompleted ? '✓ Đã xong' : 'Hoàn thành (+15 XP)'}</span>
-            </button>
+            {practiceMode === 'freehand' && (
+              <button
+                onClick={handleFinish}
+                disabled={!hasDrawn}
+                className={`px-5 py-2 rounded-xl text-xs font-bold text-white transition-all shadow-md ${
+                  hasDrawn
+                    ? 'bg-rose-600 hover:bg-rose-700 shadow-rose-600/30 active:scale-95'
+                    : 'bg-slate-300 cursor-not-allowed'
+                }`}
+              >
+                Hoàn thành (+15 XP)
+              </button>
+            )}
           </div>
         </div>
       </div>

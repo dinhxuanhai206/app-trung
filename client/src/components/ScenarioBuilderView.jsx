@@ -750,9 +750,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 shadow-xl border-2 border-slate-800 group">
                 <iframe
                   className="w-full h-full"
-                  src={`https://www.youtube.com/embed?listType=search&list=Panda+Studio+Tiếng+Trung+giao+tiếp+${encodeURIComponent(
-                    scenario.title.split(' (')[0]
-                  )}`}
+                  src={`https://www.youtube-nocookie.com/embed/${scenario.video?.youtubeId || 'kL5hL2P8U0k'}?rel=0&modestbranding=1`}
                   title={scenario.video?.title || scenario.title}
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                   allowFullScreen
@@ -764,20 +762,20 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 <div className="flex items-center gap-2 font-medium">
                   <span>💡</span>
                   <span>
-                    Nếu video không tự động phát trên trình duyệt của bạn do chính sách YouTube, bạn có thể bấm nút bên phải để mở xem trực tiếp video chuẩn nhất của Panda Studio:
+                    Nếu trình duyệt chặn nhúng iframe của YouTube hoặc hiển thị cảnh báo, bạn có thể bấm nút bên phải để mở xem trực tiếp video chuẩn nhất trên kênh Panda Studio:
                   </span>
                 </div>
-                <a
-                  href={`https://www.youtube.com/results?search_query=Panda+Studio+Luyện+Nghe+Hội+Thoại+${encodeURIComponent(
-                    scenario.title.split(' (')[0]
-                  )}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 flex-shrink-0 transition-all shadow-sm"
-                >
-                  <span>▶️ Xem Video Bài Giảng Này</span>
-                  <span>↗</span>
-                </a>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <a
+                    href={`https://www.youtube.com/watch?v=${scenario.video?.youtubeId || 'kL5hL2P8U0k'}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
+                  >
+                    <span>▶️ Mở Xem Trên YouTube</span>
+                    <span>↗</span>
+                  </a>
+                </div>
               </div>
 
               {/* Key Takeaways & Useful Sentences from this Situation */}
