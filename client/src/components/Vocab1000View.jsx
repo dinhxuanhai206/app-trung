@@ -17,6 +17,7 @@ import {
   Image as ImageIcon,
   GraduationCap,
   Filter,
+  Maximize2,
 } from 'lucide-react';
 
 export default function Vocab1000View({ onGainXP }) {
@@ -27,6 +28,7 @@ export default function Vocab1000View({ onGainXP }) {
   const [showIllustrations, setShowIllustrations] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [activeHandwritingWord, setActiveHandwritingWord] = useState(null);
+  const [previewImageWord, setPreviewImageWord] = useState(null);
   const pageSize = 24;
 
   // Connect to NestJS backend API
@@ -270,23 +272,33 @@ export default function Vocab1000View({ onGainXP }) {
                       </div>
                     </div>
 
-                    {/* Compact Rounded Image Thumbnail in Corner (Bo tròn nằm 1 góc gọn gàng) */}
+                    {/* High-Definition Rounded Image Thumbnail in Corner (To rõ, bo góc đẹp, dễ nhìn) */}
                     {showIllustrations && (
                       <div className="relative flex-shrink-0">
-                        <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-100 shadow-sm group-hover:border-rose-300 group-hover:shadow-md transition-all duration-300 relative">
+                        <div
+                          onClick={() => setPreviewImageWord(item)}
+                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden bg-slate-100 border-2 border-slate-100 shadow-sm hover:border-rose-400 hover:shadow-xl transition-all duration-300 relative group/img cursor-pointer"
+                          title="Bấm vào để phóng to hình ảnh chi tiết"
+                        >
                           <img
                             src={illustrationUrl}
                             alt={item.hanzi}
                             loading="lazy"
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
                             onError={(e) => {
                               e.target.src =
-                                'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=400&q=80';
+                                'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80';
                             }}
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+                          
+                          {/* Hover Zoom Icon Badge */}
+                          <div className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-xs opacity-0 group-hover/img:opacity-100 transition-opacity">
+                            <Maximize2 size={12} />
+                          </div>
+
                           {item.topic && (
-                            <span className="absolute bottom-1 left-1 right-1 text-center text-[9px] font-bold text-white bg-black/40 backdrop-blur-xs px-1 py-0.5 rounded truncate">
+                            <span className="absolute bottom-1.5 left-1.5 right-1.5 text-center text-[10px] font-bold text-white bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded-lg truncate">
                               {item.topic}
                             </span>
                           )}
@@ -404,6 +416,109 @@ export default function Vocab1000View({ onGainXP }) {
           onClose={() => setActiveHandwritingWord(null)}
           onGainXP={onGainXP}
         />
+      )}
+
+      {/* Image Detail Lightbox Modal (Xem ảnh chi tiết độ nét cao) */}
+      {previewImageWord && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
+          onClick={() => setPreviewImageWord(null)}
+        >
+          <div
+            className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-lg w-full border border-slate-100 relative animate-in zoom-in-95 duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setPreviewImageWord(null)}
+              className="absolute top-3.5 right-3.5 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-md"
+              title="Đóng (Esc)"
+            >
+              <X size={18} />
+            </button>
+
+            {/* High-Definition Image Display */}
+            <div className="relative aspect-video sm:aspect-4/3 w-full bg-slate-900 overflow-hidden">
+              <img
+                src={getVocabIllustration(previewImageWord)}
+                alt={previewImageWord.hanzi}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
+              
+              <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between text-white">
+                <div>
+                  <div className="text-4xl font-black chinese-font tracking-wide drop-shadow-md">
+                    {previewImageWord.hanzi}
+                  </div>
+                  <div className="text-rose-400 font-bold text-base mt-0.5">
+                    {previewImageWord.pinyin}
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => speakChinese(previewImageWord.hanzi)}
+                  className="p-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-lg active:scale-95 cursor-pointer"
+                  title="Phát âm từ vựng"
+                >
+                  <Volume2 size={20} />
+                </button>
+              </div>
+            </div>
+
+            {/* Word Details in Modal */}
+            <div className="p-6 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <div className="text-lg font-black text-slate-900">
+                  {previewImageWord.vi}
+                </div>
+                <div className="flex items-center gap-2">
+                  {previewImageWord.topic && (
+                    <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
+                      {previewImageWord.topic}
+                    </span>
+                  )}
+                  <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-rose-100 text-rose-700">
+                    {previewImageWord.level}
+                  </span>
+                </div>
+              </div>
+
+              {previewImageWord.hv && (
+                <div className="text-xs text-slate-500 bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+                  Âm Hán Việt: <strong className="text-slate-800">{previewImageWord.hv}</strong>
+                </div>
+              )}
+
+              {previewImageWord.sample && (
+                <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 flex items-center justify-between gap-2 italic">
+                  <span className="chinese-font font-medium text-sm text-slate-900">{previewImageWord.sample}</span>
+                  <button
+                    onClick={() => speakChinese(previewImageWord.sample)}
+                    className="p-2 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white transition-all flex-shrink-0 cursor-pointer"
+                    title="Nghe câu ví dụ"
+                  >
+                    <Volume2 size={14} />
+                  </button>
+                </div>
+              )}
+
+              <div className="pt-1 flex items-center justify-end">
+                <button
+                  onClick={() => {
+                    const word = previewImageWord;
+                    setPreviewImageWord(null);
+                    setActiveHandwritingWord(word);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                >
+                  <PenTool size={14} />
+                  <span>Tập viết chữ này</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
