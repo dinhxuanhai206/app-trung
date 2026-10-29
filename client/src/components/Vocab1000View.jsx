@@ -35,7 +35,13 @@ export default function Vocab1000View({ onGainXP }) {
   // Filter vocabulary
   const filteredList = useMemo(() => {
     return vocabList.filter((item) => {
-      if (selectedLevel !== 'all' && item.level !== selectedLevel) return false;
+      if (selectedLevel !== 'all') {
+        if (selectedLevel === 'HSK 3+') {
+          if (item.level !== 'HSK 3+' && item.level !== 'Giao tiếp') return false;
+        } else if (item.level !== selectedLevel) {
+          return false;
+        }
+      }
       if (selectedTopic !== 'all' && item.topic !== selectedTopic) return false;
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
@@ -65,12 +71,22 @@ export default function Vocab1000View({ onGainXP }) {
     }
   };
 
+  const counts = useMemo(() => {
+    return {
+      all: vocabList.length,
+      hsk1: vocabList.filter((v) => v.level === 'HSK 1').length,
+      hsk2: vocabList.filter((v) => v.level === 'HSK 2').length,
+      hsk3: vocabList.filter((v) => v.level === 'HSK 3').length,
+      comm: vocabList.filter((v) => v.level === 'HSK 3+' || v.level === 'Giao tiếp').length,
+    };
+  }, [vocabList]);
+
   const levelTabs = [
-    { id: 'all', label: `Tất cả (${vocabList.length})` },
-    { id: 'HSK 1', label: 'HSK 1 (150 từ)' },
-    { id: 'HSK 2', label: 'HSK 2 (150 từ)' },
-    { id: 'HSK 3', label: 'HSK 3 (300 từ)' },
-    { id: 'HSK 3+', label: 'Giao tiếp ứng dụng (400 từ)' },
+    { id: 'all', label: `Tất cả (${counts.all})` },
+    { id: 'HSK 1', label: `HSK 1 (${counts.hsk1} từ)` },
+    { id: 'HSK 2', label: `HSK 2 (${counts.hsk2} từ)` },
+    { id: 'HSK 3', label: `HSK 3 (${counts.hsk3} từ)` },
+    { id: 'HSK 3+', label: `Giao tiếp ứng dụng (${counts.comm} từ)` },
   ];
 
   return (

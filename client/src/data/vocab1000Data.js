@@ -4858,7 +4858,7 @@ export const HSK_1000_VOCABULARY = [
         pinyin: w.pinyin,
         hv: w.hv,
         vi: w.vi,
-        level: currentId <= 600 ? 'HSK 3' : 'HSK 3+',
+        level: 'HSK 3+',
         topic: w.topic,
         sample: w.sample
       });
