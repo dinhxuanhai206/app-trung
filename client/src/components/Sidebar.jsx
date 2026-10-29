@@ -38,7 +38,7 @@ export default function Sidebar({ isOpen, onClose }) {
           </div>
           <div>
             <h1 className="font-bold text-base leading-tight tracking-tight text-white">
-              Hoa Văn Học Đường
+              Học Cùng Chú Hải
             </h1>
             <p className="text-[11px] text-slate-400">HSK Interactive</p>
           </div>
