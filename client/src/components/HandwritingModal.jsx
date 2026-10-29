@@ -1,6 +1,24 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import HanziWriter from 'hanzi-writer';
 import { getWordRadicalAndMnemonic } from '../data/radicalHelper';
+import {
+  PenTool,
+  Bot,
+  Edit3,
+  Volume2,
+  AlertTriangle,
+  XCircle,
+  Trophy,
+  Lightbulb,
+  Play,
+  RotateCcw,
+  Eye,
+  EyeOff,
+  Layers,
+  Sparkles,
+  X,
+  BookOpen,
+} from 'lucide-react';
 
 export default function HandwritingModal({ word, onClose, onGainXP }) {
   if (!word) return null;
@@ -60,7 +78,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
     setCurrentStrokeIdx(0);
     setFeedback({
       type: 'info',
-      text: '✍️ Hãy vẽ nét đầu tiên theo thứ tự nét chuẩn.',
+      text: 'Hãy vẽ nét đầu tiên theo thứ tự nét chuẩn.',
     });
 
     writer.quiz({
@@ -71,14 +89,14 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
         setTotalStrokes(total);
         setFeedback({
           type: 'success',
-          text: `✅ Đúng nét ${nextIdx} / ${total}! Hãy tiếp tục viết nét kế tiếp.`,
+          text: `Đúng nét ${nextIdx} / ${total}! Hãy tiếp tục viết nét kế tiếp.`,
         });
       },
       onMistake: (data) => {
         setMistakesCount(data.totalMistakes);
         setFeedback({
           type: 'mistake',
-          text: `❌ Sai thứ tự nét! Cần viết nét thứ ${data.strokeNum + 1} trước.`,
+          text: `Sai thứ tự nét! Cần viết nét thứ ${data.strokeNum + 1} trước.`,
         });
       },
       onComplete: (summary) => {
@@ -86,7 +104,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
         setCurrentStrokeIdx(totalStrokes);
         setFeedback({
           type: 'complete',
-          text: `🎉 Xuất sắc! Bạn đã viết hoàn thành chữ "${currentChar}" chuẩn xác 100%!`,
+          text: `Xuất sắc! Bạn đã viết hoàn thành chữ "${currentChar}" chuẩn xác 100%!`,
         });
         speakText(currentChar);
         if (onGainXP) {
@@ -180,14 +198,14 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
     setIsAnimating(true);
     setFeedback({
       type: 'info',
-      text: '🎬 Đang trình chiếu thứ tự viết nét mẫu...',
+      text: 'Đang trình chiếu thứ tự viết nét mẫu...',
     });
     writerInstanceRef.current.animateCharacter({
       onComplete: () => {
         setIsAnimating(false);
         setFeedback({
           type: 'info',
-          text: '👉 Đến lượt bạn! Hãy viết theo thứ tự nét vừa được hướng dẫn.',
+          text: 'Đến lượt bạn! Hãy viết theo thứ tự nét vừa được hướng dẫn.',
         });
         startSmartQuiz(writerInstanceRef.current);
       },
@@ -201,7 +219,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
       onComplete: () => {
         setFeedback({
           type: 'info',
-          text: `💡 Hãy vẽ theo nét thứ ${currentStrokeIdx + 1} vừa nhấp nháy!`,
+          text: `Hãy vẽ theo nét thứ ${currentStrokeIdx + 1} vừa nhấp nháy!`,
         });
       },
     });
@@ -285,8 +303,8 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-md z-20">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center text-xl font-bold shadow-md shadow-rose-900/20">
-              ✍️
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-rose-700 text-white flex items-center justify-center shadow-md shadow-rose-900/20">
+              <PenTool size={20} />
             </div>
             <div>
               <h3 className="font-bold text-slate-900 text-base sm:text-lg leading-tight flex items-center gap-2">
@@ -303,10 +321,10 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
 
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center font-bold text-sm transition-all"
+            className="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 flex items-center justify-center transition-all"
             title="Đóng cửa sổ"
           >
-            ✕
+            <X size={16} />
           </button>
         </div>
 
@@ -316,23 +334,25 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
           <div className="flex items-center justify-between p-1 bg-slate-100 rounded-2xl">
             <button
               onClick={() => setPracticeMode('smart')}
-              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 practiceMode === 'smart'
                   ? 'bg-white text-rose-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🤖 Luyện Viết Thông Minh (Tự Nắn Nét)
+              <Bot size={14} />
+              <span>Luyện Viết Thông Minh</span>
             </button>
             <button
               onClick={() => setPracticeMode('freehand')}
-              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 ${
                 practiceMode === 'freehand'
                   ? 'bg-white text-rose-700 shadow-xs'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              🖌️ Vẽ Tự Do
+              <Edit3 size={14} />
+              <span>Vẽ Tự Do</span>
             </button>
           </div>
 
@@ -361,7 +381,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
               onClick={() => speakText(word.hanzi)}
               className="px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-600 hover:text-white text-xs font-bold shadow-2xs flex items-center gap-1.5 transition-all"
             >
-              <span>🔊</span>
+              <Volume2 size={14} />
               <span>Nghe đọc</span>
             </button>
           </div>
@@ -410,15 +430,22 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
               }`}
             >
               <div className="flex items-center gap-2">
-                <span>{feedback.type === 'mistake' ? '⚠️' : feedback.type === 'complete' ? '🏆' : '💡'}</span>
+                {feedback.type === 'mistake' ? (
+                  <AlertTriangle size={15} className="text-rose-600 flex-shrink-0" />
+                ) : feedback.type === 'complete' ? (
+                  <Trophy size={15} className="text-amber-600 flex-shrink-0" />
+                ) : (
+                  <Lightbulb size={15} className="text-blue-600 flex-shrink-0" />
+                )}
                 <span>{feedback.text}</span>
               </div>
               {feedback.type === 'mistake' && (
                 <button
                   onClick={giveHint}
-                  className="px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex-shrink-0"
+                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex-shrink-0 flex items-center gap-1"
                 >
-                  Gợi ý
+                  <Lightbulb size={12} />
+                  <span>Gợi ý</span>
                 </button>
               )}
             </div>
@@ -473,7 +500,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
                     disabled={isAnimating}
                     className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
                   >
-                    <span>▶️</span>
+                    <Play size={12} className="fill-current" />
                     <span>{isAnimating ? 'Đang chiếu...' : 'Xem viết mẫu'}</span>
                   </button>
                   <button
@@ -481,21 +508,22 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
                     disabled={isCompleted || isAnimating}
                     className="px-3 py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-semibold flex items-center gap-1.5 transition-all disabled:opacity-50"
                   >
-                    <span>💡</span>
+                    <Lightbulb size={12} />
                     <span>Gợi ý nét</span>
                   </button>
                   <button
                     onClick={handleResetQuiz}
                     className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
-                    <span>🧹</span>
+                    <RotateCcw size={12} />
                     <span>Viết lại</span>
                   </button>
                   <button
                     onClick={toggleOutline}
                     className="px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
-                    <span>{showGhost ? '👁️ Ẩn nét mờ' : '👁️ Hiện nét mờ'}</span>
+                    {showGhost ? <EyeOff size={12} /> : <Eye size={12} />}
+                    <span>{showGhost ? 'Ẩn nét mờ' : 'Hiện nét mờ'}</span>
                   </button>
                 </>
               ) : (
@@ -504,12 +532,14 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
                     onClick={clearCanvas}
                     className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
-                    <span>🧹 Xóa vẽ lại</span>
+                    <RotateCcw size={12} />
+                    <span>Xóa vẽ lại</span>
                   </button>
                   <button
                     onClick={() => setShowGhost(!showGhost)}
                     className="px-3.5 py-1.5 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition-all"
                   >
+                    {showGhost ? <EyeOff size={12} /> : <Eye size={12} />}
                     <span>{showGhost ? 'Ẩn nét mẫu' : 'Hiện nét mẫu'}</span>
                   </button>
                 </>
@@ -521,7 +551,7 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
           <div className="p-4 rounded-2xl bg-amber-50/80 border border-amber-200/80 text-xs space-y-2 text-slate-800">
             <div className="flex items-center justify-between font-bold text-amber-900 text-sm">
               <span className="flex items-center gap-1.5">
-                <span>🧩</span>
+                <Layers size={14} className="text-amber-800" />
                 <span>Bộ thủ: {radicalInfo.radical}</span>
               </span>
               <span className="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-900 text-[10px]">
@@ -529,8 +559,9 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
               </span>
             </div>
 
-            <p className="text-slate-600 leading-relaxed">
-              💡 <span className="font-semibold text-slate-900">Chiết tự & Cách nhớ:</span> {radicalInfo.mnemonic}
+            <p className="text-slate-600 leading-relaxed flex items-start gap-1.5">
+              <BookOpen size={14} className="text-amber-700 flex-shrink-0 mt-0.5" />
+              <span><span className="font-semibold text-slate-900">Chiết tự & Cách nhớ:</span> {radicalInfo.mnemonic}</span>
             </p>
           </div>
         </div>
@@ -540,7 +571,8 @@ export default function HandwritingModal({ word, onClose, onGainXP }) {
           <div className="text-xs text-slate-500">
             {isCompleted ? (
               <span className="text-emerald-600 font-bold flex items-center gap-1">
-                <span>🎉</span> Đã hoàn thành chữ!
+                <Sparkles size={14} />
+                <span>Đã hoàn thành chữ!</span>
               </span>
             ) : (
               <span>Vẽ đúng toàn bộ nét để nhận +15 XP!</span>

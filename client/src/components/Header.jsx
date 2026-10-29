@@ -1,4 +1,15 @@
 import React, { useState } from 'react';
+import {
+  Menu,
+  MapPin,
+  Languages,
+  Flame,
+  Sparkles,
+  X,
+  Check,
+  ChevronRight,
+  BookOpen,
+} from 'lucide-react';
 
 export default function Header({
   lessons,
@@ -44,10 +55,10 @@ export default function Header({
           {onOpenMenu && (
             <button
               onClick={onOpenMenu}
-              className="lg:hidden w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center text-lg flex-shrink-0 transition-all active:scale-95"
+              className="lg:hidden w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center justify-center flex-shrink-0 transition-all active:scale-95"
               title="Mở menu"
             >
-              ☰
+              <Menu size={18} />
             </button>
           )}
 
@@ -57,7 +68,7 @@ export default function Header({
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex-shrink-0"
             title="Xem toàn bộ lộ trình bài học"
           >
-            <span>🗺️</span>
+            <MapPin size={15} />
             <span className="hidden xs:inline">Lộ trình bài học</span>
             <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-[10px]">
               {currentLessonIndex + 1}/{lessons.length}
@@ -83,14 +94,14 @@ export default function Header({
           {/* Pinyin Toggle */}
           <button
             onClick={() => setShowPinyin(!showPinyin)}
-            className={`flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all flex-shrink-0 active:scale-95 ${
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all flex-shrink-0 active:scale-95 ${
               showPinyin
                 ? 'bg-rose-50 border-rose-300 text-rose-600 shadow-2xs'
                 : 'bg-slate-100 border-slate-300 text-slate-600'
             }`}
             title="Bật/Tắt hiển thị phiên âm Pinyin"
           >
-            <span>🔤</span>
+            <Languages size={14} />
             <span className="hidden sm:inline">{showPinyin ? 'Hiện Pinyin' : 'Ẩn Pinyin'}</span>
           </button>
         </div>
@@ -98,17 +109,17 @@ export default function Header({
         {/* Right side: Streak & XP Pills */}
         <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
           <div
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs sm:text-sm font-bold shadow-2xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs sm:text-sm font-bold shadow-2xs"
             title="Chuỗi ngày học liên tục"
           >
-            <span>🔥</span>
+            <Flame size={15} className="text-orange-500 fill-orange-500" />
             <span>{streak}<span className="hidden xs:inline"> ngày</span></span>
           </div>
           <div
-            className="flex items-center gap-1 px-2.5 sm:px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-600 text-xs sm:text-sm font-bold shadow-2xs"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs sm:text-sm font-bold shadow-2xs"
             title="Điểm kinh nghiệm tích lũy"
           >
-            <span>⭐</span>
+            <Sparkles size={15} className="text-amber-500 fill-amber-500" />
             <span>{xp}<span className="hidden xs:inline"> XP</span></span>
           </div>
         </div>
@@ -122,7 +133,7 @@ export default function Header({
             <div className="p-5 sm:p-6 border-b border-slate-200 flex items-center justify-between bg-gradient-to-r from-slate-900 via-slate-800 to-rose-900 text-white">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="text-xl">🗺️</span>
+                  <BookOpen size={20} className="text-rose-400" />
                   <h3 className="text-lg sm:text-xl font-bold">Lộ Trình Học Tiếng Trung Toàn Diện (20 Bài Học)</h3>
                 </div>
                 <p className="text-xs sm:text-sm text-slate-300 mt-1">
@@ -131,10 +142,10 @@ export default function Header({
               </div>
               <button
                 onClick={() => setShowRoadmapModal(false)}
-                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center font-bold text-sm transition-all"
+                className="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-all"
                 title="Đóng"
               >
-                ✕
+                <X size={18} />
               </button>
             </div>
 
@@ -190,7 +201,17 @@ export default function Header({
 
                     <div className="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
                       <span className="text-rose-600 font-semibold flex items-center gap-1">
-                        {isSelected ? '✓ Đang học bài này' : 'Bấm để học bài này →'}
+                        {isSelected ? (
+                          <>
+                            <Check size={14} />
+                            <span>Đang học bài này</span>
+                          </>
+                        ) : (
+                          <>
+                            <span>Bấm để học bài này</span>
+                            <ChevronRight size={14} />
+                          </>
+                        )}
                       </span>
                       <span className="text-slate-400">
                         Bài {lesson.originalIdx + 1}
@@ -203,7 +224,7 @@ export default function Header({
 
             {/* Modal Footer */}
             <div className="p-4 bg-white border-t border-slate-200 flex items-center justify-between text-xs text-slate-500">
-              <span>💡 Mỗi bài học có đầy đủ Từ vựng chuyên sâu, Ngữ pháp, Nghe, Nói, Đọc, Viết.</span>
+              <span>Mỗi bài học có đầy đủ Từ vựng chuyên sâu, Ngữ pháp, Nghe, Nói, Đọc, Viết.</span>
               <button
                 onClick={() => setShowRoadmapModal(false)}
                 className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition-all"

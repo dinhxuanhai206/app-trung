@@ -1,6 +1,25 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import HanziWriter from 'hanzi-writer';
 import { HANZI_RADICAL_MAP } from '../data/lessonEnricher';
+import {
+  PenTool,
+  Bot,
+  Edit3,
+  Volume2,
+  AlertTriangle,
+  XCircle,
+  CheckCircle2,
+  Trophy,
+  Lightbulb,
+  Play,
+  RotateCcw,
+  Eye,
+  EyeOff,
+  Search,
+  Sparkles,
+  Target,
+  BookOpen,
+} from 'lucide-react';
 
 export default function WritingView({ lesson, onGainXP }) {
   const characters = React.useMemo(() => {
@@ -110,27 +129,25 @@ export default function WritingView({ lesson, onGainXP }) {
     setCurrentStrokeIdx(0);
     setFeedback({
       type: 'info',
-      text: '✍️ Hãy dùng chuột hoặc ngón tay viết nét đầu tiên theo thứ tự nét chuẩn.',
+      text: 'Hãy dùng chuột hoặc ngón tay viết nét đầu tiên theo thứ tự nét chuẩn.',
     });
 
     writer.quiz({
       onCorrectStroke: (data) => {
-        // data: { strokeNum, mistakesOnStroke, totalMistakes, strokesRemaining }
         const nextIdx = data.strokeNum + 1;
         const total = nextIdx + data.strokesRemaining;
         setCurrentStrokeIdx(nextIdx);
         setTotalStrokes(total);
         setFeedback({
           type: 'success',
-          text: `✅ Rất chuẩn! Đã hoàn thiện nét thứ ${nextIdx} / ${total}. Hãy viết nét kế tiếp!`,
+          text: `Rất chuẩn! Đã hoàn thiện nét thứ ${nextIdx} / ${total}. Hãy viết nét kế tiếp!`,
         });
       },
       onMistake: (data) => {
-        // data: { strokeNum, mistakesOnStroke, totalMistakes }
         setMistakesCount(data.totalMistakes);
         setFeedback({
           type: 'mistake',
-          text: `❌ Sai thứ tự nét hoặc vẽ sai hướng! Cần viết nét thứ ${data.strokeNum + 1} trước. (Quy tắc: từ trên xuống dưới, từ trái sang phải)`,
+          text: `Sai thứ tự nét hoặc vẽ sai hướng! Cần viết nét thứ ${data.strokeNum + 1} trước. (Quy tắc: từ trên xuống dưới, từ trái sang phải)`,
         });
       },
       onComplete: (summary) => {
@@ -138,7 +155,7 @@ export default function WritingView({ lesson, onGainXP }) {
         setCurrentStrokeIdx(totalStrokes);
         setFeedback({
           type: 'complete',
-          text: `🎉 Xuất sắc! Bạn đã hoàn thành đúng chuẩn toàn bộ chữ "${currentChar.targetChar}" (${summary.totalMistakes} lần viết sai)!`,
+          text: `Xuất sắc! Bạn đã hoàn thành đúng chuẩn toàn bộ chữ "${currentChar.targetChar}" (${summary.totalMistakes} lần viết sai)!`,
         });
         speakText(currentChar.targetChar);
         if (onGainXP) {
@@ -177,7 +194,7 @@ export default function WritingView({ lesson, onGainXP }) {
         drawingWidth: 16,
         showHintAfterMisses: 2,
         highlightColor: '#10b981',
-        leniency: 1.25, // Tự động bắt nét & hoàn thiện nét mượt mà
+        leniency: 1.25,
         onLoadCharDataSuccess: (charData) => {
           if (!isMounted) return;
           setWriterLoading(false);
@@ -232,14 +249,14 @@ export default function WritingView({ lesson, onGainXP }) {
     setIsAnimating(true);
     setFeedback({
       type: 'info',
-      text: '🎬 Đang trình chiếu thứ tự viết nét mẫu chuẩn...',
+      text: 'Đang trình chiếu thứ tự viết nét mẫu chuẩn...',
     });
     writerInstanceRef.current.animateCharacter({
       onComplete: () => {
         setIsAnimating(false);
         setFeedback({
           type: 'info',
-          text: '👉 Đến lượt bạn! Hãy viết theo thứ tự nét vừa được hướng dẫn.',
+          text: 'Đến lượt bạn! Hãy viết theo thứ tự nét vừa được hướng dẫn.',
         });
         startSmartQuiz(writerInstanceRef.current);
       },
@@ -253,7 +270,7 @@ export default function WritingView({ lesson, onGainXP }) {
       onComplete: () => {
         setFeedback({
           type: 'info',
-          text: `💡 Hãy vẽ theo nét thứ ${currentStrokeIdx + 1} vừa nhấp nháy!`,
+          text: `Hãy vẽ theo nét thứ ${currentStrokeIdx + 1} vừa nhấp nháy!`,
         });
       },
     });
@@ -345,7 +362,7 @@ export default function WritingView({ lesson, onGainXP }) {
       <div className="bg-gradient-to-r from-amber-50 via-rose-50 to-white border border-amber-200/70 rounded-3xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-2xl">✍️</span>
+            <PenTool className="text-rose-600 w-6 h-6" />
             <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
               Luyện Viết Chữ Hán Thông Minh (米字格)
             </h2>
@@ -368,7 +385,8 @@ export default function WritingView({ lesson, onGainXP }) {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <span>🤖 Luyện Viết Thông Minh</span>
+            <Bot size={15} />
+            <span>Luyện Viết Thông Minh</span>
           </button>
           <button
             onClick={() => setPracticeMode('freehand')}
@@ -378,7 +396,8 @@ export default function WritingView({ lesson, onGainXP }) {
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            <span>🖌️ Vẽ Tự Do</span>
+            <Edit3 size={15} />
+            <span>Vẽ Tự Do</span>
           </button>
         </div>
       </div>
@@ -433,10 +452,11 @@ export default function WritingView({ lesson, onGainXP }) {
                   </span>
                   <button
                     onClick={() => speakText(currentChar.targetChar)}
-                    className="p-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs transition-all"
+                    className="p-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs transition-all flex items-center gap-1"
                     title="Phát âm tiếng Trung"
                   >
-                    🔊 Nghe
+                    <Volume2 size={13} />
+                    <span>Nghe</span>
                   </button>
                 </div>
                 <div className="text-xs text-slate-500 mt-0.5">
@@ -463,7 +483,7 @@ export default function WritingView({ lesson, onGainXP }) {
             <div
               className={`p-3 rounded-2xl text-xs font-bold flex items-center justify-between gap-2 transition-all ${
                 feedback.type === 'success'
-                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 animate-pulse'
+                  ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                   : feedback.type === 'mistake'
                   ? 'bg-rose-50 text-rose-800 border border-rose-300 animate-bounce'
                   : feedback.type === 'complete'
@@ -472,15 +492,24 @@ export default function WritingView({ lesson, onGainXP }) {
               }`}
             >
               <div className="flex items-center gap-2">
-                <span>{feedback.type === 'mistake' ? '⚠️' : feedback.type === 'complete' ? '🏆' : '💡'}</span>
+                {feedback.type === 'mistake' ? (
+                  <AlertTriangle size={16} className="text-rose-600 flex-shrink-0" />
+                ) : feedback.type === 'complete' ? (
+                  <Trophy size={16} className="text-amber-600 flex-shrink-0" />
+                ) : feedback.type === 'success' ? (
+                  <CheckCircle2 size={16} className="text-emerald-600 flex-shrink-0" />
+                ) : (
+                  <Lightbulb size={16} className="text-blue-600 flex-shrink-0" />
+                )}
                 <span>{feedback.text}</span>
               </div>
               {feedback.type === 'mistake' && (
                 <button
                   onClick={giveHint}
-                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex-shrink-0 transition-all shadow-xs"
+                  className="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-[11px] flex-shrink-0 transition-all shadow-xs flex items-center gap-1"
                 >
-                  💡 Xem gợi ý nét này
+                  <Lightbulb size={12} />
+                  <span>Xem gợi ý nét</span>
                 </button>
               )}
             </div>
@@ -530,7 +559,7 @@ export default function WritingView({ lesson, onGainXP }) {
               {/* Status Indicator Pill */}
               {practiceMode === 'smart' && mistakesCount > 0 && !isCompleted && (
                 <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 bg-red-600 text-white px-3 py-0.5 rounded-full text-[11px] font-extrabold shadow-md flex items-center gap-1 z-20">
-                  <span>❌</span>
+                  <XCircle size={12} />
                   <span>Đã viết sai: {mistakesCount} lần</span>
                 </div>
               )}
@@ -546,7 +575,7 @@ export default function WritingView({ lesson, onGainXP }) {
                   disabled={isAnimating}
                   className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  <span>▶️</span>
+                  <Play size={13} className="fill-current" />
                   <span>{isAnimating ? 'Đang chiếu...' : 'Xem viết mẫu'}</span>
                 </button>
                 <button
@@ -554,21 +583,22 @@ export default function WritingView({ lesson, onGainXP }) {
                   disabled={isCompleted || isAnimating}
                   className="px-3.5 py-2 border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95 disabled:opacity-50"
                 >
-                  <span>💡</span>
+                  <Lightbulb size={13} />
                   <span>Gợi ý nét tiếp</span>
                 </button>
                 <button
                   onClick={handleResetQuiz}
                   className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95"
                 >
-                  <span>🧹</span>
+                  <RotateCcw size={13} />
                   <span>Viết lại</span>
                 </button>
                 <button
                   onClick={toggleOutline}
                   className="px-3.5 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95"
                 >
-                  <span>{showGhost ? '👁️ Ẩn nét mờ' : '👁️ Hiện nét mờ'}</span>
+                  {showGhost ? <EyeOff size={13} /> : <Eye size={13} />}
+                  <span>{showGhost ? 'Ẩn nét mờ' : 'Hiện nét mờ'}</span>
                 </button>
               </>
             ) : (
@@ -577,12 +607,14 @@ export default function WritingView({ lesson, onGainXP }) {
                   onClick={clearFreehandCanvas}
                   className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5"
                 >
-                  <span>🧹 Xóa nét vẽ</span>
+                  <RotateCcw size={13} />
+                  <span>Xóa nét vẽ</span>
                 </button>
                 <button
                   onClick={() => setShowGhost(!showGhost)}
                   className="px-4 py-2 border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5"
                 >
+                  {showGhost ? <EyeOff size={13} /> : <Eye size={13} />}
                   <span>{showGhost ? 'Ẩn nét mẫu' : 'Hiện nét mẫu'}</span>
                 </button>
               </>
@@ -593,7 +625,7 @@ export default function WritingView({ lesson, onGainXP }) {
           <div className="text-left bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 rounded-2xl p-4 space-y-2 text-xs">
             <div className="flex items-center justify-between font-bold text-amber-950">
               <span className="flex items-center gap-1.5">
-                <span className="text-base">🔍</span>
+                <Search size={14} className="text-amber-800" />
                 <span>
                   Bộ thủ cốt lõi: <strong className="font-extrabold text-rose-700 text-sm">{currentChar.radical || currentChar.targetChar}</strong>
                 </span>
@@ -603,12 +635,13 @@ export default function WritingView({ lesson, onGainXP }) {
               </span>
             </div>
             {currentChar.tips && (
-              <p className="text-slate-700 leading-relaxed pt-1 border-t border-amber-200/50">
-                💡 <strong className="text-slate-900">Chiết tự & Mẹo ghi nhớ:</strong> {currentChar.tips}
+              <p className="text-slate-700 leading-relaxed pt-1 border-t border-amber-200/50 flex items-start gap-1.5">
+                <BookOpen size={14} className="text-amber-700 flex-shrink-0 mt-0.5" />
+                <span><strong className="text-slate-900">Chiết tự & Mẹo ghi nhớ:</strong> {currentChar.tips}</span>
               </p>
             )}
-            <div className="text-[11px] text-amber-800/80 pt-0.5 flex items-center gap-1.5">
-              <span>📌</span>
+            <div className="text-[11px] text-amber-800/80 pt-0.5 flex items-start gap-1.5">
+              <Sparkles size={13} className="text-amber-600 flex-shrink-0 mt-0.5" />
               <span><strong>Quy tắc bút thuận:</strong> Ngang trước sổ sau, phẩy trước mác sau, trên trước dưới sau, trái trước phải sau, ngoài trước trong sau, vào trước đóng sau.</span>
             </div>
           </div>
@@ -627,9 +660,10 @@ export default function WritingView({ lesson, onGainXP }) {
             </div>
 
             <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-200/70 text-sm space-y-1">
-              <span className="font-extrabold text-blue-900 block text-xs uppercase tracking-wider">
-                🎯 Đề bài thực hành:
-              </span>
+              <div className="flex items-center gap-1.5 font-extrabold text-blue-900 text-xs uppercase tracking-wider">
+                <Target size={14} className="text-blue-600" />
+                <span>Đề bài thực hành:</span>
+              </div>
               <p className="font-semibold text-slate-800 text-sm leading-relaxed">
                 {currentChar.compositionPrompt ||
                   currentChar.compositionTask?.prompt ||
@@ -656,7 +690,8 @@ export default function WritingView({ lesson, onGainXP }) {
               onClick={checkComposition}
               className="w-full py-3 bg-gradient-to-r from-rose-600 to-rose-700 hover:from-rose-700 hover:to-rose-800 text-white rounded-2xl text-sm font-extrabold transition-all shadow-md shadow-rose-600/20 active:scale-98 flex items-center justify-center gap-2"
             >
-              <span>✅ Kiểm tra & Nộp bài (+20 XP)</span>
+              <CheckCircle2 size={16} />
+              <span>Kiểm tra & Nộp bài (+20 XP)</span>
             </button>
 
             {compositionFeedback && (
@@ -670,7 +705,7 @@ export default function WritingView({ lesson, onGainXP }) {
                 {compositionFeedback.isSuccess ? (
                   <div className="space-y-1">
                     <strong className="block font-bold text-emerald-800 flex items-center gap-1.5">
-                      <span>🎉</span>
+                      <Sparkles size={16} />
                       <span>Tuyệt vời! Câu của bạn rất chuẩn xác.</span>
                     </strong>
                     <div className="text-xs text-emerald-700">
@@ -680,7 +715,7 @@ export default function WritingView({ lesson, onGainXP }) {
                 ) : (
                   <div className="space-y-1">
                     <strong className="block font-bold text-rose-800 flex items-center gap-1.5">
-                      <span>⚠️</span>
+                      <AlertTriangle size={16} />
                       <span>Chưa đạt yêu cầu.</span>
                     </strong>
                     <p className="text-xs text-rose-700">

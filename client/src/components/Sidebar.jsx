@@ -1,18 +1,31 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
+import {
+  BookOpen,
+  Headphones,
+  Mic,
+  Bot,
+  PenTool,
+  Gamepad2,
+  Compass,
+  Layers,
+  GraduationCap,
+  BarChart3,
+  X,
+} from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
   const navItems = [
-    { path: '/reading', label: '1. Kỹ Năng Đọc (阅读)', icon: '📖' },
-    { path: '/listening', label: '2. Kỹ Năng Nghe (听力)', icon: '🎧' },
-    { path: '/speaking', label: '3. Luyện Nói AI (口语)', icon: '🎙️' },
-    { path: '/ai-chat', label: '4. AI Trò Chuyện Song Song (智能对话)', icon: '🤖', isNew: true },
-    { path: '/writing', label: '5. Luyện Viết (书写)', icon: '✍️' },
-    { path: '/matching', label: '6. Game Ghép Chữ & Ghép Câu (游戏)', icon: '🎮' },
-    { path: '/scenario', label: '7. Tình Huống Thực Tế (情景)', icon: '💬' },
-    { path: '/formula', label: '8. Công Thức Ghép Câu (句型)', icon: '📐' },
-    { path: '/vocab1000', label: '9. Kho 1000 Từ HSK (词汇)', icon: '📚' },
-    { path: '/dashboard', label: 'Tiến Độ & Thống Kê', icon: '📊' },
+    { path: '/reading', label: '1. Kỹ Năng Đọc (阅读)', icon: BookOpen },
+    { path: '/listening', label: '2. Kỹ Năng Nghe (听力)', icon: Headphones },
+    { path: '/speaking', label: '3. Luyện Nói AI (口语)', icon: Mic },
+    { path: '/ai-chat', label: '4. AI Trò Chuyện Song Song (智能对话)', icon: Bot, isNew: true },
+    { path: '/writing', label: '5. Luyện Viết (书写)', icon: PenTool },
+    { path: '/matching', label: '6. Game Ghép Chữ & Ghép Câu (游戏)', icon: Gamepad2 },
+    { path: '/scenario', label: '7. Tình Huống Thực Tế (情景)', icon: Compass },
+    { path: '/formula', label: '8. Công Thức Ghép Câu (句型)', icon: Layers },
+    { path: '/vocab1000', label: '9. Kho 1000 Từ HSK (词汇)', icon: GraduationCap },
+    { path: '/dashboard', label: 'Tiến Độ & Thống Kê', icon: BarChart3 },
   ];
 
   const sidebarContent = (
@@ -35,10 +48,10 @@ export default function Sidebar({ isOpen, onClose }) {
         {onClose && (
           <button
             onClick={onClose}
-            className="lg:hidden w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition-all"
+            className="lg:hidden w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-all"
             title="Đóng menu"
           >
-            ✕
+            <X size={16} />
           </button>
         )}
       </div>
@@ -48,30 +61,33 @@ export default function Sidebar({ isOpen, onClose }) {
         <div className="text-[10px] uppercase font-bold text-slate-500 px-3 py-1 tracking-wider">
           Chức năng học tập
         </div>
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            onClick={() => {
-              if (onClose) onClose();
-            }}
-            className={({ isActive }) =>
-              `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                isActive
-                  ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 font-semibold translate-x-1'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
-              }`
-            }
-          >
-            <span className="text-lg">{item.icon}</span>
-            <span className="truncate flex-1">{item.label}</span>
-            {item.isNew && (
-              <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
-                Live
-              </span>
-            )}
-          </NavLink>
-        ))}
+        {navItems.map((item) => {
+          const IconComponent = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              onClick={() => {
+                if (onClose) onClose();
+              }}
+              className={({ isActive }) =>
+                `w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                  isActive
+                    ? 'bg-rose-600 text-white shadow-lg shadow-rose-600/30 font-semibold translate-x-1'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
+                }`
+              }
+            >
+              <IconComponent className="w-5 h-5 flex-shrink-0" />
+              <span className="truncate flex-1">{item.label}</span>
+              {item.isNew && (
+                <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                  Live
+                </span>
+              )}
+            </NavLink>
+          );
+        })}
       </nav>
 
       {/* Footer Profile */}
