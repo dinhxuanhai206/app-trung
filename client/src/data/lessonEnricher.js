@@ -140,106 +140,131 @@ export function getLessonMultiScenarios(lesson) {
   const title = lesson.title || '';
   const id = lesson.id || '';
 
-  // Bài 1: Chào hỏi
+  // Bài 1: Chào hỏi & Làm quen đời sống
   if (id === 'hsk1-lesson1') {
     return [
       {
         id: 'sc1',
-        name: 'Tình huống 1: Lần đầu gặp gỡ tại sảnh trường đại học (初次相识)',
-        context: 'David là du học sinh mới đến, tình cờ gặp Vương Lan tại sảnh đăng ký ký túc xá và làm quen.',
+        name: 'Tình huống 1: Lần đầu gặp gỡ tại sảnh ký túc xá đại học (初次相识)',
+        context: 'David là du học sinh mới đến Bắc Kinh, tình cờ gặp bạn học Vương Lan tại sảnh đăng ký ký túc xá.',
+        lifeTips: 'Khi gặp người lạ trạc tuổi mình ở trường học hay ngoài đời, xưng hô "你好" kết hợp nụ cười thân thiện là cách mở đầu tự nhiên nhất.',
         dialogues: [
           { speaker: '大卫 (David)', hanzi: '你好！请问你叫什么名字？', pinyin: 'Nǐ hǎo! Qǐngwèn nǐ jiào shénme míngzì?', vi: 'Xin chào! Xin hỏi bạn tên là gì?' },
           { speaker: '王兰 (Vương Lan)', hanzi: '你好！我叫王兰，我是中国人。你呢？', pinyin: 'Nǐ hǎo! Wǒ jiào Wáng Lán, wǒ shì Zhōngguó rén. Nǐ ne?', vi: 'Chào bạn! Mình tên là Vương Lan, mình là người Trung Quốc. Còn bạn?' },
-          { speaker: '大卫 (David)', hanzi: '我叫大卫，我是美国留学生。很高兴认识你！', pinyin: 'Wǒ jiào Dàwèi, wǒ shì Měiguó liúxuéshēng. Hěn gāoxìng rènshi nǐ!', vi: 'Mình là David, lưu học sinh Mỹ. Rất vui được làm quen với bạn!' },
-          { speaker: '王兰 (Vương Lan)', hanzi: '认识你我也很高兴！欢迎来到北京！', pinyin: 'Rènshi nǐ wǒ yě hěn gāoxìng! Huānyíng lái dào Běijīng!', vi: 'Quen bạn mình cũng rất vui! Chào mừng bạn đến Bắc Kinh nhé!' },
+          { speaker: '大卫 (David)', hanzi: '我叫大卫，我是美国留学生。很高兴认识你！', pinyin: 'Wǒ jiào Dàwèi, wǒ shì Měiguó liúxuéshēng. Hěn gāoxìng rènshi nǐ!', vi: 'Mình là David, du học sinh Mỹ. Rất vui được làm quen với bạn!' },
+          { speaker: '王兰 (Vương Lan)', hanzi: '认识你我也很高兴！欢迎来到北京！我们加个微信吧？', pinyin: 'Rènshi nǐ wǒ yě hěn gāoxìng! Huānyíng lái dào Běijīng! Wǒmen jiā gè Wēixìn ba?', vi: 'Quen bạn mình cũng rất vui! Chào mừng đến Bắc Kinh! Chúng mình kết bạn WeChat nhé?' },
+          { speaker: '大卫 (David)', hanzi: '太好了！这是我的二维码，你扫我吧。', pinyin: 'Tài hǎo le! Zhè shì wǒ de èrwéimǎ, nǐ sǎo wǒ ba.', vi: 'Tuyệt quá! Đây là mã QR của mình, bạn quét nhé.' },
+          { speaker: '王兰 (Vương Lan)', hanzi: '好的，扫上了！明天见！', pinyin: 'Hǎo de, sǎo shàng le! Míngtiān jiàn!', vi: 'Được rồi, kết bạn rồi nhé! Hẹn ngày mai gặp lại!' },
         ],
       },
       {
         id: 'sc2',
-        name: 'Tình huống 2: Chào hỏi thầy giáo trên sân trường (师生问候)',
-        context: 'Lý Minh gặp thầy giáo Trương vào buổi sáng trên đường đến giảng đường.',
+        name: 'Tình huống 2: Chào hỏi thầy cô giáo trên sân trường (师生礼貌问候)',
+        context: 'Lý Minh gặp thầy giáo Trương vào buổi sáng sớm trên đường đến giảng đường.',
+        lifeTips: 'Với người lớn tuổi, thầy cô giáo hoặc cấp trên, luôn xưng "您" (Ngài/Thầy) thay vì "你" để thể hiện sự lễ phép và tôn kính.',
         dialogues: [
-          { speaker: '李明 (Lý Minh)', hanzi: '张老师，早上好！您身体好吗？', pinyin: 'Zhāng lǎoshī, zǎoshang hǎo! Nín shēntǐ hǎo ma?', vi: 'Thầy Trương, chào buổi sáng ạ! Thầy có khỏe không ạ?' },
-          { speaker: '张老师 (Thầy Trương)', hanzi: '早上好，李明！我很好。你今天有课吗？', pinyin: 'Zǎoshang hǎo, Lǐ Míng! Wǒ hěn hǎo. Nǐ jīntiān yǒu kè ma?', vi: 'Chào buổi sáng Lý Minh! Thầy rất khỏe. Hôm nay em có tiết học không?' },
-          { speaker: '李明 (Lý Minh)', hanzi: '有的，我上午有两节汉语课。老师再见！', pinyin: 'Yǒu de, wǒ shàngwǔ yǒu liǎng jié Hànyǔ kè. Lǎoshī zàijiàn!', vi: 'Dạ có, buổi sáng em có hai tiết tiếng Hán. Em chào thầy ạ!' },
-          { speaker: '张老师 (Thầy Trương)', hanzi: '好，努力学习，再见！', pinyin: 'Hǎo, nǔlì xuéxí, zàijiàn!', vi: 'Được rồi, chăm chỉ học nhé, tạm biệt em!' },
+          { speaker: '李明 (Lý Minh)', hanzi: '张老师，早上好！您身体好吗？', pinyin: 'Zhāng lǎoshī, zǎoshang hǎo! Nín shēntǐ hǎo ma?', vi: 'Thầy Trương, chào buổi sáng ạ! Dạo này thầy có khỏe không ạ?' },
+          { speaker: '张老师 (Thầy Trương)', hanzi: '早上好，李明！我挺好的。你今天有课吗？', pinyin: 'Zǎoshang hǎo, Lǐ Míng! Wǒ tǐng hǎo de. Nǐ jīntiān yǒu kè ma?', vi: 'Chào buổi sáng Lý Minh! Thầy khá khỏe. Hôm nay em có tiết học không?' },
+          { speaker: '李明 (Lý Minh)', hanzi: '有的，我上午有两节汉语综合课。老师再见！', pinyin: 'Yǒu de, wǒ shàngwǔ yǒu liǎng jié Hànyǔ zōnghé kè. Lǎoshī zàijiàn!', vi: 'Dạ có, buổi sáng em có hai tiết tiếng Hán tổng hợp. Em chào thầy ạ!' },
+          { speaker: '张老师 (Thầy Trương)', hanzi: '好，上课认真听讲，努力学习，再见！', pinyin: 'Hǎo, shàngkè rènzhēn tīngjiǎng, nǔlì xuéxí, zàijiàn!', vi: 'Được rồi, trên lớp chú ý nghe giảng, chăm chỉ nhé, tạm biệt em!' },
         ],
       },
       {
         id: 'sc3',
-        name: 'Tình huống 3: Giới thiệu người bạn mới cho bạn bè (引荐新朋友)',
-        context: 'Mary giới thiệu David cho các bạn cùng lớp người Việt Nam.',
+        name: 'Tình huống 3: Giới thiệu người bạn mới cho nhóm bạn cùng lớp (引荐新朋友)',
+        context: 'Mary đưa David đến câu lạc bộ tiếng Trung giới thiệu với các bạn sinh viên Việt Nam.',
+        lifeTips: 'Khi giới thiệu bạn mới, người Trung thường dùng mẫu "这位是我的朋友..." kèm cử chỉ mở rộng bàn tay lịch sự.',
         dialogues: [
-          { speaker: '玛丽 (Mary)', hanzi: '大家好！这位是我的好朋友大卫。', pinyin: 'Dàjiā hǎo! Zhè wèi shì wǒ de hǎo péngyou Dàwèi.', vi: 'Chào mọi người! Vị này là David - bạn thân của mình.' },
-          { speaker: '大家 (Mọi người)', hanzi: '大卫你好！欢迎你来我们班！', pinyin: 'Dàwèi nǐ hǎo! Huānyíng nǐ lái wǒmen bān!', vi: 'Chào David! Chào mừng bạn đến với lớp chúng mình!' },
-          { speaker: '大卫 (David)', hanzi: '谢谢大家！请多关照！', pinyin: 'Xièxie dàjiā! Qǐng duō guānzhào!', vi: 'Cảm ơn mọi người! Mong được mọi người giúp đỡ nhiều!' },
+          { speaker: '玛丽 (Mary)', hanzi: '大家好！这位是我的同班好朋友大卫。', pinyin: 'Dàjiā hǎo! Zhè wèi shì wǒ de tóngbān hǎo péngyou Dàwèi.', vi: 'Chào mọi người! Vị này là David - bạn thân cùng lớp của mình.' },
+          { speaker: '大家 (Mọi người)', hanzi: '大卫你好！热烈欢迎你加入我们！', pinyin: 'Dàwèi nǐ hǎo! Rèliè huānyíng nǐ jiārù wǒmen!', vi: 'Chào David! Nhiệt liệt chào đón bạn gia nhập nhóm chúng mình!' },
+          { speaker: '大卫 (David)', hanzi: '谢谢大家！我的中文还不太好，请多关照！', pinyin: 'Xièxie dàjiā! Wǒ de Zhōngwén hái bú tài hǎo, qǐng duō guānzhào!', vi: 'Cảm ơn mọi người! Tiếng Trung của mình còn chưa tốt lắm, mong mọi người giúp đỡ nhiều!' },
+          { speaker: '大家 (Mọi người)', hanzi: '没关系，以后我们互相学习！', pinyin: 'Méi guānxi, yǐhòu wǒmen hùxiāng xuéxí!', vi: 'Không sao đâu, sau này chúng ta cùng giúp đỡ nhau học tập!' },
         ],
       },
     ];
   }
 
-  // Bài 2: Gia đình & Nghề nghiệp
+  // Bài 2: Gia đình & Thăm hỏi đời sống
   if (id === 'hsk1-lesson2') {
     return [
       {
         id: 'sc1',
-        name: 'Tình huống 1: Kể về các thành viên gia đình (谈论家庭成员)',
-        context: 'Vương Lan và David ngồi xem album ảnh gia đình và trò chuyện.',
+        name: 'Tình huống 1: Bạn bè tâm sự xem ảnh gia đình (谈论家庭成员)',
+        context: 'Vương Lan đến phòng David chơi, cùng nhau xem album ảnh gia đình và trò chuyện vui vẻ.',
+        lifeTips: 'Khi hỏi tuổi trẻ con dùng "几岁", hỏi người cùng trang lứa dùng "多大", hỏi người lớn tuổi dùng "多大年纪 / 高寿".',
         dialogues: [
-          { speaker: '大卫 (David)', hanzi: '王兰，你家有几口人？', pinyin: 'Wáng Lán, nǐ jiā yǒu jǐ kǒu rén?', vi: 'Vương Lan, nhà bạn có mấy người?' },
-          { speaker: '王兰 (Vương Lan)', hanzi: '我家有四口人：爸爸、妈妈、哥哥和我。', pinyin: 'Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ.', vi: 'Nhà mình có 4 người: bố, mẹ, anh trai và mình.' },
-          { speaker: '大卫 (David)', hanzi: '你哥哥今年多大？', pinyin: 'Nǐ gēge jīntiān duō dà?', vi: 'Anh trai bạn năm nay bao nhiêu tuổi?' },
-          { speaker: '王兰 (Vương Lan)', hanzi: '他二十五岁，是一位电脑工程师。', pinyin: 'Tā èrshíwǔ suì, shì yí wèi diànnǎo gōngchéngshī.', vi: 'Anh ấy 25 tuổi, là kỹ sư máy tính.' },
+          { speaker: '大卫 (David)', hanzi: '王兰，照片里这位是谁？', pinyin: 'Wáng Lán, zhàopiàn lǐ zhè wèi shì shéi?', vi: 'Vương Lan, vị này trong tấm ảnh là ai thế?' },
+          { speaker: '王兰 (Vương Lan)', hanzi: '这是我哥哥，他今年二十五岁，是一位电脑工程师。', pinyin: 'Zhè shì wǒ gēge, tā jīntiān èrshíwǔ suì, shì yí wèi diànnǎo gōngchéngshī.', vi: 'Đây là anh trai mình, năm nay 25 tuổi, là kỹ sư máy tính.' },
+          { speaker: '大卫 (David)', hanzi: '哇，好厉害！你家一共有几口人？', pinyin: 'Wā, hǎo lìhai! Nǐ jiā yígòng yǒu jǐ kǒu rén?', vi: 'Oa, giỏi quá! Nhà bạn tổng cộng có mấy người?' },
+          { speaker: '王兰 (Vương Lan)', hanzi: '我家有四口人：爸爸、妈妈、哥哥和我。你呢？', pinyin: 'Wǒ jiā yǒu sì kǒu rén: bàba, māma, gēge hé wǒ. Nǐ ne?', vi: 'Nhà mình có 4 người: bố, mẹ, anh trai và mình. Còn bạn thì sao?' },
+          { speaker: '大卫 (David)', hanzi: '我家有五口人，我还有一个可爱的小妹妹。', pinyin: 'Wǒ jiā yǒu wǔ kǒu rén, wǒ hái yǒu yí gè kě\'ài de xiǎo mèimei.', vi: 'Nhà mình có 5 người, mình còn có một cô em gái nhỏ đáng yêu nữa.' },
         ],
       },
       {
         id: 'sc2',
-        name: 'Tình huống 2: Hỏi thăm nghề nghiệp cha mẹ (父母的工作)',
-        context: 'Hỏi thăm công việc của cha mẹ khi trò chuyện giao lưu.',
+        name: 'Tình huống 2: Hỏi thăm công việc và sức khỏe cha mẹ (父母的工作与生活)',
+        context: 'Hai bạn trò chuyện về công việc bận rộn của bố mẹ tại quê nhà.',
+        lifeTips: 'Người Trung Quốc rất coi trọng chữ Hiếu, khi hỏi thăm công việc cha mẹ thường khen "很辛苦，很伟大".',
         dialogues: [
-          { speaker: '李明 (Lý Minh)', hanzi: '你爸爸妈妈也是老师吗？', pinyin: 'Nǐ bàba māma yě shì lǎoshī ma?', vi: 'Bố mẹ bạn cũng là giáo viên à?' },
-          { speaker: '大卫 (David)', hanzi: '不是，我爸爸是市立医院的医生，妈妈是护士。', pinyin: 'Bú shì, wǒ bàba shì shìlì yīyuàn de yīshēng, māma shì hùshi.', vi: 'Không phải, bố mình là bác sĩ bệnh viện thành phố, mẹ là y tá.' },
-          { speaker: '李明 (Lý Minh)', hanzi: '当医生很辛苦，但也很有意义！', pinyin: 'Dāng yīshēng hěn xīnkǔ, dàn yě hěn yǒu yìyì!', vi: 'Làm bác sĩ rất vất vả, nhưng cũng rất ý nghĩa!' },
+          { speaker: '李明 (Lý Minh)', hanzi: '大卫，你爸爸妈妈平时工作忙吗？', pinyin: 'Dàwèi, nǐ bàba māma píngshí gōngzuò máng ma?', vi: 'David, bố mẹ bạn bình thường công việc có bận không?' },
+          { speaker: '大卫 (David)', hanzi: '挺忙的。我爸爸是医院的医生，妈妈是护士。', pinyin: 'Tǐng máng de. Wǒ bàba shì yīyuàn de yīshēng, māma shì hùshi.', vi: 'Khá bận đấy. Bố mình là bác sĩ bệnh viện, mẹ là y tá.' },
+          { speaker: '李明 (Lý Minh)', hanzi: '医护工作真的很辛苦！他们身体都挺好的吧？', pinyin: 'Yīhù gōngzuò zhēn de hěn xīnkǔ! Tāmen shēntǐ dōu tǐng hǎo de ba?', vi: 'Công việc y tế thật sự rất vất vả! Bố mẹ bạn sức khỏe đều tốt cả chứ?' },
+          { speaker: '大卫 (David)', hanzi: '都很好，谢谢你关心！', pinyin: 'Dōu hěn hǎo, xièxie nǐ guānxīn!', vi: 'Đều khỏe cả, cảm ơn bạn đã quan tâm nhé!' },
         ],
       },
     ];
   }
 
-  // Bài 3: Nhà hàng & Ăn uống
+  // Bài 3: Nhà hàng, Quán ăn & Ẩm thực đời sống
   if (id === 'hsk1-lesson3') {
     return [
       {
         id: 'sc1',
-        name: 'Tình huống 1: Gọi món tại nhà hàng truyền thống (在餐馆点餐)',
-        context: 'David và bạn bè vào quán cơm Tứ Xuyên và gọi phục vụ xem thực đơn.',
+        name: 'Tình huống 1: Gọi món tại quán ăn địa phương (在餐馆点餐)',
+        context: 'David và bạn cùng vào một quán ăn Tứ Xuyên và gọi phục vụ gợi ý món ngon.',
+        lifeTips: 'Ở quán ăn bình dân Trung Quốc, gọi phục vụ bằng "服务员" hoặc thân mật hơn với chủ quán là "老板" (ông chủ).',
         dialogues: [
-          { speaker: '服务员 (Phục vụ)', hanzi: '您好！几位？请看菜单。', pinyin: 'Nín hǎo! Jǐ wèi? Qǐng kàn càidān.', vi: 'Xin chào quý khách! Mấy người ạ? Mời xem thực đơn.' },
-          { speaker: '大卫 (David)', hanzi: '我们两位。请问你们有什么特色菜？', pinyin: 'Wǒmen liǎng wèi. Qǐngwèn nǐmen yǒu shénme tèsè cài?', vi: 'Chúng tôi hai người. Xin hỏi quán có món đặc sản gì?' },
-          { speaker: '服务员 (Phục vụ)', hanzi: '我们店的麻婆豆腐和宫保鸡丁非常有名！', pinyin: 'Wǒmen diàn de mápó dòufu hé gōngbǎo jīdīng fēicháng yǒumíng!', vi: 'Món đậu phụ Tứ Xuyên và gà Cung Bảo của quán rất nổi tiếng ạ!' },
-          { speaker: '大卫 (David)', hanzi: '太好了，我们要一份麻婆豆腐，两碗米饭。', pinyin: 'Tài hǎo le, wǒmen yào yí fèn mápó dòufu, liǎng wǎn mǐfàn.', vi: 'Tuyệt quá, chúng tôi lấy một phần đậu phụ và hai bát cơm trắng.' },
+          { speaker: '服务员 (Phục vụ)', hanzi: '您好！两位里面请！请看菜单，想吃点什么？', pinyin: 'Nín hǎo! Liǎng wèi lǐmiàn qǐng! Qǐng kàn càidān, xiǎng chī diǎn shénme?', vi: 'Xin chào! Hai vị mời vào trong! Mời xem thực đơn, hai bạn muốn ăn gì nào?' },
+          { speaker: '大卫 (David)', hanzi: '请问老板，你们店有什么招牌特色菜？', pinyin: 'Qǐngwèn lǎobǎn, nǐmen diàn yǒu shénme zhāopai tèsè cài?', vi: 'Xin hỏi ông chủ, quán mình có món đặc sản đặc trưng nào ngon?' },
+          { speaker: '服务员 (Phục vụ)', hanzi: '我们家的麻婆豆腐和水煮牛肉特别受欢迎！', pinyin: 'Wǒmen jiā de mápó dòufu hé shuǐzhǔ niúròu tèbié shòu huānyíng!', vi: 'Món đậu phụ Tứ Xuyên và thịt bò luộc cay của quán bác cực kỳ đắt khách!' },
+          { speaker: '大卫 (David)', hanzi: '那给我们来一份麻婆豆腐，两碗米饭！', pinyin: 'Nà gěi wǒmen lái yí fèn mápó dòufu, liǎng wǎn mǐfàn!', vi: 'Vậy cho chúng cháu một phần đậu phụ Tứ Xuyên, hai bát cơm trắng nhé!' },
         ],
       },
       {
         id: 'sc2',
-        name: 'Tình huống 2: Yêu cầu khẩu vị và đồ uống (要求口味与饮品)',
-        context: 'Yêu cầu đầu bếp không cho quá nhiều ớt cay.',
+        name: 'Tình huống 2: Yêu cầu điều chỉnh vị cay & Gọi đồ uống (调整口味与饮品)',
+        context: 'Khách không ăn được cay nhiều nên nhờ đầu bếp cho ít ớt và gọi đồ uống.',
+        lifeTips: 'Các cấp độ cay phổ biến ở quán ăn Trung: 不辣 (không cay), 微辣 (cay nhẹ), 中辣 (cay vừa), 特辣 (siêu cay).',
         dialogues: [
-          { speaker: '王兰 (Vương Lan)', hanzi: '服务员，请少放一点儿辣椒，做成微辣的。', pinyin: 'Fúwùyuán, qǐng shǎo fàng yìdiǎnr làjiāo, zuò chéng wēilà de.', vi: 'Phục vụ ơi, làm ơn cho ít ớt thôi, làm cay nhẹ nhé.' },
-          { speaker: '服务员 (Phục vụ)', hanzi: '好的，微辣。请问两位想喝点什么饮料？', pinyin: 'Hǎo de, wēilà. Qǐngwèn liǎng wèi xiǎng hē diǎn shénme yǐnliào?', vi: 'Dạ được, cay nhẹ. Xin hỏi hai vị muốn uống đồ gì ạ?' },
-          { speaker: '大卫 (David)', hanzi: '请给我们两杯温开水，谢谢！', pinyin: 'Qǐng gěi wǒmen liǎng bēi wēn kāishuǐ, xièxie!', vi: 'Cho chúng tôi hai ly nước ấm, cảm ơn!' },
+          { speaker: '王兰 (Vương Lan)', hanzi: '服务员，我们不太能吃辣，请师傅少放辣椒，做成微辣的。', pinyin: 'Fúwùyuán, wǒmen bú tài néng chī là, qǐng shīfu shǎo fàng làjiāo, zuò chéng wēilà de.', vi: 'Phục vụ ơi, chúng tôi không ăn được cay lắm, nhờ đầu bếp cho ít ớt, làm cay nhẹ thôi nhé.' },
+          { speaker: '服务员 (Phục vụ)', hanzi: '好嘞，微辣没问题！要不要来两听冰镇酸梅汤解解辣？', pinyin: 'Hǎo lei, wēilà méi wèntí! Yào bu yào lái liǎng tīng bīngzhèn suānméitāng jiě jie là?', vi: 'Dạ được, cay nhẹ không vấn đề gì! Hai bạn có muốn dùng thêm 2 lon nước ô mai ướp lạnh giải cay không?' },
+          { speaker: '大卫 (David)', hanzi: '好的，来一听酸梅汤，再要一杯温开水。', pinyin: 'Hǎo de, lái yì tīng suānméitāng, zài yào yì bēi wēn kāishuǐ.', vi: 'Vâng, cho một lon nước ô mai, và thêm một cốc nước ấm nữa nhé.' },
+        ],
+      },
+      {
+        id: 'sc3',
+        name: 'Tình huống 3: Thanh toán tiền và quét mã QR (餐后买单与结账)',
+        context: 'Ăn xong, khách gọi tính tiền và dùng mã QR WeChat Pay để thanh toán.',
+        lifeTips: 'Tại Trung Quốc hiện nay hầu như 99% không dùng tiền mặt, chỉ cần hỏi: "扫码还是现金？" (Quét mã hay tiền mặt?).',
+        dialogues: [
+          { speaker: '大卫 (David)', hanzi: '服务员，我们吃好了，麻烦结一下账！', pinyin: 'Fúwùyuán, wǒmen chī hǎo le, máfan jié yíxià zhàng!', vi: 'Phục vụ ơi, chúng tôi ăn xong rồi, phiền bạn thanh toán hóa đơn nhé!' },
+          { speaker: '服务员 (Phục vụ)', hanzi: '两位一共是六十八块钱。扫桌上的二维码就行。', pinyin: 'Liǎng wèi yígòng shì liùshíbā kuài qián. Sǎo zhuō shàng de èrwéimǎ jiù xíng.', vi: 'Hai vị tổng cộng hết 68 tệ. Bạn quét mã QR dán trên mặt bàn là được ạ.' },
+          { speaker: '大卫 (David)', hanzi: '好的，微信扫过去了，您看一下。', pinyin: 'Hǎo de, Wēixìn sǎo guòqu le, nín kàn yíxià.', vi: 'Vâng, tôi vừa quét qua WeChat rồi, bạn xem qua giúp tôi.' },
+          { speaker: '服务员 (Phục vụ)', hanzi: '收到，六十八元！慢走，欢迎下次光临！', pinyin: 'Shōudào, liùshíbā yuán! Màn zǒu, huānyíng xià cì guānglín!', vi: 'Đã nhận 68 tệ! Quý khách đi thong thả, hoan nghênh lần sau lại ghé quán ạ!' },
         ],
       },
     ];
   }
 
-  // Tự động tạo 2 tình huống chuyên sâu cho các bài khác
+  // Tự động tạo các cuộc hội thoại mẫu phong phú đời sống cho các bài học khác
   return [
     {
       id: 'sc1',
-      name: `Tình huống 1: Giao tiếp thực tế chủ đề ${title.split(' ')[2] || 'bài học'} (核心实景)`,
-      context: `Tình huống hội thoại trực tiếp trong môi trường giao tiếp của ${lesson.level}.`,
-      dialogues: (lesson.listening?.dialogues || []).slice(0, 4).map((d) => ({
-        speaker: d.speaker || 'A',
+      name: `Tình huống 1: Giao tiếp đời sống thực tế chủ đề ${title.split(' ')[2] || 'bài học'} (核心实景)`,
+      context: `Cuộc hội thoại mẫu chân thực giữa người học và người bản xứ trong đời sống hàng ngày của ${lesson.level}.`,
+      lifeTips: 'Hãy chú ý lắng nghe ngữ điệu và các trợ từ ngữ khí như 吧, 呢, 啊 để nói tự nhiên như người bản xứ.',
+      dialogues: (lesson.listening?.dialogues || []).slice(0, 5).map((d) => ({
+        speaker: d.speaker || 'Nhân vật A',
         hanzi: d.hanzi,
         pinyin: d.pinyin,
         vi: d.vi,
@@ -247,10 +272,11 @@ export function getLessonMultiScenarios(lesson) {
     },
     {
       id: 'sc2',
-      name: `Tình huống 2: Mở rộng đàm thoại & Xử lý tình huống (进阶实操)`,
-      context: `Thực hành đối đáp nâng cao sử dụng các từ vựng trọng tâm trong bài.`,
-      dialogues: (lesson.speaking?.sentences || []).slice(0, 3).map((s, idx) => ({
-        speaker: idx % 2 === 0 ? 'Người học' : 'Người bản xứ',
+      name: `Tình huống 2: Xử lý tình huống phát sinh & Khẩu ngữ mở rộng (日常进阶)`,
+      context: `Tình huống đối đáp thực tế khi gặp các yêu cầu, câu hỏi trong sinh hoạt và công việc.`,
+      lifeTips: 'Luôn mở đầu câu hỏi bằng "请问" (Xin hỏi) hoặc "劳驾" (Làm phiền) để tạo thiện cảm tốt nhất.',
+      dialogues: (lesson.speaking?.sentences || []).slice(0, 4).map((s, idx) => ({
+        speaker: idx % 2 === 0 ? 'Bạn' : 'Người bản xứ',
         hanzi: s.hanzi,
         pinyin: s.pinyin,
         vi: s.vi,

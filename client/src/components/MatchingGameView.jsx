@@ -1,4 +1,81 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { getLessonSentenceBuilding } from '../data/lessonEnricher';
+
+// Ngân hàng câu đố ghép câu giao tiếp đời sống thực tế
+const LIFE_SENTENCE_PUZZLES = [
+  {
+    id: 'puz_greet',
+    topic: 'Chào hỏi & Làm quen',
+    promptVi: 'Hãy sắp xếp các từ thành câu: "Rất vui được quen biết bạn!"',
+    tokens: ['认识', '你', '很', '高兴'],
+    solution: ['很', '高兴', '认识', '你'],
+    targetZh: '很高兴认识你',
+    pinyin: 'Hěn gāoxìng rènshi nǐ',
+  },
+  {
+    id: 'puz_name',
+    topic: 'Chào hỏi & Làm quen',
+    promptVi: 'Hãy sắp xếp các từ thành câu: "Bạn tên là cái gì?"',
+    tokens: ['名字', '你', '叫', '什么'],
+    solution: ['你', '叫', '什么', '名字'],
+    targetZh: '你叫什么名字',
+    pinyin: 'Nǐ jiào shénme míngzì',
+  },
+  {
+    id: 'puz_vietnam',
+    topic: 'Giới thiệu bản thân',
+    promptVi: 'Hãy ghép thành câu: "Tôi là người Việt Nam, tôi học tiếng Trung."',
+    tokens: ['学', '我是', '越南人', '中文', '我'],
+    solution: ['我是', '越南人', '我', '学', '中文'],
+    targetZh: '我是越南人我学中文',
+    pinyin: 'Wǒ shì Yuènán rén wǒ xué Zhōngwén',
+  },
+  {
+    id: 'puz_order',
+    topic: 'Ăn uống & Nhà hàng',
+    promptVi: 'Hãy ghép thành câu: "Tôi muốn gọi một phần đậu phụ Tứ Xuyên và cơm."',
+    tokens: ['一份', '米饭', '麻婆豆腐', '我想点', '和'],
+    solution: ['我想点', '一份', '麻婆豆腐', '和', '米饭'],
+    targetZh: '我想点一份麻婆豆腐和米饭',
+    pinyin: 'Wǒ xiǎng diǎn yí fèn mápó dòufu hé mǐfàn',
+  },
+  {
+    id: 'puz_price',
+    topic: 'Mua sắm & Mặc cả',
+    promptVi: 'Hãy ghép thành câu: "Cái này bao nhiêu tiền? Có thể rẻ hơn chút không?"',
+    tokens: ['这个', '便宜一点吗', '多少钱', '能'],
+    solution: ['这个', '多少钱', '能', '便宜一点吗'],
+    targetZh: '这个多少钱能便宜一点吗',
+    pinyin: 'Zhège duōshao qián néng piányi yìdiǎn ma',
+  },
+  {
+    id: 'puz_wechat',
+    topic: 'Kết bạn & Giao tiếp',
+    promptVi: 'Hãy ghép thành câu: "Chúng mình kết bạn WeChat nhé?"',
+    tokens: ['加个', '我们', '微信吧'],
+    solution: ['我们', '加个', '微信吧'],
+    targetZh: '我们加个微信吧',
+    pinyin: 'Wǒmen jiā gè Wēixìn ba',
+  },
+  {
+    id: 'puz_weather',
+    topic: 'Hẹn hò & Đời sống',
+    promptVi: 'Hãy ghép thành câu: "Hôm nay thời tiết đẹp quá, chúng ta đi uống cà phê nhé!"',
+    tokens: ['今天', '真好', '去喝咖啡吧', '天气', '我们'],
+    solution: ['今天', '天气', '真好', '我们', '去喝咖啡吧'],
+    targetZh: '今天天气真好我们去喝咖啡吧',
+    pinyin: 'Jīntiān tiānqì zhēn hǎo wǒmen qù hē kāfēi ba',
+  },
+  {
+    id: 'puz_subway',
+    topic: 'Hỏi đường & Đi lại',
+    promptVi: 'Hãy ghép thành câu: "Xin hỏi đi đến Cố Cung đi tàu điện ngầm thế nào?"',
+    tokens: ['坐地铁', '去故宫', '请问', '怎么走'],
+    solution: ['请问', '去故宫', '坐地铁', '怎么走'],
+    targetZh: '请问去故宫坐地铁怎么走',
+    pinyin: 'Qǐngwèn qù Gùgōng zuò dìtiě zěnme zǒu',
+  },
+];
 
 const VOCAB_TOPICS = [
   {
@@ -207,27 +284,24 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
         type: 'zh',
         hanzi: w.hanzi,
         pinyin: w.pinyin,
-        matched: false,
       });
       list.push({
         pairId: w.id,
         type: 'vi',
         vi: w.vi,
-        matched: false,
       });
     });
 
-    list.sort(() => Math.random() - 0.5);
-    setCards(list);
+    setCards(list.sort(() => Math.random() - 0.5));
     setSelectedCard(null);
+    setIsWon(false);
     setTimer(0);
     setScore(0);
-    setIsWon(false);
   };
 
   useEffect(() => {
     initGame();
-  }, [activeTopicId, roundNumber, lesson]);
+  }, [activeTopicId, roundNumber]);
 
   useEffect(() => {
     if (isWon) return;
@@ -236,15 +310,6 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
     }, 1000);
     return () => clearInterval(interval);
   }, [isWon]);
-
-  const speakText = (text) => {
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang = 'zh-CN';
-      window.speechSynthesis.speak(u);
-    }
-  };
 
   const handleCardClick = (index) => {
     const clicked = cards[index];
@@ -273,7 +338,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
       const allMatched = updated.every((c) => c.matched);
       if (allMatched) {
         setIsWon(true);
-        onGainXP(30, `Thắng Game Ghép từ (${activeTopic.name})`);
+        if (onGainXP) {
+          onGainXP(30, `Thắng Game Ghép từ (${activeTopic.name})`);
+        }
       }
     } else {
       setSelectedCard({ index, ...clicked, isError: true });
@@ -285,161 +352,382 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
 
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-2xl p-6 flex justify-between items-center shadow-sm">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-            <span>🧩</span> Lộ Trình Ghép Từ Vựng Đa Chủ Đề (配对)
-          </h2>
-          <p className="text-slate-500 text-sm mt-1">
-            Mở rộng hàng trăm từ vựng theo 8 chủ đề thực tế đời sống. Ghép thẻ nhanh để nhận điểm thưởng!
-          </p>
-        </div>
+      {/* Game Mode Switcher Tab Bar */}
+      <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-2xs flex items-center gap-2">
         <button
-          onClick={() => setRoundNumber((r) => r + 1)}
-          className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold"
+          onClick={() => setGameMode('match_words')}
+          className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            gameMode === 'match_words'
+              ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-400'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
         >
-          🔄 Đổi bộ 6 từ ngẫu nhiên
+          <span>🃏</span>
+          <span>Chế độ 1: Nối Cặp Từ Vựng (Lật Thẻ Trí Nhớ)</span>
+        </button>
+
+        <button
+          onClick={() => setGameMode('sentence_puzzle')}
+          className={`flex-1 py-3 px-4 rounded-xl font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all ${
+            gameMode === 'sentence_puzzle'
+              ? 'bg-rose-600 text-white shadow-sm ring-2 ring-rose-400'
+              : 'text-slate-600 hover:bg-slate-100'
+          }`}
+        >
+          <span>🧩</span>
+          <span>Chế độ 2: Xếp Thẻ Ghép Câu Giao Tiếp Thực Tế</span>
         </button>
       </div>
 
-      {/* Topic Selector Chips */}
-      <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
-        <div className="flex justify-between items-center">
-          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-            🎯 Chọn Chủ Đề Luyện Ghép Từ:
-          </span>
-          <span className="text-xs font-bold text-rose-600">
-            Đang chọn: {activeTopic.name} ({activeTopic.words.length} từ)
-          </span>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          {allTopics.map((topic) => (
-            <button
-              key={topic.id}
-              onClick={() => {
-                setActiveTopicId(topic.id);
-                setRoundNumber(1);
-              }}
-              className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all ${
-                activeTopicId === topic.id
-                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
-                  : 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600'
-              }`}
-            >
-              {topic.name}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Matching Game Arena */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
-        <div className="flex items-center justify-between pb-4 border-b border-slate-100 text-sm font-bold">
-          <div className="text-orange-600">
-            ⏱️ Thời gian: {Math.floor(timer / 60).toString().padStart(2, '0')}:
-            {(timer % 60).toString().padStart(2, '0')}
-          </div>
-          <div className="text-xs text-slate-500">
-            Vòng {roundNumber} (Bộ 6 cặp thẻ từ vựng)
-          </div>
-          <div className="text-emerald-600">🏆 Điểm số: {score} Điểm</div>
-        </div>
-
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {cards.map((card, idx) => {
-            const isSelected = selectedCard?.index === idx;
-            const isError = isSelected && selectedCard?.isError;
-
-            return (
-              <div
-                key={idx}
-                onClick={() => handleCardClick(idx)}
-                className={`h-28 p-3 rounded-2xl border-2 flex flex-col items-center justify-center text-center cursor-pointer select-none transition-all ${
-                  card.matched
-                    ? 'border-emerald-300 bg-emerald-50 opacity-40 pointer-events-none scale-95'
-                    : isError
-                    ? 'border-red-500 bg-red-50'
-                    : isSelected
-                    ? 'border-rose-500 bg-rose-50 shadow-md ring-2 ring-rose-200'
-                    : 'border-slate-200 bg-white hover:border-rose-300 hover:shadow-md'
-                }`}
-              >
-                {card.type === 'zh' ? (
-                  <>
-                    <span className="text-2xl font-bold text-rose-600 chinese-font">
-                      {card.hanzi}
-                    </span>
-                    {showPinyin && (
-                      <span className="text-xs text-slate-500 mt-1">{card.pinyin}</span>
-                    )}
-                  </>
-                ) : (
-                  <span className="text-sm font-bold text-slate-800">{card.vi}</span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Victory modal card */}
-      {isWon && (
-        <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-          <div className="text-4xl">🎉</div>
-          <h3 className="text-xl font-bold text-emerald-800">Hoàn Thành Xuất Sắc!</h3>
-          <p className="text-sm text-emerald-700">
-            Bạn đã ghép đúng toàn bộ các từ trong chủ đề <strong>{activeTopic.name}</strong> trong{' '}
-            <strong>{timer} giây</strong> (+{score} điểm)!
-          </p>
-          <div className="flex justify-center gap-3 pt-2">
+      {/* ========================================================================= */}
+      {/* MODE 1: NỐI CẶP TỪ VỰNG (MATCH WORDS) */}
+      {/* ========================================================================= */}
+      {gameMode === 'match_words' && (
+        <div className="space-y-6 animate-fadeIn">
+          <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-2xl p-6 flex justify-between items-center shadow-sm">
+            <div>
+              <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+                <span>🃏</span> Lộ Trình Ghép Từ Vựng Đa Chủ Đề (配对)
+              </h2>
+              <p className="text-slate-500 text-sm mt-1">
+                Mở rộng hàng trăm từ vựng theo 8 chủ đề thực tế đời sống. Ghép thẻ nhanh để nhận điểm thưởng!
+              </p>
+            </div>
             <button
               onClick={() => setRoundNumber((r) => r + 1)}
-              className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20"
+              className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold"
             >
-              🔄 Chơi vòng tiếp theo (bộ 6 từ khác)
+              🔄 Đổi bộ 6 từ ngẫu nhiên
             </button>
+          </div>
+
+          {/* Topic Selector Chips */}
+          <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                🎯 Chọn Chủ Đề Luyện Ghép Từ:
+              </span>
+              <span className="text-xs font-bold text-rose-600">
+                Đang chọn: {activeTopic.name} ({activeTopic.words.length} từ)
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {allTopics.map((topic) => (
+                <button
+                  key={topic.id}
+                  onClick={() => {
+                    setActiveTopicId(topic.id);
+                    setRoundNumber(1);
+                  }}
+                  className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all ${
+                    activeTopicId === topic.id
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                      : 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600'
+                  }`}
+                >
+                  {topic.name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Matching Game Arena */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 text-sm font-bold">
+              <div className="text-orange-600">
+                ⏱️ Thời gian: {Math.floor(timer / 60).toString().padStart(2, '0')}:
+                {(timer % 60).toString().padStart(2, '0')}
+              </div>
+              <div className="text-xs text-slate-500">
+                Vòng {roundNumber} (Bộ 6 cặp thẻ từ vựng)
+              </div>
+              <div className="text-emerald-600">🏆 Điểm số: {score} Điểm</div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {cards.map((card, idx) => {
+                const isSelected = selectedCard?.index === idx;
+                const isError = isSelected && selectedCard.isError;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => handleCardClick(idx)}
+                    className={`h-28 p-3 rounded-2xl border-2 flex flex-col items-center justify-center text-center cursor-pointer select-none transition-all ${
+                      card.matched
+                        ? 'border-emerald-300 bg-emerald-50 opacity-40 pointer-events-none scale-95'
+                        : isError
+                        ? 'border-red-500 bg-red-50'
+                        : isSelected
+                        ? 'border-rose-500 bg-rose-50 shadow-md ring-2 ring-rose-200'
+                        : 'border-slate-200 bg-white hover:border-rose-300 hover:shadow-md'
+                    }`}
+                  >
+                    {card.type === 'zh' ? (
+                      <>
+                        <span className="text-2xl font-bold text-rose-600 chinese-font">
+                          {card.hanzi}
+                        </span>
+                        {showPinyin && (
+                          <span className="text-xs text-slate-500 mt-1">{card.pinyin}</span>
+                        )}
+                      </>
+                    ) : (
+                      <span className="text-sm font-bold text-slate-800">{card.vi}</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Victory modal card */}
+          {isWon && (
+            <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+              <div className="text-4xl">🎉</div>
+              <h3 className="text-xl font-bold text-emerald-800">Hoàn Thành Xuất Sắc!</h3>
+              <p className="text-sm text-emerald-700">
+                Bạn đã ghép đúng toàn bộ các từ trong chủ đề <strong>{activeTopic.name}</strong> trong{' '}
+                <strong>{timer} giây</strong> (+{score} điểm)!
+              </p>
+              <div className="flex justify-center gap-3 pt-2">
+                <button
+                  onClick={() => setRoundNumber((r) => r + 1)}
+                  className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20"
+                >
+                  🔄 Chơi vòng tiếp theo (bộ 6 từ khác)
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Complete Topic Vocabulary Library Card */}
+          <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
+              <div>
+                <h3 className="text-base font-bold text-slate-900">
+                  📖 Toàn Bộ Từ Vựng Chủ Đề: {activeTopic.name}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">Bấm vào biểu tượng loa để nghe phát âm từng từ.</p>
+              </div>
+              <button
+                onClick={() => setRoundNumber((r) => r + 1)}
+                className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold"
+              >
+                ▶ Ghép bộ từ này
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              {activeTopic.words.map((w) => (
+                <div
+                  key={w.id}
+                  className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-white hover:border-rose-300 transition-all"
+                >
+                  <div>
+                    <div className="text-lg font-bold text-rose-600 chinese-font leading-tight">{w.hanzi}</div>
+                    {showPinyin && <div className="text-xs text-amber-600 font-medium">{w.pinyin}</div>}
+                    <div className="text-xs text-slate-700 font-medium">{w.vi}</div>
+                  </div>
+                  <button
+                    onClick={() => speakText(w.hanzi)}
+                    className="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-rose-500 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
+                  >
+                    🔊
+                  </button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
 
-      {/* Complete Topic Vocabulary Library Card */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-          <div>
-            <h3 className="text-base font-bold text-slate-900">
-              📖 Toàn Bộ Từ Vựng Chủ Đề: {activeTopic.name}
-            </h3>
-            <p className="text-xs text-slate-400 mt-0.5">Bấm vào biểu tượng loa để nghe phát âm từng từ.</p>
-          </div>
-          <button
-            onClick={() => setRoundNumber((r) => r + 1)}
-            className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold"
-          >
-            ▶ Ghép bộ từ này
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-          {activeTopic.words.map((w) => (
-            <div
-              key={w.id}
-              className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between hover:bg-white hover:border-rose-300 transition-all"
-            >
-              <div>
-                <div className="text-lg font-bold text-rose-600 chinese-font leading-tight">{w.hanzi}</div>
-                {showPinyin && <div className="text-xs text-amber-600 font-medium">{w.pinyin}</div>}
-                <div className="text-xs text-slate-700 font-medium">{w.vi}</div>
+      {/* ========================================================================= */}
+      {/* MODE 2: ĐỐ VUI XẾP THẺ GHÉP CÂU GIAO TIẾP THỰC TẾ (SENTENCE PUZZLE) */}
+      {/* ========================================================================= */}
+      {gameMode === 'sentence_puzzle' && (
+        <div className="space-y-6 animate-fadeIn">
+          {/* Header Banner */}
+          <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-3xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl">🧩</span>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                  Trò Chơi Xếp Thẻ Ghép Câu Giao Tiếp Thực Tế (组词造句)
+                </h2>
               </div>
-              <button
-                onClick={() => speakText(w.hanzi)}
-                className="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-rose-500 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
-              >
-                🔊
-              </button>
+              <p className="text-slate-600 text-xs sm:text-sm mt-1">
+                Sắp xếp các thẻ từ xáo trộn thành câu giao tiếp chuẩn xác theo ngữ pháp SVO tiếng Trung.
+              </p>
             </div>
-          ))}
+            <div className="flex items-center gap-3">
+              <span className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
+                🏆 Điểm Puzzle: {puzzleScore} XP
+              </span>
+              <span className="px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-700 font-bold text-xs">
+                Câu {activePuzzleIdx + 1} / {sentencePuzzles.length}
+              </span>
+            </div>
+          </div>
+
+          {/* Puzzle Category Selector */}
+          <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-2xs space-y-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              Chọn câu đố theo ngữ cảnh giao tiếp:
+            </span>
+            <div className="flex flex-wrap gap-2">
+              {sentencePuzzles.map((puz, idx) => (
+                <button
+                  key={puz.id || idx}
+                  onClick={() => {
+                    setActivePuzzleIdx(idx);
+                    setSelectedPuzzleTokens([]);
+                    setPuzzleFeedback(null);
+                    setShowHint(false);
+                  }}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                    activePuzzleIdx === idx
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <span>Câu {idx + 1}: {puz.topic || 'Giao tiếp'}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Puzzle Main Arena */}
+          {currentPuzzle && (
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+              {/* Question prompt */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 font-bold text-base sm:text-lg flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-xl">🎯</span>
+                  <span>{currentPuzzle.promptVi}</span>
+                </div>
+                <button
+                  onClick={() => setShowHint(!showHint)}
+                  className="px-3 py-1 rounded-xl bg-amber-200/70 hover:bg-amber-200 text-amber-900 text-xs font-bold transition-all flex-shrink-0"
+                >
+                  💡 {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
+                </button>
+              </div>
+
+              {/* Hint Box */}
+              {showHint && (
+                <div className="p-3.5 rounded-2xl bg-blue-50 border border-blue-200 text-xs text-blue-900 space-y-1">
+                  <div><strong>Pinyin tham khảo:</strong> {currentPuzzle.pinyin}</div>
+                  <div><strong>Từ cần xếp:</strong> {currentPuzzle.solution?.join(' + ')}</div>
+                </div>
+              )}
+
+              {/* User Built Sentence Dropzone */}
+              <div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex items-center justify-between">
+                  <span>Câu bạn đang xếp (Bấm thẻ để gỡ ra):</span>
+                  <span className="text-slate-400 font-normal">
+                    {selectedPuzzleTokens.length} / {currentPuzzle.tokens.length} từ
+                  </span>
+                </div>
+                <div className="min-h-[80px] p-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50/70 flex flex-wrap items-center gap-2.5">
+                  {selectedPuzzleTokens.length === 0 ? (
+                    <span className="text-xs sm:text-sm text-slate-400 italic">
+                      Chạm vào các thẻ từ bên dưới để lắp ghép câu giao tiếp...
+                    </span>
+                  ) : (
+                    selectedPuzzleTokens.map((token, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => handleRemovePuzzleToken(idx)}
+                        className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold chinese-font text-lg shadow-sm hover:bg-rose-600 transition-all active:scale-95 flex items-center gap-1.5"
+                        title="Bấm để bỏ từ này ra khỏi câu"
+                      >
+                        <span>{token.text}</span>
+                        <span className="text-xs text-slate-400 hover:text-white">✕</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Available Token Pool */}
+              <div className="space-y-2">
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  Kho thẻ từ khả dụng (Bấm để chọn):
+                </div>
+                <div className="flex flex-wrap gap-2.5">
+                  {currentPuzzle.tokens.map((token, originIdx) => {
+                    const isUsed = selectedPuzzleTokens.some((t) => t.originIdx === originIdx);
+                    return (
+                      <button
+                        key={originIdx}
+                        disabled={isUsed}
+                        onClick={() => handleSelectPuzzleToken(token, originIdx)}
+                        className={`px-5 py-3 rounded-2xl font-bold chinese-font text-lg border transition-all ${
+                          isUsed
+                            ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed scale-95'
+                            : 'bg-white hover:bg-rose-50 text-slate-800 border-slate-300 hover:border-rose-400 shadow-2xs active:scale-95'
+                        }`}
+                      >
+                        {token}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Action Buttons & Result Feedback */}
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
+                <button
+                  onClick={handleResetPuzzle}
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
+                >
+                  🔄 Xếp lại từ đầu
+                </button>
+
+                <div className="flex items-center gap-3">
+                  {puzzleFeedback === 'correct' && (
+                    <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs sm:text-sm">
+                      <span>🎉 Xuất sắc! Câu ghép hoàn toàn chính xác (+25 XP).</span>
+                      <button
+                        onClick={() => speakText(currentPuzzle.targetZh)}
+                        className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1"
+                      >
+                        🔊 Nghe câu
+                      </button>
+                    </div>
+                  )}
+
+                  {puzzleFeedback === 'wrong' && (
+                    <span className="text-rose-600 font-bold text-xs sm:text-sm">
+                      ❌ Trật tự từ chưa đúng, hãy thử kiểm tra lại nhé!
+                    </span>
+                  )}
+
+                  {puzzleFeedback === 'correct' ? (
+                    <button
+                      onClick={handleNextPuzzle}
+                      className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 flex items-center gap-1.5"
+                    >
+                      <span>Câu đố tiếp theo</span>
+                      <span>▶</span>
+                    </button>
+                  ) : (
+                    <button
+                      onClick={handleCheckPuzzle}
+                      disabled={selectedPuzzleTokens.length === 0}
+                      className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/30"
+                    >
+                      Kiểm Tra Đáp Án
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
+

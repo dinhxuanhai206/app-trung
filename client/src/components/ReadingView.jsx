@@ -40,12 +40,6 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [vocabFilter, setVocabFilter] = useState('');
 
-  // Sentence Building State
-  const sentenceData = useMemo(() => getLessonSentenceBuilding(lesson), [lesson]);
-  const [currentPuzzleIdx, setCurrentPuzzleIdx] = useState(0);
-  const [selectedTokens, setSelectedTokens] = useState([]);
-  const [puzzleFeedback, setPuzzleFeedback] = useState(null); // 'correct' | 'wrong' | null
-
   const levelInfo = LEVEL_TIERS[lesson.level] || LEVEL_TIERS['HSK 1'];
 
   const speakText = (text) => {
@@ -78,35 +72,35 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
   });
 
   const currentFlashcard = enrichedVocabList[flashcardIdx] || enrichedVocabList[0];
-  const currentPuzzle = sentenceData.puzzles[currentPuzzleIdx] || sentenceData.puzzles[0];
 
-  // Handle sentence building puzzle
-  const handleSelectToken = (token, originIdx) => {
-    if (puzzleFeedback === 'correct') return;
-    setSelectedTokens((prev) => [...prev, { text: token, originIdx }]);
-    speakText(token);
-  };
-
-  const handleRemoveToken = (idxToRemove) => {
-    if (puzzleFeedback === 'correct') return;
-    setSelectedTokens((prev) => prev.filter((_, i) => i !== idxToRemove));
-  };
-
-  const handleCheckPuzzle = () => {
-    const userBuilt = selectedTokens.map((t) => t.text).join('');
-    const solution = currentPuzzle.solution.join('');
-    if (userBuilt === solution) {
-      setPuzzleFeedback('correct');
-      speakText(currentPuzzle.targetZh);
-      onGainXP(25, 'Ghép câu giao tiếp chính xác');
-    } else {
-      setPuzzleFeedback('wrong');
+  // Phát âm toàn bộ cuộc hội thoại mẫu tuần tự
+  const [isPlayingFull, setIsPlayingFull] = useState(false);
+  const speakFullScenario = () => {
+    if (!('speechSynthesis' in window) || !currentScenario?.dialogues?.length) return;
+    window.speechSynthesis.cancel();
+    if (isPlayingFull) {
+      setIsPlayingFull(false);
+      return;
     }
-  };
-
-  const handleResetPuzzle = () => {
-    setSelectedTokens([]);
-    setPuzzleFeedback(null);
+    setIsPlayingFull(true);
+    let index = 0;
+    const playNext = () => {
+      if (index >= currentScenario.dialogues.length) {
+        setIsPlayingFull(false);
+        return;
+      }
+      const item = currentScenario.dialogues[index];
+      const u = new SpeechSynthesisUtterance(item.hanzi);
+      u.lang = 'zh-CN';
+      u.rate = 0.85;
+      u.onend = () => {
+        index++;
+        setTimeout(playNext, 600);
+      };
+      u.onerror = () => setIsPlayingFull(false);
+      window.speechSynthesis.speak(u);
+    };
+    playNext();
   };
 
   return (
@@ -151,7 +145,7 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
         </button>
       </div>
 
-      {/* Navigation Sub-Tabs (4 Chức Năng Cốt Lõi) */}
+      {/* Navigation Sub-Tabs (3 Chức Năng Chuyên Sâu) */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto scrollbar-none">
         <button
           onClick={() => setActiveTab('scenarios')}
@@ -162,7 +156,7 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
           }`}
         >
           <span>🎭</span>
-          <span>1. Đối Thoại Đa Tình Huống ({scenarios.length})</span>
+          <span>1. Tình Huống & Hội Thoại Đời Sống Mẫu ({scenarios.length})</span>
         </button>
 
         <button
@@ -178,18 +172,6 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
         </button>
 
         <button
-          onClick={() => setActiveTab('sentence')}
-          className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
-            activeTab === 'sentence'
-              ? 'bg-rose-600 text-white shadow-sm'
-              : 'bg-white hover:bg-slate-100 text-slate-600 border border-slate-200'
-          }`}
-        >
-          <span>🧩</span>
-          <span>3. Ghép Từ Mới Thành Câu Thực Tế</span>
-        </button>
-
-        <button
           onClick={() => setActiveTab('grammar')}
           className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl font-bold text-xs sm:text-sm whitespace-nowrap transition-all ${
             activeTab === 'grammar'
@@ -198,7 +180,7 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
           }`}
         >
           <span>💡</span>
-          <span>4. Cấu Trúc Ngữ Pháp Then Chốt</span>
+          <span>3. Cấu Trúc Ngữ Pháp Then Chốt ({lesson.grammarPoints?.length || 2})</span>
         </button>
       </div>
 
@@ -233,14 +215,39 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
             {/* Main Scenario Dialogues Column */}
             <div className="lg:col-span-8 space-y-6">
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-5">
-                <div className="border-b border-slate-100 pb-4">
-                  <h3 className="text-lg sm:text-xl font-bold text-slate-900">
-                    {currentScenario.name}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
-                    📌 <strong>Bối cảnh:</strong> {currentScenario.context}
-                  </p>
+                <div className="border-b border-slate-100 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-bold text-slate-900">
+                      {currentScenario.name}
+                    </h3>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                      📌 <strong>Bối cảnh đời sống:</strong> {currentScenario.context}
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={speakFullScenario}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-2xl font-bold text-xs transition-all active:scale-95 flex-shrink-0 ${
+                      isPlayingFull
+                        ? 'bg-rose-600 text-white animate-pulse shadow-md shadow-rose-600/30'
+                        : 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'
+                    }`}
+                  >
+                    <span>{isPlayingFull ? '⏹️' : '🎧'}</span>
+                    <span>{isPlayingFull ? 'Đang đọc hội thoại...' : 'Nghe toàn bộ hội thoại'}</span>
+                  </button>
                 </div>
+
+                {/* Life speaking tips box */}
+                {currentScenario.lifeTips && (
+                  <div className="p-3.5 rounded-2xl bg-amber-50/70 border border-amber-200/70 text-xs flex items-start gap-2.5">
+                    <span className="text-base flex-shrink-0">💡</span>
+                    <div className="space-y-0.5">
+                      <span className="font-bold text-amber-900">Mẹo khẩu ngữ đời sống thực tế:</span>
+                      <p className="text-amber-800 leading-relaxed">{currentScenario.lifeTips}</p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Dialogues list */}
                 <div className="space-y-4">
@@ -753,185 +760,7 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 3: GHÉP TỪ MỚI THÀNH CÂU THỰC TẾ (SENTENCE BUILDING) */}
-      {/* ========================================================================= */}
-      {activeTab === 'sentence' && (
-        <div className="space-y-6 animate-fadeIn">
-          {/* Header Description */}
-          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-3xl p-6 shadow-xs space-y-2">
-            <h3 className="text-lg sm:text-xl font-bold text-slate-900 flex items-center gap-2">
-              <span>🧩</span> {sentenceData.title}
-            </h3>
-            <p className="text-slate-600 text-xs sm:text-sm">
-              {sentenceData.description}
-            </p>
-          </div>
-
-          {/* Section 1: Công Thức Ghép Từ Thành Câu (Formulas) */}
-          <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-            <h4 className="font-bold text-sm text-slate-900 flex items-center gap-2 pb-3 border-b border-slate-100">
-              <span>📐</span> Các Công Thức Ghép Câu Điển Hình:
-            </h4>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {sentenceData.formulas.map((form) => (
-                <div
-                  key={form.id}
-                  className="p-5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-300 transition-all space-y-3"
-                >
-                  <div className="font-bold text-sm text-blue-900">
-                    {form.name}
-                  </div>
-
-                  <div className="p-2.5 rounded-xl bg-white border border-slate-200 text-xs font-mono font-bold text-slate-800">
-                    {form.pattern}
-                  </div>
-
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {form.explanation}
-                  </p>
-
-                  {/* Components Visualizer */}
-                  <div className="flex flex-wrap gap-2 pt-2 border-t border-slate-200/60">
-                    {form.components?.map((c, i) => (
-                      <div key={i} className={`px-2.5 py-1 rounded-xl text-xs font-bold ${c.color}`}>
-                        <div className="text-[10px] opacity-75">{c.role}</div>
-                        <div className="chinese-font text-sm">{c.word}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-blue-100/50 border border-blue-200 text-xs space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="chinese-font font-bold text-slate-900 text-sm">{form.sampleZh}</span>
-                      <button
-                        onClick={() => speakText(form.sampleZh)}
-                        className="text-blue-700 hover:text-blue-800 font-bold text-xs"
-                      >
-                        🔊
-                      </button>
-                    </div>
-                    <div className="text-amber-700 font-medium">{form.samplePinyin}</div>
-                    <div className="text-slate-600">{form.sampleVi}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Section 2: Trò Chơi Ghép Thẻ Từ Thành Câu (Interactive Sentence Puzzle) */}
-          {currentPuzzle && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
-              <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div>
-                  <h4 className="font-bold text-base text-slate-900 flex items-center gap-2">
-                    <span>🎮</span> Thử Thách Ghép Thẻ Từ Thành Câu Hoàn Chỉnh:
-                  </h4>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    Nhấp chọn các thẻ từ theo đúng trật tự ngữ pháp tiếng Trung để tạo thành câu hoàn chỉnh.
-                  </p>
-                </div>
-                <span className="px-3 py-1 rounded-full bg-rose-100 text-rose-700 font-bold text-xs">
-                  +25 XP Thưởng
-                </span>
-              </div>
-
-              {/* Prompt Target Meaning */}
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-sm sm:text-base">
-                🎯 {currentPuzzle.promptVi}
-              </div>
-
-              {/* User Built Sentence Drop Zone */}
-              <div className="min-h-[70px] p-4 rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 flex flex-wrap items-center gap-2.5">
-                {selectedTokens.length === 0 ? (
-                  <span className="text-xs sm:text-sm text-slate-400 italic">
-                    Chạm vào các thẻ từ bên dưới để đưa vào câu của bạn...
-                  </span>
-                ) : (
-                  selectedTokens.map((token, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => handleRemoveToken(idx)}
-                      className="px-4 py-2 rounded-xl bg-slate-900 text-white font-bold chinese-font text-base shadow-sm hover:bg-rose-600 transition-all active:scale-95 flex items-center gap-1.5"
-                      title="Bấm để bỏ từ này ra khỏi câu"
-                    >
-                      <span>{token.text}</span>
-                      <span className="text-[10px] text-slate-400 hover:text-white">✕</span>
-                    </button>
-                  ))
-                )}
-              </div>
-
-              {/* Available Token Pool */}
-              <div className="space-y-2">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">
-                  Kho thẻ từ khả dụng:
-                </div>
-                <div className="flex flex-wrap gap-2.5">
-                  {currentPuzzle.tokens.map((token, originIdx) => {
-                    const isUsed = selectedTokens.some((t) => t.originIdx === originIdx);
-                    return (
-                      <button
-                        key={originIdx}
-                        disabled={isUsed}
-                        onClick={() => handleSelectToken(token, originIdx)}
-                        className={`px-4 py-2.5 rounded-xl font-bold chinese-font text-base border transition-all ${
-                          isUsed
-                            ? 'bg-slate-100 text-slate-300 border-slate-200 cursor-not-allowed'
-                            : 'bg-white hover:bg-rose-50 text-slate-800 border-slate-300 hover:border-rose-300 shadow-2xs active:scale-95'
-                        }`}
-                      >
-                        {token}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Action Buttons & Feedback */}
-              <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
-                <button
-                  onClick={handleResetPuzzle}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
-                >
-                  🔄 Làm lại
-                </button>
-
-                <div className="flex items-center gap-3">
-                  {puzzleFeedback === 'correct' && (
-                    <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs sm:text-sm">
-                      <span>🎉 Xuất sắc! Câu ghép hoàn toàn chính xác.</span>
-                      <button
-                        onClick={() => speakText(currentPuzzle.targetZh)}
-                        className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold"
-                      >
-                        🔊 Nghe cả câu
-                      </button>
-                    </div>
-                  )}
-
-                  {puzzleFeedback === 'wrong' && (
-                    <span className="text-rose-600 font-bold text-xs sm:text-sm">
-                      ❌ Trật tự từ chưa đúng, hãy thử sắp xếp lại nhé!
-                    </span>
-                  )}
-
-                  <button
-                    onClick={handleCheckPuzzle}
-                    disabled={selectedTokens.length === 0 || puzzleFeedback === 'correct'}
-                    className="px-6 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 disabled:opacity-40 text-white font-bold text-xs sm:text-sm shadow-md shadow-rose-600/30"
-                  >
-                    Kiểm Tra Đáp Án
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* TAB 4: CẤU TRÚC NGỮ PHÁP THEN CHỐT */}
+      {/* TAB 3: CẤU TRÚC NGỮ PHÁP THEN CHỐT */}
       {/* ========================================================================= */}
       {activeTab === 'grammar' && (
         <div className="space-y-6 animate-fadeIn">
