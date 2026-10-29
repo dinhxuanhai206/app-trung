@@ -8,7 +8,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { path: '/speaking', label: '3. Luyện Nói AI (口语)', icon: '🎙️' },
     { path: '/ai-chat', label: '4. AI Trò Chuyện Song Song (智能对话)', icon: '🤖', isNew: true },
     { path: '/writing', label: '5. Luyện Viết (书写)', icon: '✍️' },
-    { path: '/matching', label: '6. Game Ghép Từ (配对)', icon: '🧩' },
+    { path: '/matching', label: '6. Game Ghép Chữ & Ghép Câu (游戏)', icon: '🎮' },
     { path: '/scenario', label: '7. Tình Huống Thực Tế (情景)', icon: '💬' },
     { path: '/formula', label: '8. Công Thức Ghép Câu (句型)', icon: '📐' },
     { path: '/vocab1000', label: '9. Kho 1000 Từ HSK (词汇)', icon: '📚' },

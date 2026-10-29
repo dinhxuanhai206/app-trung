@@ -4,9 +4,9 @@ import { NavLink } from 'react-router-dom';
 export default function BottomNav({ onOpenMore }) {
   const primaryTabs = [
     { path: '/reading', label: 'Đọc', icon: '📖' },
-    { path: '/listening', label: 'Nghe', icon: '🎧' },
+    { path: '/matching', label: 'Ghép chữ', icon: '🎮' },
     { path: '/ai-chat', label: 'AI Nói', icon: '🤖' },
-    { path: '/speaking', label: 'Mẫu câu', icon: '🎙️' },
+    { path: '/listening', label: 'Nghe', icon: '🎧' },
     { path: '/scenario', label: 'Thực tế', icon: '💬' },
   ];
 

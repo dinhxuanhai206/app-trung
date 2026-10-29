@@ -1,9 +1,9 @@
 import React, { useState, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import {
   LEVEL_TIERS,
   enrichVocabularyRadical,
   getLessonMultiScenarios,
-  getLessonSentenceBuilding,
 } from '../data/lessonEnricher';
 
 export default function ReadingView({ lesson, showPinyin, onGainXP }) {
@@ -182,6 +182,33 @@ export default function ReadingView({ lesson, showPinyin, onGainXP }) {
           <span>💡</span>
           <span>3. Cấu Trúc Ngữ Pháp Then Chốt ({lesson.grammarPoints?.length || 2})</span>
         </button>
+      </div>
+
+      {/* Banner thông báo chuyển phần Ghép Chữ & Ghép Câu sang Game */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-gradient-to-r from-purple-50 via-rose-50 to-amber-50 border border-purple-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xs">
+        <div className="flex items-center gap-3.5">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 to-purple-600 text-white flex items-center justify-center text-2xl font-bold shadow-md shadow-purple-900/20 flex-shrink-0">
+            🎮
+          </div>
+          <div>
+            <div className="font-bold text-slate-900 text-sm sm:text-base flex items-center gap-2">
+              <span>Phòng Game Ghép Chữ & Ghép Câu Bài Học</span>
+              <span className="px-2 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-black uppercase tracking-wider">
+                Mục 6
+              </span>
+            </div>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Phần ghép câu & ghép chữ đã được chuyển vào <strong>Mục 6: Game Ghép Chữ & Ghép Câu</strong> với 3 chế độ: Xếp câu giao tiếp, Ghép bộ thủ chữ Hán và Lật thẻ trí nhớ!
+            </p>
+          </div>
+        </div>
+        <Link
+          to="/matching"
+          className="px-5 py-2.5 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-bold shadow-md shadow-rose-600/30 flex items-center justify-center gap-2 transition-all active:scale-95 self-start sm:self-auto flex-shrink-0"
+        >
+          <span>Chơi Game Ghép Chữ</span>
+          <span>▶</span>
+        </Link>
       </div>
 
       {/* ========================================================================= */}
