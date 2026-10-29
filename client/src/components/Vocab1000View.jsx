@@ -232,77 +232,67 @@ export default function Vocab1000View({ onGainXP }) {
             return (
               <div
                 key={item.id}
-                className="bg-white p-5 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-4 shadow-2xs"
+                className="bg-white p-5 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-3.5 shadow-2xs"
               >
-                <div className="space-y-3.5">
-                  {/* Illustrative Concept Image (Clone hình ảnh minh họa nghĩa từ) */}
-                  {showIllustrations && (
-                    <div className="relative w-full h-36 rounded-2xl overflow-hidden bg-slate-100 group-hover:shadow-md transition-all">
-                      <img
-                        src={illustrationUrl}
-                        alt={item.hanzi}
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        onError={(e) => {
-                          e.target.src =
-                            'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=400&q=80';
-                        }}
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/20 pointer-events-none" />
-                      <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-white text-xs font-bold pointer-events-none">
-                        <span className="bg-black/40 backdrop-blur-xs px-2.5 py-0.5 rounded-md text-[11px] truncate max-w-[140px]">
-                          {item.topic || 'Từ vựng HSK'}
-                        </span>
-                        <span className="bg-rose-600/90 backdrop-blur-xs px-2 py-0.5 rounded-md text-[10px] font-black uppercase">
+                <div className="space-y-3">
+                  {/* Top Row: Hanzi + Pinyin + Meaning (Left) & Compact Rounded Image Thumbnail (Right Corner) */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1 space-y-1">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <div
+                          onClick={() => setActiveHandwritingWord(item)}
+                          className="text-3xl font-black text-slate-900 chinese-font hover:text-rose-600 cursor-pointer transition-colors flex items-center gap-1.5 group/h tracking-wide"
+                          title="Bấm vào để mở bảng tập viết chữ này trên ô Mễ"
+                        >
+                          <span>{item.hanzi}</span>
+                          <span className="text-xs text-rose-500 opacity-0 group-hover/h:opacity-100 transition-opacity p-1 rounded-md bg-rose-50">
+                            <PenTool size={12} />
+                          </span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border uppercase tracking-wider ${levelColor}`}>
                           {item.level}
                         </span>
                       </div>
-                    </div>
-                  )}
 
-                  {/* Top row: Hanzi & Pinyin & Level badges (when image hidden) */}
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <div
-                        onClick={() => setActiveHandwritingWord(item)}
-                        className="text-3xl font-extrabold text-slate-900 chinese-font hover:text-rose-600 cursor-pointer transition-colors flex items-center gap-2 group/h"
-                        title="Bấm vào để mở bảng tập viết chữ này trên ô Mễ"
-                      >
-                        <span>{item.hanzi}</span>
-                        <span className="text-xs text-rose-500 opacity-0 group-hover/h:opacity-100 transition-opacity">
-                          <PenTool size={14} />
-                        </span>
-                      </div>
-                      <div className="text-sm font-bold text-rose-600 mt-0.5">
+                      <div className="text-sm font-bold text-rose-600">
                         {item.pinyin}
                       </div>
+
+                      {item.hv && (
+                        <div className="text-[11px] text-slate-400 font-medium">
+                          Hán Việt: <strong className="text-slate-700">{item.hv}</strong>
+                        </div>
+                      )}
+
+                      <div className="text-sm font-extrabold text-slate-900 leading-snug flex items-center gap-1.5 pt-0.5">
+                        <Sparkles size={13} className="text-amber-500 flex-shrink-0" />
+                        <span className="truncate">{item.vi}</span>
+                      </div>
                     </div>
 
-                    {!showIllustrations && (
-                      <div className="flex flex-col items-end gap-1">
-                        <span className={`px-2.5 py-0.5 rounded-lg text-xs font-black border ${levelColor}`}>
-                          {item.level}
-                        </span>
-                        {item.topic && (
-                          <span className="px-2 py-0.5 rounded-md text-[10px] bg-slate-100 text-slate-500 font-semibold truncate max-w-[120px]">
-                            {item.topic}
-                          </span>
-                        )}
+                    {/* Compact Rounded Image Thumbnail in Corner (Bo tròn nằm 1 góc gọn gàng) */}
+                    {showIllustrations && (
+                      <div className="relative flex-shrink-0">
+                        <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-100 shadow-sm group-hover:border-rose-300 group-hover:shadow-md transition-all duration-300 relative">
+                          <img
+                            src={illustrationUrl}
+                            alt={item.hanzi}
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            onError={(e) => {
+                              e.target.src =
+                                'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=400&q=80';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+                          {item.topic && (
+                            <span className="absolute bottom-1 left-1 right-1 text-center text-[9px] font-bold text-white bg-black/40 backdrop-blur-xs px-1 py-0.5 rounded truncate">
+                              {item.topic}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     )}
-                  </div>
-
-                  {/* Meaning & Sino-Vietnamese (Hán Việt) */}
-                  <div className="space-y-1">
-                    {item.hv && (
-                      <div className="text-xs text-slate-500">
-                        Hán Việt: <strong className="text-slate-800">{item.hv}</strong>
-                      </div>
-                    )}
-                    <div className="text-sm font-bold text-slate-900 leading-snug flex items-start gap-1.5">
-                      <Sparkles size={15} className="text-amber-500 flex-shrink-0 mt-0.5" />
-                      <span>{item.vi}</span>
-                    </div>
                   </div>
 
                   {/* Radical Info Box (Giải thích Bộ Thủ) */}
