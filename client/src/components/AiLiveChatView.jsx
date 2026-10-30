@@ -241,6 +241,10 @@ export default function AiLiveChatView({ onGainXP }) {
         setInterimTranscript('');
         if (e.error === 'not-allowed') {
           alert('Vui lòng cấp quyền Microphone trên trình duyệt để nói trực tiếp cùng AI nhé!');
+        } else if (e.error === 'service-not-allowed') {
+          alert('⚠️ Dịch vụ Google Speech của trình duyệt đang bị chặn (Lỗi service-not-allowed: thường do Brave Shields hoặc Windows tắt Speech Recognition). Bạn có thể gõ câu hỏi trực tiếp vào khung chat bên dưới!');
+        } else if (e.error === 'network') {
+          alert('⚠️ Không thể kết nối tới máy chủ giọng nói. Bạn hãy gõ câu hỏi vào khung chat bên dưới nhé!');
         }
       };
 
