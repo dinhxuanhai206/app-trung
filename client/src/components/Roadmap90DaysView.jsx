@@ -584,7 +584,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
   }, [selectedDayNum, activeStages]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 animate-fadeIn pb-28 sm:pb-14">
+    <div className="space-y-4 sm:space-y-6 animate-fadeIn pb-28 sm:pb-14 max-w-full overflow-x-hidden">
       {/* 1. HERO BANNER: Responsive & Compact on Mobile */}
       <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl text-white p-4 sm:p-7 shadow-xl border transition-all ${
         currentLang === 'en'
@@ -868,59 +868,65 @@ export default function Roadmap90DaysView({ onGainXP }) {
       </div>
 
       {/* 3. TODAY'S RICH 6-TAB WORKSPACE */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 shadow-lg p-5 sm:p-7 space-y-6">
+      <div className="bg-white rounded-2xl sm:rounded-3xl border border-slate-200/90 shadow-lg p-3.5 sm:p-7 space-y-5 sm:space-y-6 max-w-full">
         {/* Day navigation header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-lg bg-rose-600 text-white font-black text-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-3 sm:pb-4 border-b border-slate-100 min-w-0">
+          <div className="space-y-1 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-lg bg-rose-600 text-white font-black text-xs flex-shrink-0">
                 NGÀY {currentDayData.day}
               </span>
               <span className="text-xs font-bold text-slate-400">
                 Tuần {currentDayData.week} • Tháng {currentDayData.stage}
               </span>
               {completedDays.includes(currentDayData.day) && (
-                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center gap-1">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-bold flex items-center gap-1 flex-shrink-0">
                   <CheckCircle2 size={12} /> Đã hoàn thành
                 </span>
               )}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-lg sm:text-2xl font-black text-slate-900 tracking-tight break-words">
               {currentDayData.title}
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500">
+            <p className="text-xs sm:text-sm text-slate-500 break-words">
               <strong className="text-rose-600">Trọng tâm:</strong> {currentDayData.focus}
             </p>
           </div>
 
           {/* Quick Day Jumper & Prev/Next Controls */}
-          <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
+          <div className="flex items-center gap-1.5 w-full sm:w-auto justify-between sm:justify-end min-w-0 flex-shrink-0">
             <button
               onClick={() => setSelectedDayNum((prev) => Math.max(1, prev - 1))}
               disabled={selectedDayNum === 1}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
               title="Ngày trước"
             >
               <ChevronLeft size={18} />
             </button>
 
-            {/* Quick jump select dropdown */}
-            <select
-              value={selectedDayNum}
-              onChange={(e) => setSelectedDayNum(Number(e.target.value))}
-              className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-black text-slate-800 outline-none focus:border-rose-500 cursor-pointer shadow-2xs"
-            >
-              {activeDaysData.map((d) => (
-                <option key={d.day} value={d.day}>
-                  Ngày {d.day}: {d.title.split(':')[0]}
-                </option>
-              ))}
-            </select>
+            {/* Quick jump select dropdown with responsive max-width and clean truncated titles */}
+            <div className="flex-1 sm:flex-initial min-w-0 max-w-[calc(100%-84px)] sm:max-w-[260px]">
+              <select
+                value={selectedDayNum}
+                onChange={(e) => setSelectedDayNum(Number(e.target.value))}
+                className="w-full px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-black text-slate-800 outline-none focus:border-rose-500 cursor-pointer shadow-2xs truncate"
+              >
+                {activeDaysData.map((d) => {
+                  const cleanTitle = (d.title || '').replace(/^Ngày\s*\d+\s*:\s*/i, '').trim();
+                  const displayTitle = cleanTitle.length > 20 ? cleanTitle.slice(0, 18) + '...' : cleanTitle;
+                  return (
+                    <option key={d.day} value={d.day}>
+                      Ngày {d.day}: {displayTitle}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
 
             <button
               onClick={() => setSelectedDayNum((prev) => Math.min(90, prev + 1))}
               disabled={selectedDayNum === 90}
-              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95 flex-shrink-0"
               title="Ngày tiếp theo"
             >
               <ChevronRight size={18} />
@@ -944,7 +950,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
         </div>
 
         {/* 7 Workspace Tabs: Sticky & Horizontal Scroll on Mobile, 7-Cols on Desktop */}
-        <div className="sticky top-0 z-20 -mx-5 sm:mx-0 px-5 sm:px-0 py-2.5 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs">
+        <div className="sticky top-0 z-20 -mx-3.5 sm:mx-0 px-3.5 sm:px-0 py-2.5 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs">
           <div className="flex lg:grid lg:grid-cols-7 overflow-x-auto no-scrollbar gap-1.5 p-1 bg-slate-100 rounded-2xl scrollbar-none snap-x">
             <button
               onClick={() => setActiveTab(1)}
