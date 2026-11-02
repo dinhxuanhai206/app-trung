@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import BottomNav from './components/BottomNav';
@@ -173,8 +174,9 @@ export default function App() {
 
       {/* Toast Notification */}
       {toast && (
-        <div className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 bg-slate-900 text-white px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm shadow-2xl border-l-4 border-rose-500 z-50 animate-bounce">
-          ✨ {toast}
+        <div className="fixed bottom-20 lg:bottom-6 right-4 sm:right-6 bg-slate-900 text-white px-4 py-2.5 rounded-xl font-semibold text-xs sm:text-sm shadow-2xl border-l-4 border-rose-500 z-50 animate-bounce flex items-center gap-2">
+          <Sparkles size={16} className="text-amber-400" />
+          <span>{toast}</span>
         </div>
       )}
     </div>

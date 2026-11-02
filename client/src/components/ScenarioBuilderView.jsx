@@ -1,13 +1,43 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import {
+  Sparkles,
+  UtensilsCrossed,
+  Car,
+  ShoppingBag,
+  HeartPulse,
+  Briefcase,
+  MessageSquare,
+  Tv,
+  BookOpen,
+  Puzzle,
+  Play,
+  Square,
+  Volume2,
+  Mic,
+  Eye,
+  EyeOff,
+  Lightbulb,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  ExternalLink,
+  ChevronRight,
+  Flame,
+  Award,
+  Video,
+  X,
+  RotateCcw,
+  UserCheck
+} from 'lucide-react';
 import { REAL_LIFE_SCENARIOS } from '../data/scenarioData';
 
 const CATEGORIES = [
-  { id: 'all', label: 'Tất cả (12)', icon: '🌟' },
-  { id: 'dining', label: 'Ăn Uống (Ẩm thực)', icon: '🍜' },
-  { id: 'travel', label: 'Du Lịch (Di chuyển)', icon: '🚕' },
-  { id: 'shopping', label: 'Mua Sắm (Tiêu dùng)', icon: '🛍️' },
-  { id: 'daily', label: 'Đời Sống (Sức khỏe)', icon: '🏥' },
-  { id: 'work', label: 'Công Sở & Đàm Phán', icon: '💼' },
+  { id: 'all', label: 'Tất cả (12)', icon: Sparkles },
+  { id: 'dining', label: 'Ăn Uống (Ẩm thực)', icon: UtensilsCrossed },
+  { id: 'travel', label: 'Du Lịch (Di chuyển)', icon: Car },
+  { id: 'shopping', label: 'Mua Sắm (Tiêu dùng)', icon: ShoppingBag },
+  { id: 'daily', label: 'Đời Sống (Sức khỏe)', icon: HeartPulse },
+  { id: 'work', label: 'Công Sở & Đàm Phán', icon: Briefcase },
 ];
 
 export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = true, onGainXP }) {
@@ -268,11 +298,12 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold tracking-wide">
-              <span>🎭</span>
+              <Sparkles size={14} className="text-emerald-400" />
               <span>ĐÀM THOẠI THỰC TẾ & VIDEO PANDA STUDIO 4.0</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <span>💬</span> 7. Tình Huống Thực Tế (情景交际)
+              <MessageSquare className="text-emerald-400" size={28} />
+              <span>7. Tình Huống Thực Tế (情景交际)</span>
             </h1>
             <p className="text-slate-300 text-sm leading-relaxed">
               Luyện nghe hiểu và đọc song ngữ qua <strong>12 kịch bản hội thoại thực tế</strong>, tích hợp video bài giảng từ kênh <strong>Panda Studio</strong>, luyện đóng vai (Role-play AI) và sổ tay 200+ từ vựng giao tiếp thực tiễn!
@@ -286,12 +317,12 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               rel="noopener noreferrer"
               className="px-4 py-2.5 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-red-600/30 active:scale-95"
             >
-              <span>📺</span>
+              <Tv size={16} />
               <span>Kênh YouTube Panda Studio</span>
-              <span className="text-[10px] bg-red-800 px-1.5 py-0.5 rounded">Offical</span>
+              <span className="text-[10px] bg-red-800 px-1.5 py-0.5 rounded">Official</span>
             </a>
             <div className="flex items-center gap-2 text-xs text-emerald-300 font-semibold bg-emerald-950/60 px-3 py-1.5 rounded-xl border border-emerald-500/30">
-              <span>✨</span>
+              <Sparkles size={14} className="text-emerald-400" />
               <span>12 Chủ đề • 100+ Lượt đối đáp • 200+ Từ vựng</span>
             </div>
           </div>
@@ -300,20 +331,23 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
 
       {/* CATEGORY FILTER PILLS */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-        {CATEGORIES.map((cat) => (
-          <button
-            key={cat.id}
-            onClick={() => setSelectedCategory(cat.id)}
-            className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
-              selectedCategory === cat.id
-                ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
-                : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-2xs'
-            }`}
-          >
-            <span>{cat.icon}</span>
-            <span>{cat.label}</span>
-          </button>
-        ))}
+        {CATEGORIES.map((cat) => {
+          const CatIcon = cat.icon;
+          return (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-2 ${
+                selectedCategory === cat.id
+                  ? 'bg-emerald-600 text-white shadow-md shadow-emerald-600/30'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 shadow-2xs'
+              }`}
+            >
+              <CatIcon size={14} />
+              <span>{cat.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* SCENARIOS HORIZONTAL SELECTOR GRID */}
@@ -349,15 +383,16 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
 
               <div className="flex items-center justify-between gap-1 mt-2.5">
                 <span
-                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                  className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
                     isSelected ? 'bg-emerald-700/80 text-white' : 'bg-slate-100 text-slate-500'
                   }`}
                 >
-                  💬 {sc.dialogue ? sc.dialogue.length : 0} thoại
+                  <MessageSquare size={10} />
+                  <span>{sc.dialogue ? sc.dialogue.length : 0} thoại</span>
                 </span>
                 {sc.video && (
-                  <span className="text-[10px]" title="Có video bài giảng Panda Studio">
-                    📺
+                  <span className="text-red-500 flex items-center" title="Có video bài giảng Panda Studio">
+                    <Tv size={12} />
                   </span>
                 )}
               </div>
@@ -393,7 +428,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 onClick={stopAutoPlay}
                 className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-amber-500/20 animate-pulse"
               >
-                <span>⏸️</span>
+                <Square size={14} />
                 <span>Tạm Dừng Hội Thoại</span>
               </button>
             ) : (
@@ -401,7 +436,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 onClick={startAutoPlay}
                 className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-md shadow-emerald-600/25 active:scale-95 transition-all"
               >
-                <span>▶️</span>
+                <Play size={14} />
                 <span>Phát Toàn Bộ Đoạn Hội Thoại</span>
               </button>
             )}
@@ -418,7 +453,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>💬</span>
+            <MessageSquare size={14} />
             <span>Đàm Thoại & Luyện Nghe Đọc</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20">
               {scenario.dialogue ? scenario.dialogue.length : 0} câu
@@ -433,7 +468,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 : 'bg-red-50 text-red-700 hover:bg-red-100 border border-red-200/60'
             }`}
           >
-            <span>📺</span>
+            <Tv size={14} />
             <span>Video Thực Tế (Panda Studio)</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500 text-white font-bold">
               HD
@@ -448,7 +483,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>📖</span>
+            <BookOpen size={14} />
             <span>Sổ Tay Từ Vựng & Mẹo Văn Hóa</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20">
               {scenario.vocabList ? scenario.vocabList.length : 0} từ
@@ -463,7 +498,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
             }`}
           >
-            <span>🧩</span>
+            <Puzzle size={14} />
             <span>Thử Thách Ghép Câu Phản Xạ</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20">
               {scenario.challenges ? scenario.challenges.length : 0} câu
@@ -480,23 +515,25 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 <span className="text-xs font-bold text-slate-500">Tùy chọn hiển thị:</span>
                 <button
                   onClick={() => setShowPinyin((p) => !p)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5 ${
                     showPinyin
                       ? 'bg-rose-100 text-rose-800 border-rose-300'
                       : 'bg-white text-slate-500 border-slate-200'
                   }`}
                 >
-                  {showPinyin ? '👁️ Đang hiện Pinyin' : '🙈 Ẩn Pinyin'}
+                  {showPinyin ? <Eye size={13} /> : <EyeOff size={13} />}
+                  <span>{showPinyin ? 'Hiện Pinyin' : 'Ẩn Pinyin'}</span>
                 </button>
                 <button
                   onClick={() => setShowVi((v) => !v)}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border ${
+                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all border flex items-center gap-1.5 ${
                     showVi
                       ? 'bg-blue-100 text-blue-800 border-blue-300'
                       : 'bg-white text-slate-500 border-slate-200'
                   }`}
                 >
-                  {showVi ? '🇻🇳 Đang hiện Dịch nghĩa' : '🙈 Ẩn Dịch nghĩa'}
+                  {showVi ? <Eye size={13} /> : <EyeOff size={13} />}
+                  <span>{showVi ? 'Hiện Dịch nghĩa' : 'Ẩn Dịch nghĩa'}</span>
                 </button>
               </div>
 
@@ -505,19 +542,19 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                   <span>Tốc độ đọc:</span>
                   <button
                     onClick={() => setSpeechRate(0.7)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold ${
                       speechRate === 0.7 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
                     }`}
                   >
-                    🐢 Chậm (0.7x)
+                    Chậm (0.7x)
                   </button>
                   <button
                     onClick={() => setSpeechRate(0.88)}
-                    className={`px-2 py-0.5 rounded text-[11px] font-bold ${
+                    className={`px-2.5 py-0.5 rounded text-[11px] font-bold ${
                       speechRate === 0.88 ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'
                     }`}
                   >
-                    🔊 Chuẩn (1.0x)
+                    Chuẩn (1.0x)
                   </button>
                 </div>
 
@@ -529,7 +566,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                       : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
                   }`}
                 >
-                  <span>🎙️</span>
+                  <Mic size={13} />
                   <span>{roleplayMode ? 'Đang bật Đóng Vai' : 'Bật Luyện Đóng Vai'}</span>
                 </button>
               </div>
@@ -539,7 +576,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
             {roleplayMode && (
               <div className="p-3.5 bg-purple-50/70 border border-purple-200 rounded-2xl flex items-center justify-between gap-4">
                 <div className="text-xs text-purple-900 font-bold flex items-center gap-2">
-                  <span>🎭</span>
+                  <UserCheck size={16} className="text-purple-600" />
                   <span>Chọn nhân vật bạn muốn đóng vai để luyện nói:</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -580,8 +617,8 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                   >
                     <div className="flex items-start gap-3.5 flex-1">
                       {/* Character Avatar */}
-                      <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-2xl flex-shrink-0 shadow-2xs">
-                        {line.avatar || '💬'}
+                      <div className="w-11 h-11 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-700 text-base flex-shrink-0 shadow-2xs">
+                        {line.avatar || line.speaker?.[0] || <MessageSquare size={16} className="text-purple-600" />}
                       </div>
 
                       <div className="space-y-1.5 flex-1">
@@ -611,8 +648,9 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
 
                         {/* Vietnamese Meaning */}
                         {showVi && (
-                          <div className="text-xs text-slate-600 font-medium leading-relaxed pt-0.5">
-                            💡 {line.vi}
+                          <div className="text-xs text-slate-600 font-medium leading-relaxed pt-0.5 flex items-start gap-1.5">
+                            <Lightbulb size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                            <span>{line.vi}</span>
                           </div>
                         )}
 
@@ -625,9 +663,16 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                                 : 'bg-amber-100 text-amber-900 border border-amber-200'
                             }`}
                           >
-                            <span>
-                              {fb.match ? '✅ Bạn đã nói:' : '⚠️ Giọng nói nhận dạng:'}{' '}
-                              <strong>"{fb.transcript}"</strong>
+                            <span className="flex items-center gap-1.5">
+                              {fb.match ? (
+                                <CheckCircle2 size={14} className="text-emerald-700" />
+                              ) : (
+                                <AlertCircle size={14} className="text-amber-700" />
+                              )}
+                              <span>
+                                {fb.match ? 'Bạn đã nói:' : 'Giọng nói nhận dạng:'}{' '}
+                                <strong>"{fb.transcript}"</strong>
+                              </span>
                             </span>
                             <span className="font-black px-2 py-0.5 rounded bg-white/70">
                               Độ chuẩn: {fb.score}%
@@ -645,16 +690,16 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                         className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-700 flex items-center justify-center text-sm transition-all shadow-2xs"
                         title="Nghe phát âm chuẩn câu này"
                       >
-                        🔊
+                        <Volume2 size={16} />
                       </button>
 
                       {/* Read slow button */}
                       <button
                         onClick={() => speakText(line.hanzi, 0.65)}
-                        className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-amber-500 hover:text-white text-slate-700 flex items-center justify-center text-sm transition-all shadow-2xs"
+                        className="w-9 h-9 rounded-xl bg-slate-100 hover:bg-amber-500 hover:text-white text-slate-700 flex items-center justify-center text-xs font-bold transition-all shadow-2xs"
                         title="Nghe phát âm chậm 0.65x"
                       >
-                        🐢
+                        0.6x
                       </button>
 
                       {/* Mic button for role-play practice */}
@@ -668,7 +713,8 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                           }`}
                           title="Bấm mic để luyện nói câu của bạn"
                         >
-                          <span>{recordingIndex === idx ? '⏹️ Dừng' : '🎙️ Đọc câu này'}</span>
+                          {recordingIndex === idx ? <Square size={13} /> : <Mic size={13} />}
+                          <span>{recordingIndex === idx ? 'Dừng' : 'Đọc câu này'}</span>
                         </button>
                       )}
                     </div>
@@ -685,8 +731,8 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
             {/* Panda Studio Channel Hero Card */}
             <div className="bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 rounded-3xl p-6 text-white shadow-xl flex flex-col md:flex-row items-start md:items-center justify-between gap-5 border border-red-400/30">
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl bg-white text-slate-900 flex items-center justify-center text-3xl font-black shadow-md flex-shrink-0">
-                  🐼
+                <div className="w-16 h-16 rounded-2xl bg-white text-red-600 flex items-center justify-center font-black shadow-md flex-shrink-0">
+                  <Video size={32} />
                 </div>
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
@@ -712,8 +758,9 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                   rel="noopener noreferrer"
                   className="px-4 py-2.5 rounded-xl bg-white text-red-600 hover:bg-red-50 font-extrabold text-xs flex items-center gap-2 transition-all shadow-md active:scale-95"
                 >
-                  <span>▶️ Xem Trên YouTube</span>
-                  <span>↗</span>
+                  <Play size={14} />
+                  <span>Xem Trên YouTube</span>
+                  <ExternalLink size={12} />
                 </a>
                 <a
                   href="https://www.youtube.com/@PandaStudio24"
@@ -721,7 +768,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                   rel="noopener noreferrer"
                   className="px-4 py-2.5 rounded-xl bg-black/30 hover:bg-black/50 text-white font-bold text-xs flex items-center gap-2 transition-all border border-white/20"
                 >
-                  <span>🔔 Kênh Panda Studio</span>
+                  <span>Kênh Panda Studio</span>
                 </a>
               </div>
             </div>
@@ -731,7 +778,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               <div className="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-slate-100 gap-2">
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-red-600 flex items-center gap-1.5">
-                    <span>🎬</span>
+                    <Tv size={14} />
                     <span>Video Bài Học Tình Huống:</span>
                   </span>
                   <h4 className="text-lg font-extrabold text-slate-900 mt-0.5">
@@ -760,7 +807,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               {/* Video Quick Navigation Bar */}
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs text-slate-600">
                 <div className="flex items-center gap-2 font-medium">
-                  <span>💡</span>
+                  <Lightbulb size={16} className="text-amber-500 flex-shrink-0" />
                   <span>
                     Nếu trình duyệt chặn nhúng iframe của YouTube hoặc hiển thị cảnh báo, bạn có thể bấm nút bên phải để mở xem trực tiếp video chuẩn nhất trên kênh Panda Studio:
                   </span>
@@ -772,8 +819,9 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                     rel="noopener noreferrer"
                     className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-sm"
                   >
-                    <span>▶️ Mở Xem Trên YouTube</span>
-                    <span>↗</span>
+                    <Play size={14} />
+                    <span>Mở Xem Trên YouTube</span>
+                    <ExternalLink size={12} />
                   </a>
                 </div>
               </div>
@@ -781,8 +829,8 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               {/* Key Takeaways & Useful Sentences from this Situation */}
               <div className="space-y-3 pt-2">
                 <div className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-                  <span>🎯</span>
-                  <span>Các mẫu câu khẩu ngữ đắt giá rút ra từ video tình huống này (Bấm 🔊 để nghe):</span>
+                  <Award size={15} className="text-amber-500" />
+                  <span>Các mẫu câu khẩu ngữ đắt giá rút ra từ video tình huống này (Bấm loa để nghe):</span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -797,7 +845,10 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                             {item.hanzi}
                           </div>
                           <div className="text-xs font-semibold text-rose-600">{item.pinyin}</div>
-                          <div className="text-xs text-slate-500">💡 {item.vi}</div>
+                          <div className="text-xs text-slate-500 flex items-center gap-1">
+                            <Lightbulb size={12} className="text-amber-500" />
+                            <span>{item.vi}</span>
+                          </div>
                         </div>
 
                         <button
@@ -805,7 +856,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                           className="w-8 h-8 rounded-xl bg-white hover:bg-emerald-600 hover:text-white text-slate-600 flex items-center justify-center text-xs transition-all shadow-2xs flex-shrink-0"
                           title="Nghe câu này"
                         >
-                          🔊
+                          <Volume2 size={15} />
                         </button>
                       </div>
                     ))}
@@ -822,7 +873,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
             {scenario.culturalTips && scenario.culturalTips.length > 0 && (
               <div className="p-5 rounded-3xl bg-amber-50/70 border border-amber-200 space-y-3">
                 <div className="font-extrabold text-amber-950 text-sm flex items-center gap-2">
-                  <span>🏮</span>
+                  <Sparkles size={16} className="text-amber-600" />
                   <span>Bí kíp văn hóa ứng xử thực tế của người Trung Quốc:</span>
                 </div>
                 <ul className="space-y-2 text-xs text-amber-900 leading-relaxed list-disc list-inside">
@@ -838,7 +889,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
             {/* Vocab Cards Grid */}
             <div className="space-y-2">
               <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-                <span>🔑</span>
+                <BookOpen size={14} className="text-emerald-600" />
                 <span>Từ vựng cốt lõi trong hoàn cảnh ({scenario.vocabList ? scenario.vocabList.length : 0} từ):</span>
               </div>
 
@@ -862,7 +913,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                           className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-emerald-600 hover:text-white text-slate-600 flex items-center justify-center text-xs transition-all"
                           title="Phát âm từ này"
                         >
-                          🔊
+                          <Volume2 size={13} />
                         </button>
                       </div>
 
@@ -872,7 +923,10 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                             Hán Việt: <strong className="text-slate-700">{v.hv}</strong>
                           </div>
                         )}
-                        <div className="font-semibold text-slate-800 leading-tight">💡 {v.vi}</div>
+                        <div className="font-semibold text-slate-800 leading-tight flex items-start gap-1">
+                          <Lightbulb size={12} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                          <span>{v.vi}</span>
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -887,8 +941,9 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
             {/* Target Sentence Prompt */}
             <div className="p-5 rounded-2xl bg-emerald-50/70 border border-emerald-200">
               <div className="flex items-center justify-between mb-1">
-                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider">
-                  🎯 Thử thách ghép câu giao tiếp #{challengeIdx + 1}:
+                <span className="text-xs font-bold text-emerald-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <Award size={14} className="text-emerald-600" />
+                  <span>Thử thách ghép câu giao tiếp #{challengeIdx + 1}:</span>
                 </span>
                 <span className="text-xs text-slate-500 font-semibold">
                   Câu {challengeIdx + 1} / {scenario.challenges.length}
@@ -897,16 +952,18 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               <div className="text-lg md:text-xl font-black text-slate-900 leading-snug">
                 "{challenge.promptVi}"
               </div>
-              <div className="text-xs text-slate-600 mt-1.5 italic">
-                💡 Gợi ý cấu trúc: {challenge.grammarHint}
+              <div className="text-xs text-slate-600 mt-1.5 italic flex items-center gap-1">
+                <Lightbulb size={12} className="text-amber-500 flex-shrink-0" />
+                <span>Gợi ý cấu trúc: {challenge.grammarHint}</span>
               </div>
             </div>
 
             {/* Tray Slots (Word tokens placed) */}
             <div className="p-4 rounded-2xl bg-slate-50 border-2 border-dashed border-slate-300 min-h-[90px] flex flex-wrap items-center gap-2.5">
               {trayTokens.length === 0 ? (
-                <div className="w-full text-center text-sm text-slate-400 select-none py-2">
-                  👉 Nhấp vào các từ vựng bên dưới để xếp thành câu hoàn chỉnh theo ngữ pháp
+                <div className="w-full text-center text-sm text-slate-400 select-none py-2 flex items-center justify-center gap-2">
+                  <ChevronRight size={16} />
+                  <span>Nhấp vào các từ vựng bên dưới để xếp thành câu hoàn chỉnh theo ngữ pháp</span>
                 </div>
               ) : (
                 trayTokens.map((token) => (
@@ -917,7 +974,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                     title="Nhấp để gỡ từ này"
                   >
                     <span>{token.text}</span>
-                    <span className="text-xs opacity-60 group-hover:opacity-100">✕</span>
+                    <X size={14} className="opacity-60 group-hover:opacity-100" />
                   </button>
                 ))
               )}
@@ -930,9 +987,10 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 {trayTokens.length > 0 && (
                   <button
                     onClick={handleClearTray}
-                    className="text-rose-500 hover:underline cursor-pointer"
+                    className="text-rose-500 hover:underline cursor-pointer flex items-center gap-1"
                   >
-                    Xóa làm lại
+                    <RotateCcw size={12} />
+                    <span>Xóa làm lại</span>
                   </button>
                 )}
               </div>
@@ -958,7 +1016,7 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 className="px-6 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold text-sm shadow-md shadow-emerald-600/25 transition-all flex items-center gap-2"
               >
                 <span>Kiểm tra kết quả</span>
-                <span>✓</span>
+                <CheckCircle2 size={16} />
               </button>
 
               <button
@@ -966,7 +1024,8 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                 className="px-4 py-3 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm shadow-2xs transition-all flex items-center gap-2"
                 title="Nghe câu mẫu chuẩn"
               >
-                <span>🔊 Nghe câu mẫu</span>
+                <Volume2 size={16} />
+                <span>Nghe câu mẫu</span>
               </button>
             </div>
 
@@ -981,7 +1040,11 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2 font-bold text-base">
-                    <span>{feedback.isCorrect ? '🎉' : '❌'}</span>
+                    {feedback.isCorrect ? (
+                      <CheckCircle2 size={20} className="text-emerald-600" />
+                    ) : (
+                      <AlertCircle size={20} className="text-rose-600" />
+                    )}
                     <span>{feedback.isCorrect ? 'Chính xác! Hoàn hảo!' : 'Chưa chính xác!'}</span>
                   </div>
                   {feedback.isCorrect && (
@@ -998,17 +1061,19 @@ export default function ScenarioBuilderView({ showPinyin: globalShowPinyin = tru
                       {feedback.targetSentence}
                     </strong>
                   </div>
-                  <div className="text-xs text-slate-600 italic">
-                    💡 Giải thích: {feedback.explanation}
+                  <div className="text-xs text-slate-600 flex items-center gap-1.5">
+                    <Lightbulb size={13} className="text-amber-500 flex-shrink-0" />
+                    <span><strong>Giải thích:</strong> {feedback.explanation}</span>
                   </div>
                 </div>
 
                 <div className="pt-2">
                   <button
                     onClick={handleNextChallenge}
-                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm"
+                    className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-sm flex items-center gap-1.5"
                   >
-                    Tiếp tục câu tiếp theo ➔
+                    <span>Tiếp tục câu tiếp theo</span>
+                    <ChevronRight size={14} />
                   </button>
                 </div>
               </div>

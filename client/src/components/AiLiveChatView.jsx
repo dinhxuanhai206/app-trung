@@ -1,5 +1,28 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  Bot,
+  Settings,
+  Volume2,
+  VolumeX,
+  Square,
+  Sparkles,
+  Brain,
+  Target,
+  Search,
+  Lightbulb,
+  Mic,
+  Send,
+  X,
+  ExternalLink,
+  Save,
+  CheckCircle2,
+  AlertCircle,
+  HelpCircle,
+  ChevronDown,
+  ChevronUp,
+  User
+} from 'lucide-react';
+import {
   AI_PERSONAS,
   QUICK_VOICE_TOPICS,
   sendChatMessageToAi,
@@ -242,9 +265,9 @@ export default function AiLiveChatView({ onGainXP }) {
         if (e.error === 'not-allowed') {
           alert('Vui lòng cấp quyền Microphone trên trình duyệt để nói trực tiếp cùng AI nhé!');
         } else if (e.error === 'service-not-allowed') {
-          alert('⚠️ Dịch vụ Google Speech của trình duyệt đang bị chặn (Lỗi service-not-allowed: thường do Brave Shields hoặc Windows tắt Speech Recognition). Bạn có thể gõ câu hỏi trực tiếp vào khung chat bên dưới!');
+          alert('Dịch vụ Google Speech của trình duyệt đang bị chặn (Lỗi service-not-allowed: thường do Brave Shields hoặc Windows tắt Speech Recognition). Bạn có thể gõ câu hỏi trực tiếp vào khung chat bên dưới!');
         } else if (e.error === 'network') {
-          alert('⚠️ Không thể kết nối tới máy chủ giọng nói. Bạn hãy gõ câu hỏi vào khung chat bên dưới nhé!');
+          alert('Không thể kết nối tới máy chủ giọng nói. Bạn hãy gõ câu hỏi vào khung chat bên dưới nhé!');
         }
       };
 
@@ -283,7 +306,8 @@ export default function AiLiveChatView({ onGainXP }) {
         <div>
           <div className="flex items-center gap-2.5">
             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2">
-              <span>🤖</span> AI Giao Tiếp Thực Tế (Real AI Thinking)
+              <Bot className="text-rose-600" size={26} />
+              <span>AI Giao Tiếp Thực Tế (Real AI Thinking)</span>
             </h2>
             <button
               onClick={() => {
@@ -299,7 +323,11 @@ export default function AiLiveChatView({ onGainXP }) {
               }`}
               title="Bấm để cấu hình API Key AI (Gemini / OpenAI / DeepSeek)"
             >
-              <span>{isRealAiConfigured ? '🟢' : '⚙️'}</span>
+              {isRealAiConfigured ? (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
+              ) : (
+                <Settings size={13} className="text-amber-700" />
+              )}
               <span>
                 {isRealAiConfigured
                   ? `AI Thực Tế (${aiSettings.provider === 'gemini' ? 'Gemini' : aiSettings.provider})`
@@ -320,7 +348,8 @@ export default function AiLiveChatView({ onGainXP }) {
               className="px-2.5 py-1.5 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-semibold flex items-center gap-1 transition-all animate-pulse"
               title="Dừng phát âm hiện tại"
             >
-              ⏹️ Dừng đọc
+              <Square size={13} />
+              <span>Dừng đọc</span>
             </button>
           )}
 
@@ -333,7 +362,7 @@ export default function AiLiveChatView({ onGainXP }) {
             }`}
             title="Bật/Tắt tự động phát âm câu trả lời của AI"
           >
-            <span>{autoSpeakAi ? '🔊' : '🔇'}</span>
+            {autoSpeakAi ? <Volume2 size={15} /> : <VolumeX size={15} />}
             <span>Tự đọc: <strong>{autoSpeakAi ? 'BẬT' : 'TẮT'}</strong></span>
           </button>
         </div>
@@ -391,10 +420,11 @@ export default function AiLiveChatView({ onGainXP }) {
                       </div>
                       <button
                         onClick={() => speakAiResponse(msg.hanzi, persona.gender)}
-                        className="text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-md hover:bg-rose-50 transition-colors"
+                        className="text-rose-600 hover:text-rose-700 font-semibold inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-md hover:bg-rose-50 transition-colors"
                         title="Bấm để nghe phát âm câu này"
                       >
-                        🔊 Nghe phát âm
+                        <Volume2 size={13} />
+                        <span>Nghe phát âm</span>
                       </button>
                     </div>
 
@@ -409,8 +439,9 @@ export default function AiLiveChatView({ onGainXP }) {
                     )}
 
                     {msg.vi && (
-                      <div className="text-xs text-slate-600 pt-1 border-t border-slate-200/40">
-                        💡 {msg.vi}
+                      <div className="text-xs text-slate-600 pt-1 border-t border-slate-200/40 flex items-start gap-1.5">
+                        <Lightbulb size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                        <span>{msg.vi}</span>
                       </div>
                     )}
                   </div>
@@ -423,7 +454,7 @@ export default function AiLiveChatView({ onGainXP }) {
                         className="w-full px-3 py-2 flex items-center justify-between font-semibold text-purple-900 hover:bg-purple-100/60 transition-colors"
                       >
                         <span className="flex items-center gap-1.5">
-                          <span>🧠</span>
+                          <Brain size={15} className="text-purple-600" />
                           <span>Quá trình suy nghĩ thực tế của AI (Thinking Chain)</span>
                           {msg.provider && (
                             <span className="text-[10px] text-purple-500 font-normal">
@@ -431,30 +462,43 @@ export default function AiLiveChatView({ onGainXP }) {
                             </span>
                           )}
                         </span>
-                        <span className="text-[11px] text-purple-600 font-bold">
-                          {isExpanded ? '▲ Thu gọn' : '▼ Xem chi tiết'}
+                        <span className="text-[11px] text-purple-600 font-bold flex items-center gap-1">
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp size={14} />
+                              <span>Thu gọn</span>
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown size={14} />
+                              <span>Xem chi tiết</span>
+                            </>
+                          )}
                         </span>
                       </button>
 
                       {isExpanded && (
                         <div className="px-3.5 pb-3 pt-1 space-y-2 border-t border-purple-200/50 bg-white/80">
                           <div>
-                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
-                              <span>🎯</span> Phân tích ý định người dùng (Intent):
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1.5">
+                              <Target size={13} className="text-purple-600" />
+                              <span>Phân tích ý định người dùng (Intent):</span>
                             </div>
                             <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.intent}</p>
                           </div>
 
                           <div>
-                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
-                              <span>🧐</span> Đánh giá ngữ pháp & Sắc thái (Grammar & Tone):
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1.5">
+                              <Search size={13} className="text-purple-600" />
+                              <span>Đánh giá ngữ pháp & Sắc thái (Grammar & Tone):</span>
                             </div>
                             <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.grammarAndTone}</p>
                           </div>
 
                           <div>
-                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1">
-                              <span>💡</span> Chiến lược đối đáp sư phạm (Strategy):
+                            <div className="font-bold text-purple-800 text-[11px] flex items-center gap-1.5">
+                              <Lightbulb size={13} className="text-purple-600" />
+                              <span>Chiến lược đối đáp sư phạm (Strategy):</span>
                             </div>
                             <p className="text-slate-600 pl-4 text-xs">{msg.thoughtProcess.strategy}</p>
                           </div>
@@ -472,7 +516,7 @@ export default function AiLiveChatView({ onGainXP }) {
             <div key={msg.id} className="flex flex-col items-end gap-1.5 ml-auto max-w-[94%] sm:max-w-[85%]">
               <div className="flex items-start gap-2.5 flex-row-reverse">
                 <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-bold text-base flex-shrink-0 shadow-md">
-                  🧑
+                  <User size={18} />
                 </div>
                 <div className="bg-blue-600 text-white p-4 rounded-2xl rounded-tr-none shadow-md space-y-1">
                   <div className="text-lg sm:text-xl font-bold chinese-font leading-relaxed">
@@ -487,7 +531,7 @@ export default function AiLiveChatView({ onGainXP }) {
                 <div className="w-full bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 text-left space-y-1.5 text-xs text-slate-700 shadow-2xs">
                   <div className="flex items-center justify-between">
                     <span className="font-bold text-emerald-800 flex items-center gap-1.5">
-                      <span>✨</span>
+                      <Sparkles size={14} className="text-amber-500" />
                       <span>AI Nhận Xét Câu Nói:</span>
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-600 text-white font-bold text-[10px]">
@@ -511,9 +555,12 @@ export default function AiLiveChatView({ onGainXP }) {
                   </div>
 
                   {msg.analysis.nativePolish && (
-                    <div className="pt-1 border-t border-emerald-200/60 text-slate-800">
-                      <strong>💡 Gợi ý nói chuẩn bản xứ hơn: </strong>
-                      <span className="chinese-font font-bold text-emerald-700">{msg.analysis.nativePolish}</span>
+                    <div className="pt-1 border-t border-emerald-200/60 text-slate-800 flex items-start gap-1">
+                      <Lightbulb size={13} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <strong>Gợi ý nói chuẩn bản xứ hơn: </strong>
+                        <span className="chinese-font font-bold text-emerald-700">{msg.analysis.nativePolish}</span>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -526,7 +573,7 @@ export default function AiLiveChatView({ onGainXP }) {
         {interimTranscript && (
           <div className="flex items-start gap-2.5 flex-row-reverse ml-auto max-w-[85%]">
             <div className="w-10 h-10 rounded-2xl bg-rose-500 text-white flex items-center justify-center font-bold text-base flex-shrink-0 animate-pulse">
-              🎙️
+              <Mic size={18} />
             </div>
             <div className="bg-rose-50 text-rose-900 border border-rose-300 p-3.5 rounded-2xl rounded-tr-none text-base chinese-font italic shadow-xs">
               {interimTranscript} ...
@@ -538,7 +585,7 @@ export default function AiLiveChatView({ onGainXP }) {
         {isThinking && (
           <div className="flex items-start gap-3 max-w-[85%] animate-fade-in">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-purple-500 to-indigo-600 text-white flex items-center justify-center text-xl flex-shrink-0 shadow-md animate-pulse">
-              🧠
+              <Brain size={20} />
             </div>
             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 text-purple-900 p-3.5 rounded-2xl rounded-tl-none shadow-xs space-y-1.5">
               <div className="flex items-center gap-2 font-bold text-xs">
@@ -589,14 +636,14 @@ export default function AiLiveChatView({ onGainXP }) {
         {/* BIG MIC BUTTON */}
         <button
           onClick={toggleMic}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl text-white font-bold transition-all flex-shrink-0 shadow-lg relative ${
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center text-white font-bold transition-all flex-shrink-0 shadow-lg relative ${
             isListening
               ? 'bg-rose-600 shadow-rose-600/50 scale-105 animate-pulse ring-4 ring-rose-300'
               : 'bg-gradient-to-br from-rose-500 to-rose-700 hover:from-rose-600 hover:to-rose-800 shadow-rose-600/30 active:scale-95'
           }`}
           title={isListening ? 'Bấm để dừng ghi âm' : 'Bấm để nói tiếng Trung'}
         >
-          {isListening ? '🛑' : '🎙️'}
+          {isListening ? <Square size={24} /> : <Mic size={26} />}
         </button>
 
         {/* Text Input Fallback */}
@@ -622,9 +669,10 @@ export default function AiLiveChatView({ onGainXP }) {
           <button
             onClick={() => handleSendUserMessage()}
             disabled={!inputText.trim()}
-            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-sm transition-all flex-shrink-0 shadow-xs"
+            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 disabled:opacity-40 text-white font-bold text-sm transition-all flex-shrink-0 shadow-xs flex items-center gap-1.5"
           >
-            Gửi
+            <span>Gửi</span>
+            <Send size={15} />
           </button>
         </div>
       </div>
@@ -635,7 +683,7 @@ export default function AiLiveChatView({ onGainXP }) {
           <div className="bg-white rounded-3xl p-6 sm:p-7 max-w-lg w-full shadow-2xl border border-slate-200 space-y-5 animate-scale-in">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div className="flex items-center gap-2">
-                <span className="text-2xl">⚙️</span>
+                <Settings size={22} className="text-slate-800" />
                 <h3 className="text-lg font-bold text-slate-900">
                   Cài Đặt Kết Nối AI Thực Tế (LLM)
                 </h3>
@@ -644,7 +692,7 @@ export default function AiLiveChatView({ onGainXP }) {
                 onClick={() => setShowSettingsModal(false)}
                 className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm font-bold"
               >
-                ✕
+                <X size={16} />
               </button>
             </div>
 
@@ -667,7 +715,9 @@ export default function AiLiveChatView({ onGainXP }) {
                         : 'border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    <div>🌟 Google Gemini</div>
+                    <div className="font-bold flex items-center justify-center gap-1">
+                      <Sparkles size={13} className="text-rose-600" /> Google Gemini
+                    </div>
                     <div className="text-[10px] text-slate-500">Miễn phí & Nhanh</div>
                   </button>
 
@@ -683,7 +733,9 @@ export default function AiLiveChatView({ onGainXP }) {
                         : 'border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    <div>🤖 OpenAI</div>
+                    <div className="font-bold flex items-center justify-center gap-1">
+                      <Bot size={13} className="text-slate-700" /> OpenAI
+                    </div>
                     <div className="text-[10px] text-slate-500">GPT-4o-mini</div>
                   </button>
 
@@ -699,7 +751,9 @@ export default function AiLiveChatView({ onGainXP }) {
                         : 'border-slate-200 hover:bg-slate-50'
                     }`}
                   >
-                    <div>🚀 DeepSeek</div>
+                    <div className="font-bold flex items-center justify-center gap-1">
+                      <Brain size={13} className="text-indigo-600" /> DeepSeek
+                    </div>
                     <div className="text-[10px] text-slate-500">R1 / V3 Chat</div>
                   </button>
                 </div>
@@ -716,9 +770,10 @@ export default function AiLiveChatView({ onGainXP }) {
                       href="https://aistudio.google.com/app/apikey"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-xs text-rose-600 hover:underline font-semibold"
+                      className="text-xs text-rose-600 hover:underline font-semibold flex items-center gap-1"
                     >
-                      🔗 Lấy Key Gemini miễn phí tại đây
+                      <ExternalLink size={12} />
+                      <span>Lấy Key Gemini miễn phí tại đây</span>
                     </a>
                   )}
                 </div>
@@ -766,9 +821,10 @@ export default function AiLiveChatView({ onGainXP }) {
               <button
                 type="button"
                 onClick={saveAiSettings}
-                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md"
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md flex items-center gap-1.5"
               >
-                💾 Lưu & Áp Dụng
+                <Save size={14} />
+                <span>Lưu & Áp Dụng</span>
               </button>
             </div>
           </div>

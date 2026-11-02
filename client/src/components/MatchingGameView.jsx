@@ -1,4 +1,22 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Puzzle,
+  Gamepad2,
+  Trophy,
+  RotateCcw,
+  Sparkles,
+  Volume2,
+  Lightbulb,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Target,
+  Layers,
+  ChevronRight,
+  BookOpen,
+  Clock,
+  Play
+} from 'lucide-react';
 import { getLessonSentenceBuilding } from '../data/lessonEnricher';
 import { VOCAB_TOPICS } from '../data/matchingVocabData';
 import {
@@ -145,7 +163,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
       if (lessonWords.length >= 4) {
         list.push({
           id: 'current_lesson',
-          name: `🎯 Từ Vựng Bài Đang Học (${lesson.title?.split(':')[0] || 'Bài ' + lesson.id})`,
+          name: `Từ Vựng Bài Đang Học (${lesson.title?.split(':')[0] || 'Bài ' + lesson.id})`,
           words: lessonWords,
         });
       }
@@ -185,7 +203,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
     if (lesson) {
       list.push({
         id: 'lesson_active',
-        name: `🎯 Bài Đang Học (${lesson.title?.split(':')[0] || 'Bài ' + lesson.id})`,
+        name: `Bài Đang Học (${lesson.title?.split(':')[0] || 'Bài ' + lesson.id})`,
       });
     }
     return [...list, ...SENTENCE_PUZZLE_TOPICS];
@@ -409,7 +427,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <span>🧩</span>
+          <Puzzle size={16} />
           <span>Chế độ 1: Xếp Thẻ Ghép Câu (组词造句)</span>
         </button>
 
@@ -421,7 +439,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <span>🀄</span>
+          <Layers size={16} />
           <span>Chế độ 2: Ghép Bộ Thủ Tạo Chữ Hán (拆字组字)</span>
         </button>
 
@@ -433,7 +451,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               : 'text-slate-600 hover:bg-slate-100'
           }`}
         >
-          <span>🃏</span>
+          <Gamepad2 size={16} />
           <span>Chế độ 3: Lật Thẻ Ghép Từ (配对记忆)</span>
         </button>
       </div>
@@ -446,7 +464,8 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           <div className="bg-gradient-to-r from-purple-50 to-white border border-purple-100 rounded-2xl p-6 flex justify-between items-center shadow-sm">
             <div>
               <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-                <span>🃏</span> Lộ Trình Ghép Từ Vựng Đa Chủ Đề (配对)
+                <Gamepad2 size={24} className="text-purple-600" />
+                <span>Lộ Trình Ghép Từ Vựng Đa Chủ Đề (配对)</span>
               </h2>
               <p className="text-slate-500 text-sm mt-1">
                 Mở rộng hàng trăm từ vựng theo 8 chủ đề thực tế đời sống. Ghép thẻ nhanh để nhận điểm thưởng!
@@ -454,17 +473,19 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
             </div>
             <button
               onClick={() => setRoundNumber((r) => r + 1)}
-              className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold"
+              className="px-4 py-2 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5"
             >
-              🔄 Đổi bộ 6 từ ngẫu nhiên
+              <RotateCcw size={14} />
+              <span>Đổi bộ 6 từ ngẫu nhiên</span>
             </button>
           </div>
 
           {/* Topic Selector Chips */}
           <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-3">
             <div className="flex justify-between items-center">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                🎯 Chọn Chủ Đề Luyện Ghép Từ:
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Target size={14} className="text-rose-500" />
+                <span>Chọn Chủ Đề Luyện Ghép Từ:</span>
               </span>
               <span className="text-xs font-bold text-rose-600">
                 Đang chọn: {activeTopic.name} ({activeTopic.words.length} từ)
@@ -493,14 +514,17 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           {/* Matching Game Arena */}
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-6">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 text-sm font-bold">
-              <div className="text-orange-600">
-                ⏱️ Thời gian: {Math.floor(timer / 60).toString().padStart(2, '0')}:
-                {(timer % 60).toString().padStart(2, '0')}
+              <div className="text-orange-600 flex items-center gap-1.5">
+                <Clock size={15} />
+                <span>Thời gian: {Math.floor(timer / 60).toString().padStart(2, '0')}:{(timer % 60).toString().padStart(2, '0')}</span>
               </div>
               <div className="text-xs text-slate-500">
                 Vòng {roundNumber} (Bộ 6 cặp thẻ từ vựng)
               </div>
-              <div className="text-emerald-600">🏆 Điểm số: {score} Điểm</div>
+              <div className="text-emerald-600 flex items-center gap-1.5">
+                <Trophy size={15} />
+                <span>Điểm số: {score} Điểm</span>
+              </div>
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -542,7 +566,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           {/* Victory modal card */}
           {isWon && (
             <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
-              <div className="text-4xl">🎉</div>
+              <Trophy size={42} className="text-amber-500 mx-auto" />
               <h3 className="text-xl font-bold text-emerald-800">Hoàn Thành Xuất Sắc!</h3>
               <p className="text-sm text-emerald-700">
                 Bạn đã ghép đúng toàn bộ các từ trong chủ đề <strong>{activeTopic.name}</strong> trong{' '}
@@ -551,9 +575,10 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               <div className="flex justify-center gap-3 pt-2">
                 <button
                   onClick={() => setRoundNumber((r) => r + 1)}
-                  className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20"
+                  className="px-5 py-2.5 bg-emerald-600 text-white rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-all shadow-md shadow-emerald-600/20 flex items-center gap-1.5"
                 >
-                  🔄 Chơi vòng tiếp theo (bộ 6 từ khác)
+                  <RotateCcw size={15} />
+                  <span>Chơi vòng tiếp theo (bộ 6 từ khác)</span>
                 </button>
               </div>
             </div>
@@ -563,16 +588,18 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
             <div className="flex justify-between items-center pb-3 border-b border-slate-100">
               <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  📖 Toàn Bộ Từ Vựng Chủ Đề: {activeTopic.name}
+                <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                  <BookOpen size={18} className="text-slate-700" />
+                  <span>Toàn Bộ Từ Vựng Chủ Đề: {activeTopic.name}</span>
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">Bấm vào biểu tượng loa để nghe phát âm từng từ.</p>
               </div>
               <button
                 onClick={() => setRoundNumber((r) => r + 1)}
-                className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold"
+                className="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg text-xs font-bold flex items-center gap-1"
               >
-                ▶ Ghép bộ từ này
+                <Play size={12} fill="currentColor" />
+                <span>Ghép bộ từ này</span>
               </button>
             </div>
 
@@ -591,7 +618,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                     onClick={() => speakText(w.hanzi)}
                     className="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-rose-500 hover:text-white flex items-center justify-center text-xs transition-all shadow-sm"
                   >
-                    🔊
+                    <Volume2 size={14} />
                   </button>
                 </div>
               ))}
@@ -608,8 +635,8 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           {/* Header Banner */}
           <div className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-3xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🧩</span>
+              <div className="flex items-center gap-2.5">
+                <Puzzle size={24} className="text-blue-600" />
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                   Trò Chơi Xếp Thẻ Ghép Câu Giao Tiếp Thực Tế (组词造句)
                 </h2>
@@ -619,8 +646,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs">
-                🏆 Điểm Puzzle: {puzzleScore} XP
+              <span className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5">
+                <Trophy size={14} />
+                <span>Điểm Puzzle: {puzzleScore} XP</span>
               </span>
               <span className="px-3 py-1.5 rounded-full bg-white border border-blue-200 text-blue-700 font-bold text-xs">
                 Câu {activePuzzleIdx + 1} / {sentencePuzzles.length}
@@ -631,8 +659,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           {/* 1. Puzzle Topic Selector */}
           <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-2xs space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                🎯 1. Chọn Chủ Đề Ghép Câu (20 câu mỗi chủ đề):
+              <span className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <Target size={14} className="text-rose-500" />
+                <span>1. Chọn Chủ Đề Ghép Câu (20 câu mỗi chủ đề):</span>
               </span>
               <span className="text-xs font-bold text-rose-600">
                 {allPuzzleTopics.find((t) => t.id === activePuzzleTopicId)?.name || 'Chủ đề'} ({sentencePuzzles.length} câu)
@@ -663,8 +692,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
             {/* 2. Questions 1..20 Quick Jump Bar */}
             <div className="pt-3 border-t border-slate-100 space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                  🔢 Chọn câu hỏi trong chủ đề:
+                <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                  <Layers size={13} className="text-slate-400" />
+                  <span>Chọn câu hỏi trong chủ đề:</span>
                 </span>
                 <span className="text-[11px] text-slate-500 font-medium">
                   Đang làm: Câu {activePuzzleIdx + 1} / {sentencePuzzles.length}
@@ -700,14 +730,15 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               {/* Question prompt */}
               <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/80 border border-amber-200 text-amber-900 font-bold text-base sm:text-lg flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2.5">
-                  <span className="text-xl">🎯</span>
+                  <Target size={20} className="text-amber-600 flex-shrink-0" />
                   <span>{currentPuzzle.promptVi}</span>
                 </div>
                 <button
                   onClick={() => setShowHint(!showHint)}
-                  className="px-3 py-1 rounded-xl bg-amber-200/70 hover:bg-amber-200 text-amber-900 text-xs font-bold transition-all flex-shrink-0"
+                  className="px-3 py-1 rounded-xl bg-amber-200/70 hover:bg-amber-200 text-amber-900 text-xs font-bold transition-all flex-shrink-0 flex items-center gap-1.5"
                 >
-                  💡 {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
+                  <Lightbulb size={13} />
+                  <span>{showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}</span>
                 </button>
               </div>
 
@@ -741,7 +772,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                         title="Bấm để bỏ từ này ra khỏi câu"
                       >
                         <span>{token.text}</span>
-                        <span className="text-xs text-slate-400 hover:text-white">✕</span>
+                        <X size={13} className="text-slate-400 hover:text-white" />
                       </button>
                     ))
                   )}
@@ -778,27 +809,31 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
                 <button
                   onClick={handleResetPuzzle}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5"
                 >
-                  🔄 Xếp lại từ đầu
+                  <RotateCcw size={14} />
+                  <span>Xếp lại từ đầu</span>
                 </button>
 
                 <div className="flex items-center gap-3">
                   {puzzleFeedback === 'correct' && (
                     <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs sm:text-sm">
-                      <span>🎉 Xuất sắc! Câu ghép hoàn toàn chính xác (+25 XP).</span>
+                      <CheckCircle2 size={16} className="text-emerald-500" />
+                      <span>Xuất sắc! Câu ghép hoàn toàn chính xác (+25 XP).</span>
                       <button
                         onClick={() => speakText(currentPuzzle.targetZh)}
                         className="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800 text-xs font-bold flex items-center gap-1"
                       >
-                        🔊 Nghe câu
+                        <Volume2 size={13} />
+                        <span>Nghe câu</span>
                       </button>
                     </div>
                   )}
 
                   {puzzleFeedback === 'wrong' && (
-                    <span className="text-rose-600 font-bold text-xs sm:text-sm">
-                      ❌ Trật tự từ chưa đúng, hãy thử kiểm tra lại nhé!
+                    <span className="text-rose-600 font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                      <AlertCircle size={16} className="text-rose-500" />
+                      <span>Trật tự từ chưa đúng, hãy thử kiểm tra lại nhé!</span>
                     </span>
                   )}
 
@@ -808,7 +843,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                       className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 flex items-center gap-1.5"
                     >
                       <span>Câu đố tiếp theo</span>
-                      <span>▶</span>
+                      <ChevronRight size={16} />
                     </button>
                   ) : (
                     <button
@@ -834,8 +869,8 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
           {/* Header Banner */}
           <div className="bg-gradient-to-r from-amber-50 via-rose-50 to-orange-50 border border-amber-200 rounded-3xl p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-2xl">🀄</span>
+              <div className="flex items-center gap-2.5">
+                <Layers size={24} className="text-amber-600" />
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
                   Trò Chơi Ghép Bộ Thủ Tạo Chữ Hán (拆字组字)
                 </h2>
@@ -845,8 +880,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <span className="px-3.5 py-1.5 rounded-full bg-amber-600 text-white font-bold text-xs shadow-xs">
-                🏆 Điểm Ghép Chữ: {radicalScore} XP
+              <span className="px-3.5 py-1.5 rounded-full bg-amber-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5">
+                <Trophy size={14} />
+                <span>Điểm Ghép Chữ: {radicalScore} XP</span>
               </span>
               <span className="px-3 py-1.5 rounded-full bg-white border border-amber-200 text-amber-800 font-bold text-xs">
                 Chữ {activeRadicalIdx + 1} / {RADICAL_PUZZLES.length}
@@ -887,8 +923,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               {/* Challenge Target Prompt */}
               <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-orange-50 to-amber-50 border border-amber-200 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div className="space-y-1">
-                  <div className="text-xs uppercase font-bold text-amber-700 tracking-wider">
-                    🎯 Nhiệm vụ ghép chữ:
+                  <div className="text-xs uppercase font-bold text-amber-700 tracking-wider flex items-center gap-1.5">
+                    <Target size={14} className="text-amber-700" />
+                    <span>Nhiệm vụ ghép chữ:</span>
                   </div>
                   <div className="text-base sm:text-lg font-bold">
                     Hãy tìm các bộ thủ để ghép thành chữ có nghĩa: <span className="text-rose-600">"{currentRadicalPuzzle.vi}"</span>
@@ -902,7 +939,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                   onClick={() => speakText(currentRadicalPuzzle.targetChar)}
                   className="px-4 py-2 rounded-xl bg-white border border-amber-200 hover:bg-amber-100 text-amber-900 text-xs font-bold shadow-2xs flex items-center gap-2 self-start sm:self-auto transition-all"
                 >
-                  <span>🔊</span>
+                  <Volume2 size={14} />
                   <span>Nghe phát âm chữ mẫu</span>
                 </button>
               </div>
@@ -916,12 +953,14 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                     </div>
                     <div className="text-center">
                       <div className="text-emerald-700 font-bold text-base flex items-center justify-center gap-1.5">
-                        <span>🎉 Ghép thành công chữ:</span>
+                        <CheckCircle2 size={18} className="text-emerald-600" />
+                        <span>Ghép thành công chữ:</span>
                         <span className="chinese-font text-xl text-rose-600">{currentRadicalPuzzle.targetChar}</span>
                         <span>({currentRadicalPuzzle.pinyin})</span>
                       </div>
-                      <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-lg leading-relaxed">
-                        📖 <strong>Ý nghĩa chiết tự:</strong> {currentRadicalPuzzle.story}
+                      <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-lg leading-relaxed flex items-center justify-center gap-1">
+                        <BookOpen size={14} className="inline text-slate-500 mr-1 flex-shrink-0" />
+                        <span><strong>Ý nghĩa chiết tự:</strong> {currentRadicalPuzzle.story}</span>
                       </p>
                     </div>
                   </div>
@@ -946,7 +985,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                               title="Bấm để gỡ bỏ bộ này"
                             >
                               <span>{rad.part}</span>
-                              <span className="text-xs text-slate-400 group-hover:text-white">✕</span>
+                              <X size={14} className="text-slate-400 group-hover:text-white" />
                             </button>
                           </React.Fragment>
                         ))
@@ -986,15 +1025,17 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100">
                 <button
                   onClick={handleResetRadical}
-                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold flex items-center gap-1.5"
                 >
-                  🔄 Chọn lại
+                  <RotateCcw size={14} />
+                  <span>Chọn lại</span>
                 </button>
 
                 <div className="flex items-center gap-3">
                   {radicalFeedback === 'wrong' && (
-                    <span className="text-rose-600 font-bold text-xs sm:text-sm">
-                      ❌ Các bộ này chưa tạo thành chữ đúng, hãy thử chọn lại nhé!
+                    <span className="text-rose-600 font-bold text-xs sm:text-sm flex items-center gap-1.5">
+                      <AlertCircle size={16} className="text-rose-500" />
+                      <span>Các bộ này chưa tạo thành chữ đúng, hãy thử chọn lại nhé!</span>
                     </span>
                   )}
 
@@ -1004,7 +1045,7 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                       className="px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-emerald-600/30 flex items-center gap-1.5"
                     >
                       <span>Ghép chữ tiếp theo</span>
-                      <span>▶</span>
+                      <ChevronRight size={16} />
                     </button>
                   ) : (
                     <button

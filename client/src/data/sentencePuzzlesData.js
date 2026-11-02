@@ -6,28 +6,28 @@
 export const SENTENCE_PUZZLE_TOPICS = [
   {
     id: 'greet_intro',
-    name: '🤝 Chào Hỏi & Làm Quen (20 câu)',
-    icon: '🤝',
+    name: 'Chào Hỏi & Làm Quen (20 câu)',
+    icon: 'greet',
   },
   {
     id: 'dining_order',
-    name: '🍜 Ẩm Thực & Gọi Món (20 câu)',
-    icon: '🍜',
+    name: 'Ẩm Thực & Gọi Món (20 câu)',
+    icon: 'dining',
   },
   {
     id: 'shopping_bargain',
-    name: '🛍️ Mua Sắm & Mặc Cả (20 câu)',
-    icon: '🛍️',
+    name: 'Mua Sắm & Mặc Cả (20 câu)',
+    icon: 'shopping',
   },
   {
     id: 'travel_direction',
-    name: '🚖 Hỏi Đường & Đi Lại (20 câu)',
-    icon: '🚖',
+    name: 'Hỏi Đường & Đi Lại (20 câu)',
+    icon: 'travel',
   },
   {
     id: 'work_lifestyle',
-    name: '💼 Công Sở & Đời Sống (20 câu)',
-    icon: '💼',
+    name: 'Công Sở & Đời Sống (20 câu)',
+    icon: 'work',
   },
 ];
 

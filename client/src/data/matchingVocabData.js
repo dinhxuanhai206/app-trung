@@ -6,8 +6,8 @@
 export const VOCAB_TOPICS = [
   {
     id: 'food_drink',
-    name: '🍜 Ẩm Thực & Nhà Hàng (30 từ)',
-    icon: '🍜',
+    name: 'Ẩm Thực & Nhà Hàng (30 từ)',
+    icon: 'food',
     words: [
       { id: 'fd_1', hanzi: '菜单', pinyin: 'càidān', vi: 'Thực đơn' },
       { id: 'fd_2', hanzi: '服务员', pinyin: 'fúwùyuán', vi: 'Người phục vụ' },
@@ -43,8 +43,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'travel_transit',
-    name: '✈️ Du Lịch & Di Chuyển (30 từ)',
-    icon: '✈️',
+    name: 'Du Lịch & Di Chuyển (30 từ)',
+    icon: 'travel',
     words: [
       { id: 'tr_1', hanzi: '火车站', pinyin: 'huǒchēzhàn', vi: 'Ga tàu hỏa' },
       { id: 'tr_2', hanzi: '机场', pinyin: 'jīchǎng', vi: 'Sân bay' },
@@ -80,8 +80,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'shopping_pay',
-    name: '🛍️ Mua Sắm & Mặc Cả (30 từ)',
-    icon: '🛍️',
+    name: 'Mua Sắm & Mặc Cả (30 từ)',
+    icon: 'shopping',
     words: [
       { id: 'sh_1', hanzi: '多少钱', pinyin: 'duōshǎo qián', vi: 'Bao nhiêu tiền' },
       { id: 'sh_2', hanzi: '太贵了', pinyin: 'tài guì le', vi: 'Đắt quá rồi' },
@@ -117,8 +117,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'work_business',
-    name: '💼 Công Sở & Đàm Phán (30 từ)',
-    icon: '💼',
+    name: 'Công Sở & Đàm Phán (30 từ)',
+    icon: 'work',
     words: [
       { id: 'wk_1', hanzi: '经理', pinyin: 'jīnglǐ', vi: 'Giám đốc / Quản lý' },
       { id: 'wk_2', hanzi: '同事', pinyin: 'tóngshì', vi: 'Đồng nghiệp' },
@@ -154,8 +154,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'health_hospital',
-    name: '🏥 Sức Khỏe & Y Tế (30 từ)',
-    icon: '🏥',
+    name: 'Sức Khỏe & Y Tế (30 từ)',
+    icon: 'health',
     words: [
       { id: 'hl_1', hanzi: '生病', pinyin: 'shēngbìng', vi: 'Bị ốm / Bệnh' },
       { id: 'hl_2', hanzi: '发烧', pinyin: 'fāshāo', vi: 'Bị sốt' },
@@ -191,8 +191,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'family_life',
-    name: '🏠 Gia Đình & Đời Sống (30 từ)',
-    icon: '🏠',
+    name: 'Gia Đình & Đời Sống (30 từ)',
+    icon: 'family',
     words: [
       { id: 'fm_1', hanzi: '爸爸', pinyin: 'bàba', vi: 'Bố / Ba' },
       { id: 'fm_2', hanzi: '妈妈', pinyin: 'māma', vi: 'Mẹ' },
@@ -228,8 +228,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'school_study',
-    name: '🎓 Trường Học & Học HSK (30 từ)',
-    icon: '🎓',
+    name: 'Trường Học & Học HSK (30 từ)',
+    icon: 'school',
     words: [
       { id: 'sc_1', hanzi: '老师', pinyin: 'lǎoshī', vi: 'Thầy cô' },
       { id: 'sc_2', hanzi: '同学', pinyin: 'tóngxué', vi: 'Bạn cùng lớp' },
@@ -265,8 +265,8 @@ export const VOCAB_TOPICS = [
   },
   {
     id: 'weather_emotion',
-    name: '🌦️ Thời Tiết & Cảm Xúc (30 từ)',
-    icon: '🌦️',
+    name: 'Thời Tiết & Cảm Xúc (30 từ)',
+    icon: 'weather',
     words: [
       { id: 'we_1', hanzi: '今天', pinyin: 'jīntiān', vi: 'Hôm nay' },
       { id: 'we_2', hanzi: '明天', pinyin: 'míngtiān', vi: 'Ngày mai' },

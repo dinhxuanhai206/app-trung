@@ -1,4 +1,19 @@
 import React, { useState, useEffect, useRef } from 'react';
+import {
+  Headphones,
+  MessageSquare,
+  Sparkles,
+  Zap,
+  Loader2,
+  Play,
+  Pause,
+  Eye,
+  EyeOff,
+  Volume2,
+  PenTool,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
 import { getLessonListeningSections } from '../data/listeningData';
 
 export default function ListeningView({ lesson, showPinyin, onGainXP }) {
@@ -153,7 +168,8 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 shadow-sm">
         <div>
           <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-2.5">
-            <span>🎧</span> Kỹ Năng Luyện Nghe Đa Hội Thoại
+            <Headphones size={24} className="text-blue-600" />
+            <span>Kỹ Năng Luyện Nghe Đa Hội Thoại</span>
           </h2>
           <p className="text-slate-600 text-sm mt-1">
             Luyện tai với nhiều đoạn hội thoại thực tế được mở rộng từ kho từ vựng bài học.
@@ -185,7 +201,7 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <span>💬</span>
+              <MessageSquare size={14} />
               <span>{sec.title.split(' (')[0]}</span>
             </button>
           ))}
@@ -199,7 +215,7 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
                   : 'bg-purple-50 text-purple-700 border border-purple-200 hover:bg-purple-100'
               }`}
             >
-              <span>✨</span>
+              <Sparkles size={14} />
               <span>Đoạn mở rộng từ vựng AI</span>
             </button>
           )}
@@ -210,7 +226,7 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
             className="px-4 py-2.5 rounded-xl text-sm font-semibold bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-600 hover:to-rose-600 text-white shadow-sm transition-all flex items-center gap-2 ml-auto"
             title="Tự động ghép từ vựng bài học thành đoạn hội thoại mới"
           >
-            <span>{isGenerating ? '⏳' : '⚡'}</span>
+            {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
             <span>{isGenerating ? 'Đang tạo...' : '+ Tạo thêm đoạn nghe từ vựng'}</span>
           </button>
         </div>
@@ -228,7 +244,7 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
             }`}
             title={isPlaying ? 'Tạm dừng' : 'Phát toàn bộ đoạn hội thoại'}
           >
-            {isPlaying ? '❚❚' : '▶'}
+            {isPlaying ? <Pause size={20} /> : <Play size={20} fill="currentColor" />}
           </button>
           <div>
             <div className="font-bold text-base flex items-center gap-2">
@@ -258,7 +274,17 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
             }`}
             title="Bật/Tắt hiển thị nghĩa tiếng Việt để luyện tai nghe phản xạ"
           >
-            {showTranslation ? '👁️ Hiện dịch' : '🙈 Ẩn dịch (Luyện tai)'}
+            {showTranslation ? (
+              <span className="flex items-center gap-1.5">
+                <Eye size={13} />
+                <span>Hiện dịch</span>
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <EyeOff size={13} />
+                <span>Ẩn dịch (Luyện tai)</span>
+              </span>
+            )}
           </button>
 
           {/* Speed Buttons */}
@@ -318,7 +344,7 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
                       : 'bg-rose-600 text-white'
                   }`}
                 >
-                  {isSpeakerMale ? '👨' : '👩'}
+                  {isSpeakerMale ? '男' : '女'}
                 </div>
 
                 <div className="flex-1 min-w-0">
@@ -338,9 +364,10 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
                         setCurrentLineIndex(idx);
                         speakSentence(dlg.hanzi, dlg.gender, speed);
                       }}
-                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1 bg-white px-2 py-1 rounded-md border border-slate-200 shadow-2xs"
+                      className="text-xs font-semibold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1.5 bg-white px-2.5 py-1 rounded-md border border-slate-200 shadow-2xs"
                     >
-                      <span>🔊 Phát câu</span>
+                      <Volume2 size={13} />
+                      <span>Phát câu</span>
                     </button>
                   </div>
 
@@ -389,7 +416,8 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
         <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <h4 className="font-bold text-slate-900 text-base flex items-center gap-2">
-              <span>✍️</span> Bài tập nghe & điền từ vào chỗ trống:
+              <PenTool size={18} className="text-blue-600" />
+              <span>Bài tập nghe & điền từ vào chỗ trống:</span>
             </h4>
             <span className="text-xs text-slate-500">
               Gợi ý: {currentSection.quiz.hint || 'Nghe kỹ câu thoại để điền đúng từ'}
@@ -411,9 +439,10 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
           <div className="flex items-center gap-3">
             <button
               onClick={handleCheckQuiz}
-              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-blue-600/20"
+              className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5"
             >
-              ✓ Kiểm tra đáp án
+              <CheckCircle2 size={16} />
+              <span>Kiểm tra đáp án</span>
             </button>
             <button
               onClick={() => {
@@ -423,21 +452,30 @@ export default function ListeningView({ lesson, showPinyin, onGainXP }) {
                   currentSection.quiz.sentenceSuffix;
                 speakSentence(full, 'female', speed);
               }}
-              className="px-4 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all"
+              className="px-4 py-2.5 border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium transition-all flex items-center gap-1.5"
             >
-              🔊 Nghe lại câu hỏi
+              <Volume2 size={15} />
+              <span>Nghe lại câu hỏi</span>
             </button>
           </div>
 
           {quizFeedback !== null && (
             <div
-              className={`p-3.5 rounded-xl text-sm font-semibold ${
+              className={`p-3.5 rounded-xl text-sm font-semibold flex items-center gap-2 ${
                 quizFeedback ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
               }`}
             >
-              {quizFeedback
-                ? '🎉 Xuất sắc! Bạn đã nghe và điền từ vựng hoàn toàn chính xác (+15 XP).'
-                : `❌ Chưa chính xác. Đáp án đúng là: "${currentSection.quiz.missingWord}". Hãy nghe lại và thử lại nhé!`}
+              {quizFeedback ? (
+                <>
+                  <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />
+                  <span>Xuất sắc! Bạn đã nghe và điền từ vựng hoàn toàn chính xác (+15 XP).</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle size={18} className="text-rose-600 flex-shrink-0" />
+                  <span>Chưa chính xác. Đáp án đúng là: "{currentSection.quiz.missingWord}". Hãy nghe lại và thử lại nhé!</span>
+                </>
+              )}
             </div>
           )}
         </div>

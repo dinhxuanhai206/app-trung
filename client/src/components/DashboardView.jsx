@@ -1,4 +1,19 @@
 import React from 'react';
+import {
+  Flame,
+  Star,
+  Map,
+  BookOpen,
+  Headphones,
+  Mic,
+  PenTool,
+  Puzzle,
+  Target,
+  BarChart3,
+  Lightbulb,
+  CheckCircle2,
+  ChevronRight
+} from 'lucide-react';
 import { LESSONS_DATA } from '../data/lessonsData';
 
 export default function DashboardView({ xp, streak, skills }) {
@@ -6,18 +21,18 @@ export default function DashboardView({ xp, streak, skills }) {
   const totalVocabInCurriculum = LESSONS_DATA.reduce((acc, curr) => acc + (curr.vocabularies?.length || 8), 0);
 
   const statCards = [
-    { label: 'Chuỗi Ngày Học', value: `${streak} Ngày`, icon: '🔥', color: 'text-orange-600 bg-orange-50 border-orange-200' },
-    { label: 'Tổng Điểm XP', value: `${xp} XP`, icon: '⭐', color: 'text-amber-600 bg-amber-50 border-amber-200' },
-    { label: 'Tổng Bài Học Khóa', value: `${totalLessons} Bài Học`, icon: '🗺️', color: 'text-rose-600 bg-rose-50 border-rose-200' },
-    { label: 'Từ Vựng Cốt Lõi', value: `${totalVocabInCurriculum}+ Từ`, icon: '📚', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
+    { label: 'Chuỗi Ngày Học', value: `${streak} Ngày`, icon: Flame, iconColor: 'text-orange-600', color: 'text-orange-600 bg-orange-50 border-orange-200' },
+    { label: 'Tổng Điểm XP', value: `${xp} XP`, icon: Star, iconColor: 'text-amber-500', color: 'text-amber-600 bg-amber-50 border-amber-200' },
+    { label: 'Tổng Bài Học Khóa', value: `${totalLessons} Bài Học`, icon: Map, iconColor: 'text-rose-600', color: 'text-rose-600 bg-rose-50 border-rose-200' },
+    { label: 'Từ Vựng Cốt Lõi', value: `${totalVocabInCurriculum}+ Từ`, icon: BookOpen, iconColor: 'text-emerald-600', color: 'text-emerald-600 bg-emerald-50 border-emerald-200' },
   ];
 
   const skillBars = [
-    { label: '📖 Kỹ năng Đọc hiểu (Reading)', score: skills?.reading || 85, color: 'bg-rose-500' },
-    { label: '🎧 Kỹ năng Luyện nghe (Listening)', score: skills?.listening || 75, color: 'bg-blue-500' },
-    { label: '🎙️ Kỹ năng Luyện nói AI (Speaking)', score: skills?.speaking || 70, color: 'bg-emerald-500' },
-    { label: '✍️ Kỹ năng Luyện viết (Writing)', score: skills?.writing || 65, color: 'bg-amber-500' },
-    { label: '🧩 Game Ghép từ vựng (Matching)', score: skills?.matching || 90, color: 'bg-purple-500' },
+    { label: 'Kỹ năng Đọc hiểu (Reading)', icon: BookOpen, score: skills?.reading || 85, color: 'bg-rose-500' },
+    { label: 'Kỹ năng Luyện nghe (Listening)', icon: Headphones, score: skills?.listening || 75, color: 'bg-blue-500' },
+    { label: 'Kỹ năng Luyện nói AI (Speaking)', icon: Mic, score: skills?.speaking || 70, color: 'bg-emerald-500' },
+    { label: 'Kỹ năng Luyện viết (Writing)', icon: PenTool, score: skills?.writing || 65, color: 'bg-amber-500' },
+    { label: 'Game Ghép từ vựng (Matching)', icon: Puzzle, score: skills?.matching || 90, color: 'bg-purple-500' },
   ];
 
   const milestones = [
@@ -67,8 +82,9 @@ export default function DashboardView({ xp, streak, skills }) {
           <div className="inline-block px-3 py-1 rounded-full bg-white/10 text-xs font-bold text-rose-300 uppercase tracking-wider mb-2">
             HSK Learning Dashboard & Progress
           </div>
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
-            📊 Bảng Điều Khiển & Tiến Độ Học Tập
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight flex items-center gap-2.5">
+            <BarChart3 className="text-rose-400" size={28} />
+            <span>Bảng Điều Khiển & Tiến Độ Học Tập</span>
           </h2>
           <p className="text-slate-300 text-sm mt-1 max-w-2xl leading-relaxed">
             Hệ thống hóa toàn diện lộ trình 20 bài học chuẩn HSK 1 - HSK 4 & Thương mại, theo dõi 5 kỹ năng then chốt và tích lũy XP thăng hạng.
@@ -83,24 +99,27 @@ export default function DashboardView({ xp, streak, skills }) {
 
       {/* Stats Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {statCards.map((card, idx) => (
-          <div
-            key={idx}
-            className={`p-5 rounded-3xl border shadow-xs flex items-center gap-4 bg-white ${card.color}`}
-          >
-            <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center text-2xl font-bold shadow-2xs">
-              {card.icon}
-            </div>
-            <div>
-              <div className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
-                {card.value}
+        {statCards.map((card, idx) => {
+          const CardIcon = card.icon;
+          return (
+            <div
+              key={idx}
+              className={`p-5 rounded-3xl border shadow-xs flex items-center gap-4 bg-white ${card.color}`}
+            >
+              <div className="w-12 h-12 rounded-2xl bg-white flex items-center justify-center shadow-2xs">
+                <CardIcon size={24} className={card.iconColor} />
               </div>
-              <div className="text-xs text-slate-500 font-semibold mt-0.5">
-                {card.label}
+              <div>
+                <div className="text-xl sm:text-2xl font-extrabold text-slate-900 leading-tight">
+                  {card.value}
+                </div>
+                <div className="text-xs text-slate-500 font-semibold mt-0.5">
+                  {card.label}
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -108,7 +127,8 @@ export default function DashboardView({ xp, streak, skills }) {
         <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-5">
           <div>
             <h3 className="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
-              <span>🎯</span> Độ Thuần Thục 5 Kỹ Năng Ngôn Ngữ
+              <Target size={20} className="text-rose-600" />
+              <span>Độ Thuần Thục 5 Kỹ Năng Ngôn Ngữ</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
               Đánh giá dựa trên độ chính xác khi làm bài tập, luyện nói AI và đọc hiểu.
@@ -116,24 +136,31 @@ export default function DashboardView({ xp, streak, skills }) {
           </div>
 
           <div className="space-y-4 pt-1">
-            {skillBars.map((item, idx) => (
-              <div key={idx} className="space-y-1.5">
-                <div className="flex justify-between text-xs font-semibold text-slate-700">
-                  <span>{item.label}</span>
-                  <span className="font-bold">{item.score}%</span>
+            {skillBars.map((item, idx) => {
+              const SkillIcon = item.icon;
+              return (
+                <div key={idx} className="space-y-1.5">
+                  <div className="flex justify-between items-center text-xs font-semibold text-slate-700">
+                    <span className="flex items-center gap-1.5">
+                      <SkillIcon size={14} className="text-slate-500" />
+                      <span>{item.label}</span>
+                    </span>
+                    <span className="font-bold">{item.score}%</span>
+                  </div>
+                  <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
+                    <div
+                      className={`h-full ${item.color} rounded-full transition-all duration-700`}
+                      style={{ width: `${item.score}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden p-0.5">
-                  <div
-                    className={`h-full ${item.color} rounded-full transition-all duration-700`}
-                    style={{ width: `${item.score}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 flex items-center justify-between">
-            <span>💡 <strong>Mẹo thăng hạng:</strong> Luyện tập đều đặn Speaking AI và Matching Game mỗi ngày để tăng tốc độ phản xạ tự nhiên.</span>
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs text-slate-600 flex items-center gap-2">
+            <Lightbulb size={18} className="text-amber-500 flex-shrink-0" />
+            <span><strong>Mẹo thăng hạng:</strong> Luyện tập đều đặn Speaking AI và Matching Game mỗi ngày để tăng tốc độ phản xạ tự nhiên.</span>
           </div>
         </div>
 
@@ -141,7 +168,8 @@ export default function DashboardView({ xp, streak, skills }) {
         <div className="lg:col-span-6 bg-white p-6 sm:p-7 rounded-3xl border border-slate-200 shadow-sm space-y-4">
           <div>
             <h3 className="font-bold text-slate-900 text-base sm:text-lg flex items-center gap-2">
-              <span>🗺️</span> 4 Chặng Lộ Trình Thăng Hạng HSK
+              <Map size={20} className="text-rose-600" />
+              <span>4 Chặng Lộ Trình Thăng Hạng HSK</span>
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">
               20 bài học được thiết kế từng bước đưa người học từ nhập môn đến giao tiếp công sở.
