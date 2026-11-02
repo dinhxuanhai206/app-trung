@@ -47,6 +47,7 @@ import { enrichDayData } from '../data/roadmapEnricher';
 import { ROADMAP_ENGLISH_STAGES, ROADMAP_ENGLISH_DAYS_DATA, ANTI_BURNOUT_ENGLISH_TIPS } from '../data/roadmapEnglish90DaysData';
 import { enrichEnglishDayData } from '../data/roadmapEnglishEnricher';
 import { getDailyChunksData } from '../data/roadmapChunksData';
+import { speakText, stopSpeech } from '../utils/speechUtils';
 
 export default function Roadmap90DaysView({ onGainXP }) {
   const navigate = useNavigate();
@@ -55,6 +56,12 @@ export default function Roadmap90DaysView({ onGainXP }) {
   const STORAGE_KEY_LANG = 'hsk_learning_language';
   const [currentLang, setCurrentLang] = useState(() => {
     return localStorage.getItem(STORAGE_KEY_LANG) || 'zh';
+  });
+
+  // Voice Preference: 'female' (Giọng nữ tự nhiên) | 'male' (Giọng nam trầm ấm)
+  const STORAGE_KEY_VOICE_GENDER = 'hsk_voice_gender';
+  const [preferredVoiceGender, setPreferredVoiceGender] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY_VOICE_GENDER) || 'female';
   });
 
   const activeStages = currentLang === 'en' ? ROADMAP_ENGLISH_STAGES : ROADMAP_STAGES;
@@ -405,41 +412,29 @@ export default function Roadmap90DaysView({ onGainXP }) {
     }
   };
 
-  // TTS Helper
+  // TTS Helper - Sử dụng bộ SpeechUtils tối ưu giọng đọc Neural / Natural bản xứ
   const playTTS = (text, rate = 1.0, onEndCallback = null) => {
-    if (!('speechSynthesis' in window) || !text) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
-    utterance.rate = rate;
-
-    const voices = window.speechSynthesis.getVoices();
-    if (currentLang === 'en') {
-      const enVoice = voices.find((v) => v.lang.startsWith('en'));
-      if (enVoice) utterance.voice = enVoice;
-    } else {
-      const zhVoice = voices.find((v) => v.lang.includes('zh') || v.lang.includes('cmn'));
-      if (zhVoice) utterance.voice = zhVoice;
-    }
-
-    utterance.onend = () => {
-      setPlayingSentenceIdx(null);
-      if (onEndCallback) onEndCallback();
-    };
-    utterance.onerror = () => {
-      setPlayingSentenceIdx(null);
-      if (onEndCallback) onEndCallback();
-    };
-
-    window.speechSynthesis.speak(utterance);
+    if (!text) return;
+    const effectiveRate = currentLang === 'en' && rate === 1.0 ? 0.92 : rate;
+    speakText(text, {
+      lang: currentLang,
+      rate: effectiveRate,
+      preferredGender: preferredVoiceGender,
+      onEnd: () => {
+        setPlayingSentenceIdx(null);
+        if (onEndCallback) onEndCallback();
+      },
+      onError: () => {
+        setPlayingSentenceIdx(null);
+        if (onEndCallback) onEndCallback();
+      }
+    });
   };
 
   // Auto-play hands-free loop
   const stopAutoPlay = () => {
     setIsAutoPlaying(false);
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
+    stopSpeech();
     if (autoPlayTimeoutRef.current) {
       clearTimeout(autoPlayTimeoutRef.current);
       autoPlayTimeoutRef.current = null;
@@ -596,31 +591,70 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
           <div className="space-y-2.5 max-w-2xl">
-            {/* Language Switcher: 🇨🇳 Tiếng Trung vs 🇬🇧 Tiếng Anh */}
-            <div className="flex items-center gap-1.5 p-1 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 w-fit">
-              <button
-                onClick={() => handleLanguageSwitch('zh')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
-                  currentLang === 'zh'
-                    ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <span>🇨🇳</span>
-                <span>Tiếng Trung</span>
-              </button>
+            {/* Language Switcher & Voice Selection */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1.5 p-1 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 w-fit">
+                <button
+                  onClick={() => handleLanguageSwitch('zh')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+                    currentLang === 'zh'
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>🇨🇳</span>
+                  <span>Tiếng Trung</span>
+                </button>
 
-              <button
-                onClick={() => handleLanguageSwitch('en')}
-                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
-                  currentLang === 'en'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <span>🇬🇧</span>
-                <span>Tiếng Anh</span>
-              </button>
+                <button
+                  onClick={() => handleLanguageSwitch('en')}
+                  className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+                    currentLang === 'en'
+                      ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>🇬🇧</span>
+                  <span>Tiếng Anh</span>
+                </button>
+              </div>
+
+              {/* Bộ chọn giọng đọc Chuẩn Bản Xứ: Nữ (Tự nhiên) vs Nam (Trầm ấm) */}
+              <div className="flex items-center gap-1 p-1 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 w-fit">
+                <span className="text-[10px] text-slate-300 font-bold px-1.5 hidden xs:inline">Giọng đọc:</span>
+                <button
+                  onClick={() => {
+                    setPreferredVoiceGender('female');
+                    localStorage.setItem('hsk_voice_gender', 'female');
+                    playTTS(currentLang === 'en' ? 'Natural female voice activated.' : '你好！已切换至自然女声。', 0.95);
+                  }}
+                  title="Giọng Nữ Tự Nhiên (Jenny, Aria, Google US, Zira - Chuẩn bản xứ)"
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 active:scale-95 ${
+                    preferredVoiceGender === 'female'
+                      ? 'bg-amber-400 text-slate-900 shadow-sm font-black'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>👩</span>
+                  <span>Nữ (Tự nhiên)</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setPreferredVoiceGender('male');
+                    localStorage.setItem('hsk_voice_gender', 'male');
+                    playTTS(currentLang === 'en' ? 'Natural male voice activated.' : '你好！已切换至自然男声。', 0.95);
+                  }}
+                  title="Giọng Nam Trầm Ấm (Guy, Christopher, Daniel - Trầm ấm rõ ràng)"
+                  className={`px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1 active:scale-95 ${
+                    preferredVoiceGender === 'male'
+                      ? 'bg-amber-400 text-slate-900 shadow-sm font-black'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <span>👨</span>
+                  <span>Nam (Trầm ấm)</span>
+                </button>
+              </div>
             </div>
 
             <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">

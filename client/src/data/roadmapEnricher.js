@@ -234,31 +234,205 @@ export const DAILY_ZH_VOCABULARY_MAP = {
     { hanzi: '收获', pinyin: 'shōuhuò', hv: 'Thu hoạch', vi: 'Thu hoạch, thành quả', type: 'Danh/Động', example: '这两周我的中文口语收获满满。' },
     { hanzi: '成就感', pinyin: 'chéngjiùgǎn', hv: 'Thành tựu cảm', vi: 'Cảm giác thành tựu', type: 'Danh từ', example: '能够用中文自我介绍让我充满成就感。' },
     { hanzi: '加油', pinyin: 'jiāyóu', hv: 'Gia du', vi: 'Cố lên!', type: 'Khẩu ngữ', example: '还有76天，大家一起加油！' }
+  ],
+
+  // NGÀY 15: Giờ giấc làm việc & Lịch trình công sở (HSK 1 - 2)
+  15: [
+    { hanzi: '点', pinyin: 'diǎn', hv: 'Điểm', vi: 'Giờ (thời gian)', type: 'Thời gian', example: '我们上午九点开始上班。' },
+    { hanzi: '分', pinyin: 'fēn', hv: 'Phân', vi: 'Phút', type: 'Thời gian', example: '现在是八点三十分。' },
+    { hanzi: '半', pinyin: 'bàn', hv: 'Bán', vi: 'Rưỡi, nửa', type: 'Thời gian', example: '中午十二点半去吃午饭。' },
+    { hanzi: '上班', pinyin: 'shàngbān', hv: 'Thượng ban', vi: 'Đi làm, vào ca', type: 'Động từ', example: '你每天几点上班？' },
+    { hanzi: '下班', pinyin: 'xiàbān', hv: 'Hạ ban', vi: 'Tan ca, về', type: 'Động từ', example: '今天工作多，要很晚才下班。' },
+    { hanzi: '迟到', pinyin: 'chídào', hv: 'Trì đáo', vi: 'Đến muộn, đi trễ', type: 'Động từ', example: '路上堵车，我不小心迟到了十分钟。' },
+    { hanzi: '准时', pinyin: 'zhǔnshí', hv: 'Chuẩn thời', vi: 'Đúng giờ', type: 'Tính/Phó', example: '请大家准时到会议室开会。' },
+    { hanzi: '休息', pinyin: 'xiūxi', hv: 'Hưu tức', vi: 'Nghỉ ngơi, giải lao', type: 'Động từ', example: '累了就喝杯水休息一下吧。' },
+    { hanzi: '加班', pinyin: 'jiābān', hv: 'Gia ban', vi: 'Làm thêm giờ (OT)', type: 'Động từ', example: '今晚团队需要加班完成这个方案。' },
+    { hanzi: '星期', pinyin: 'xīngqī', hv: 'Tinh kỳ', vi: 'Thứ, tuần lễ', type: 'Thời gian', example: '星期五下午我们有个部门总结。' },
+    { hanzi: '什么时候', pinyin: 'shénme shíhou', hv: 'Thập ma thời hậu', vi: 'Khi nào, bao giờ', type: 'Nghi vấn', example: '你什么时候有空见个面？' },
+    { hanzi: '安排', pinyin: 'ānpái', hv: 'An bài', vi: 'Sắp xếp, bố trí', type: 'Động từ', example: '这是今天的工作安排。' }
+  ],
+
+  // NGÀY 16: Số đếm, Hỏi giá & Mua sắm sinh hoạt (HSK 1 - 2)
+  16: [
+    { hanzi: '多少钱', pinyin: 'duōshao qián', hv: 'Đa thiểu tiền', vi: 'Bao nhiêu tiền?', type: 'Nghi vấn', example: '请问这本笔记本多少钱？' },
+    { hanzi: '块', pinyin: 'kuài', hv: 'Khối', vi: 'Đồng, tệ (khẩu ngữ)', type: 'Lượng từ', example: '一共是四十五块钱。' },
+    { hanzi: '百', pinyin: 'bǎi', hv: 'Bách', vi: 'Trăm (100)', type: 'Số từ', example: '押金一共两百元。' },
+    { hanzi: '千', pinyin: 'qiān', hv: 'Thiên', vi: 'Nghìn (1.000)', type: 'Số từ', example: '这部手机三千多块。' },
+    { hanzi: '太贵了', pinyin: 'tài guì le', hv: 'Thái quý liễu', vi: 'Đắt quá rồi!', type: 'Khẩu ngữ', example: '太贵了，能不能便宜一点？' },
+    { hanzi: '便宜', pinyin: 'piányi', hv: 'Tiện nghi', vi: 'Rẻ, giá mềm', type: 'Tính từ', example: '这里的水果既新鲜又便宜。' },
+    { hanzi: '打折', pinyin: 'dǎzhé', hv: 'Đả chiết', vi: 'Giảm giá, chiết khấu', type: 'Động từ', example: '今天全场商品打八折。' },
+    { hanzi: '买单', pinyin: 'mǎidān', hv: 'Mãi đơn', vi: 'Thanh toán, tính tiền', type: 'Động từ', example: '服务员，我们这桌买单！' },
+    { hanzi: '现金', pinyin: 'xiànjīn', hv: 'Hiện kim', vi: 'Tiền mặt', type: 'Danh từ', example: '请问可以付现金吗？' },
+    { hanzi: '刷卡', pinyin: 'shuākǎ', hv: 'Soát tạp', vi: 'Quẹt thẻ ngân hàng', type: 'Động từ', example: '您想微信扫码还是刷卡？' },
+    { hanzi: '小票', pinyin: 'xiǎopiào', hv: 'Tiểu phiếu', vi: 'Hóa đơn thanh toán', type: 'Danh từ', example: '这是您的小票，请拿好。' },
+    { hanzi: '找钱', pinyin: 'zhǎoqián', hv: 'Thối tiền', vi: 'Thối lại tiền thừa', type: 'Động từ', example: '找您二十块零钱。' }
+  ],
+
+  // NGÀY 17: Đồ dùng văn phòng & Thiết bị công sở (HSK 1 - 2)
+  17: [
+    { hanzi: '电脑', pinyin: 'diànnǎo', hv: 'Điện não', vi: 'Máy vi tính, laptop', type: 'Danh từ', example: '我的电脑运行有点慢。' },
+    { hanzi: '文件', pinyin: 'wénjiàn', hv: 'Văn kiện', vi: 'Tài liệu, tệp tin', type: 'Danh từ', example: '我已经把文件发到你的邮箱了。' },
+    { hanzi: '打印', pinyin: 'dǎyìn', hv: 'Đả ấn', vi: 'In ấn', type: 'Động từ', example: '帮我打印三份会议材料。' },
+    { hanzi: '桌子', pinyin: 'zhuōzi', hv: 'Trác tử', vi: 'Bàn làm việc', type: 'Danh từ', example: '材料放在你的桌子上了。' },
+    { hanzi: '椅子', pinyin: 'yǐzi', hv: 'Ỷ tử', vi: 'Ghế ngồi', type: 'Danh từ', example: '请随便坐，拉一把椅子过来。' },
+    { hanzi: '发送', pinyin: 'fāsòng', hv: 'Phát tống', vi: 'Gửi đi (email, tin nhắn)', type: 'Động từ', example: '邮件已经成功发送了。' },
+    { hanzi: '收到', pinyin: 'shōudào', hv: 'Thu đáo', vi: 'Đã nhận được', type: 'Động từ', example: '你收到我发的设计方案了吗？' },
+    { hanzi: '查收', pinyin: 'cháshōu', hv: 'Tra thu', vi: 'Kiểm tra và nhận', type: 'Lịch sự', example: '附件请查收，有修改随时沟通。' },
+    { hanzi: '网络', pinyin: 'wǎngluò', hv: 'Võng lạc', vi: 'Mạng internet, wifi', type: 'Danh từ', example: '办公室的无线网络密码是多少？' },
+    { hanzi: '笔', pinyin: 'bǐ', hv: 'Bút', vi: 'Cây bút viết', type: 'Danh từ', example: '我借用一下你的黑色签字笔。' },
+    { hanzi: '本子', pinyin: 'běnzi', hv: 'Bản tử', vi: 'Quyển sổ ghi chép', type: 'Danh từ', example: '开会时记得带上笔记本。' },
+    { hanzi: '帮忙', pinyin: 'bāngmáng', hv: 'Bang mang', vi: 'Giúp một tay', type: 'Động từ', example: '能不能请你帮个忙？' }
+  ],
+
+  // NGÀY 18: Ăn trưa đồng nghiệp & Ẩm thực thường nhật (HSK 1 - 2)
+  18: [
+    { hanzi: '吃饭', pinyin: 'chīfàn', hv: 'Ngật phạn', vi: 'Ăn cơm, dùng bữa', type: 'Động từ', example: '中午大家一起去吃饭吧！' },
+    { hanzi: '茶', pinyin: 'chá', hv: 'Trà', vi: 'Nước trà', type: 'Danh từ', example: '请喝杯绿茶润润喉咙。' },
+    { hanzi: '咖啡', pinyin: 'kāfēi', hv: 'Ca phê', vi: 'Cà phê', type: 'Danh từ', example: '下午来一杯冰美式咖啡提提神。' },
+    { hanzi: '菜', pinyin: 'cài', hv: 'Thái', vi: 'Món ăn, thức ăn', type: 'Danh từ', example: '这道四川菜味道特别正宗。' },
+    { hanzi: '好吃', pinyin: 'hǎochī', hv: 'Hảo ngật', vi: 'Ngon miệng', type: 'Tính từ', example: '这家餐厅的面条非常好吃。' },
+    { hanzi: '饱', pinyin: 'bǎo', hv: 'Bão', vi: 'No bụng', type: 'Tính từ', example: '我已经吃得很饱了，谢谢！' },
+    { hanzi: '点菜', pinyin: 'diǎncài', hv: 'Điểm thái', vi: 'Gọi món, gọi đồ ăn', type: 'Động từ', example: '服务员，请给我们拿菜单点菜。' },
+    { hanzi: '请客', pinyin: 'qǐngkè', hv: 'Thỉnh khách', vi: 'Mời bữa ăn, bao ăn', type: 'Động từ', example: '今天项目顺利上线，我请客！' },
+    { hanzi: '米饭', pinyin: 'mǐfàn', hv: 'Mễ phạn', vi: 'Cơm trắng', type: 'Danh từ', example: '再来一碗热腾腾的米饭。' },
+    { hanzi: '微辣', pinyin: 'wēilà', hv: 'Vi lạt', vi: 'Cay ít, cay nhẹ', type: 'Hương vị', example: '这几道菜请师傅做微辣。' },
+    { hanzi: '打包', pinyin: 'dǎbāo', hv: 'Đả bao', vi: 'Gói đồ ăn mang về', type: 'Động từ', example: '吃不完的菜请帮我们打包。' },
+    { hanzi: '味道', pinyin: 'wèidao', hv: 'Vị đạo', vi: 'Hương vị', type: 'Danh từ', example: '这里的菜很符合大家的口味。' }
+  ],
+
+  // NGÀY 19: Phương hướng & Chỉ đường đến văn phòng (HSK 2)
+  19: [
+    { hanzi: '在哪儿', pinyin: 'zài nǎr', hv: 'Tại na nhi', vi: 'Ở đâu?', type: 'Nghi vấn', example: '请问王经理的办公室在哪儿？' },
+    { hanzi: '怎么走', pinyin: 'zěnme zǒu', hv: 'Chẩm ma tẩu', vi: 'Đi như thế nào?', type: 'Nghi vấn', example: '去最近的地铁站怎么走？' },
+    { hanzi: '前面', pinyin: 'qiánmian', hv: 'Tiền diện', vi: 'Phía trước', type: 'Phương vị', example: '一直往前走一百米就是了。' },
+    { hanzi: '后面', pinyin: 'hòumian', hv: 'Hậu diện', vi: 'Phía sau', type: 'Phương vị', example: '停车场在办公大楼后面。' },
+    { hanzi: '左拐', pinyin: 'zuǒ guǎi', hv: 'Tả quải', vi: 'Rẽ trái', type: 'Hướng đi', example: '出了电梯往左拐就是会议室。' },
+    { hanzi: '右拐', pinyin: 'yòu guǎi', hv: 'Hữu quải', vi: 'Rẽ phải', type: 'Hướng đi', example: '在下一个路口往右拐。' },
+    { hanzi: '电梯', pinyin: 'diàntī', hv: 'Điện thê', vi: 'Thang máy', type: 'Danh từ', example: '我们坐电梯上五楼。' },
+    { hanzi: '大楼', pinyin: 'dàlóu', hv: 'Đại lầu', vi: 'Tòa nhà cao tầng', type: 'Danh từ', example: '公司在市中心的那座写字楼里。' },
+    { hanzi: '附近', pinyin: 'fùjìn', hv: 'Phụ cận', vi: 'Gần đây, lân cận', type: 'Danh từ', example: '公司附近有很多便利店。' },
+    { hanzi: '远', pinyin: 'yuǎn', hv: 'Viễn', vi: 'Xa', type: 'Tính từ', example: '这里离火车站有点远。' },
+    { hanzi: '近', pinyin: 'jìn', hv: 'Cận', vi: 'Gần', type: 'Tính từ', example: '我家离公司挺近的，走路十分钟。' },
+    { hanzi: '路口', pinyin: 'lùkǒu', hv: 'Lộ khẩu', vi: 'Ngã tư, giao lộ', type: 'Danh từ', example: '我们在十字路口见。' }
+  ],
+
+  // NGÀY 20: Đặt lịch họp & Trao đổi công việc nội bộ (HSK 2)
+  20: [
+    { hanzi: '开会', pinyin: 'kāihuì', hv: 'Khai hội', vi: 'Họp, mở cuộc họp', type: 'Động từ', example: '下午两点我们准时在二号会议室开会。' },
+    { hanzi: '准备', pinyin: 'zhǔnbèi', hv: 'Chuẩn bị', vi: 'Chuẩn bị', type: 'Động từ', example: '材料大家都准备齐全了吗？' },
+    { hanzi: '讨论', pinyin: 'tǎolùn', hv: 'Thảo luận', vi: 'Bàn bạc, thảo luận', type: 'Động từ', example: '今天重点讨论下个季度的计划。' },
+    { hanzi: '问题', pinyin: 'wèntí', hv: 'Vấn đề', vi: 'Câu hỏi, vấn đề khó khăn', type: 'Danh từ', example: '请问大家还有什么疑问吗？' },
+    { hanzi: '解决', pinyin: 'jiějué', hv: 'Giải quyết', vi: 'Xử lý xong, giải quyết', type: 'Động từ', example: '这个问题我们必须尽快解决。' },
+    { hanzi: '意见', pinyin: 'yìjiàn', hv: 'Ý kiến', vi: 'Ý kiến đóng góp', type: 'Danh từ', example: '我想听听大家的不同意见。' },
+    { hanzi: '同意', pinyin: 'tóngyì', hv: 'Đồng ý', vi: 'Đồng tình, nhất trí', type: 'Động từ', example: '大家都同意这个方案吗？' },
+    { hanzi: '决定', pinyin: 'juédìng', hv: 'Quyết định', vi: 'Quyết định', type: 'Động từ', example: '经过讨论，领导最终做出了决定。' },
+    { hanzi: '稍等', pinyin: 'shāoděng', hv: 'Sảo đẳng', vi: 'Chờ một lát', type: 'Khẩu ngữ', example: '请稍等片刻，我马上把文件发您。' },
+    { hanzi: '重要', pinyin: 'zhòngyào', hv: 'Trọng yếu', vi: 'Quan trọng', type: 'Tính từ', example: '今天有个非常重要的会议。' },
+    { hanzi: '清楚', pinyin: 'qīngchu', hv: 'Thanh sở', vi: 'Rõ ràng', type: 'Tính từ', example: '大家都听清楚了吗？' },
+    { hanzi: '完成', pinyin: 'wánchéng', hv: 'Hoàn thành', vi: 'Làm xong, hoàn tất', type: 'Động từ', example: '今天务必把报表完成。' }
   ]
 };
 
+// KHO TỪ VỰNG THỰC CHIẾN HSK 3 & HSK 4 (CÔNG SỞ, MARKETING, BOOKING & ĐÀM PHÁN)
+export const CHINESE_WORKPLACE_HSK4_POOL = [
+  // Nhóm Booking & Khách sạn & Tiếp đón (HSK 3 - 4)
+  { hanzi: '预订', pinyin: 'yùdìng', hv: 'Dự đính', vi: 'Đặt trước (phòng, vé, bàn)', type: 'Booking', example: '我在网上预订了一间大床房。' },
+  { hanzi: '办理', pinyin: 'bànlǐ', hv: 'Biện lý', vi: 'Làm thủ tục, giải quyết', type: 'Công việc', example: '你好，我来办理入住手续。' },
+  { hanzi: '前台', pinyin: 'qiántái', hv: 'Tiền đài', vi: 'Quầy lễ tân', type: 'Địa điểm', example: '行李可以寄存在前台吗？' },
+  { hanzi: '押金', pinyin: 'yājīn', hv: 'Áp kim', vi: 'Tiền đặt cọc', type: 'Tài chính', example: '入住需要交两百元押金。' },
+  { hanzi: '退房', pinyin: 'tuìfáng', hv: 'Thoái phòng', vi: 'Trả phòng (Check-out)', type: 'Booking', example: '请问最晚几点退房？' },
+  { hanzi: '升级', pinyin: 'shēngjí', hv: 'Thăng cấp', vi: 'Nâng cấp phòng/dịch vụ', type: 'Dịch vụ', example: '免费为您升级成海景套房。' },
+  { hanzi: '发票', pinyin: 'fāpiào', hv: 'Phát phiếu', vi: 'Hóa đơn tài chính VAT', type: 'Tài chính', example: '请帮我们开一张公司的增值税专用发票。' },
+  { hanzi: '出差', pinyin: 'chūchāi', hv: 'Xuất sai', vi: 'Đi công tác xa', type: 'Công việc', example: '下周经理要去广州出差五天。' },
+  { hanzi: '航班', pinyin: 'hángbān', hv: 'Hàng ban', vi: 'Chuyến bay', type: 'Giao thông', example: '由于天气原因，航班延误了一个小时。' },
+  { hanzi: '接待', pinyin: 'jiēdài', hv: 'Tiếp đãi', vi: 'Đón tiếp (đối tác, khách)', type: 'Xã giao', example: '今天下午我们要去机场接待中国代表团。' },
+  
+  // Nhóm Hợp đồng & Đàm phán & Giá cả (HSK 4)
+  { hanzi: '合同', pinyin: 'hétong', hv: 'Hợp đồng', vi: 'Bản hợp đồng kinh tế', type: 'Thương mại', example: '双方已经正式签署了合作合同。' },
+  { hanzi: '谈判', pinyin: 'tánpàn', hv: 'Đàm phán', vi: 'Đàm phán, thương lượng', type: 'Thương mại', example: '这次价格谈判进行得非常顺利。' },
+  { hanzi: '折扣', pinyin: 'zhékòu', hv: 'Chiết khấu', vi: 'Mức giảm giá, chiết khấu', type: 'Thương mại', example: '如果批量采购，能给我们多少折扣？' },
+  { hanzi: '报价', pinyin: 'bàojià', hv: 'Báo giá', vi: 'Bảng báo giá', type: 'Thương mại', example: '明天上午前把最新报价单发给我。' },
+  { hanzi: '合作', pinyin: 'hézuò', hv: 'Hợp tác', vi: 'Hợp tác đôi bên', type: 'Thương mại', example: '期待我们两家公司能有长期合作！' },
+  { hanzi: '签字', pinyin: 'qiānzì', hv: 'Thiêm tự', vi: 'Ký tên xác nhận', type: 'Công việc', example: '请领导在这份文件右下角签字。' },
+  { hanzi: '盖章', pinyin: 'gàizhāng', hv: 'Cái chương', vi: 'Đóng dấu mộc đỏ', type: 'Thương mại', example: '合同签字盖章后立即生效。' },
+  { hanzi: '违约', pinyin: 'wéiyuē', hv: 'Vi ước', vi: 'Vi phạm hợp đồng', type: 'Pháp lý', example: '任何一方违约都需要承担违约责任。' },
+  { hanzi: '赔偿', pinyin: 'péicháng', hv: 'Bồi thường', vi: 'Đền bù, bồi thường', type: 'Pháp lý', example: '由于货物破损，对方同意赔偿全部损失。' },
+  { hanzi: '汇款', pinyin: 'huìkuǎn', hv: 'Hối khoản', vi: 'Chuyển khoản thanh toán', type: 'Tài chính', example: '财务部已经在今天上午完成了汇款。' },
+
+  // Nhóm Marketing & Quảng cáo & Khách hàng (HSK 4)
+  { hanzi: '客户', pinyin: 'kèhù', hv: 'Khách hộ', vi: 'Khách hàng, đối tác', type: 'Thương mại', example: '我们要始终以客户的需求为中心。' },
+  { hanzi: '市场', pinyin: 'shìchǎng', hv: 'Thị trường', vi: 'Thị trường tiêu thụ', type: 'Kinh doanh', example: '开拓东南亚新市场很有潜力。' },
+  { hanzi: '营销', pinyin: 'yíngxiāo', hv: 'Doanh tiêu', vi: 'Marketing, tiếp thị', type: 'Kinh doanh', example: '这次数字营销活动的效果非常好。' },
+  { hanzi: '推广', pinyin: 'tuīguǎng', hv: 'Thôi quảng', vi: 'Quảng bá, lan tỏa', type: 'Marketing', example: '通过社交媒体平台全面推广新产品。' },
+  { hanzi: '广告', pinyin: 'guǎnggào', hv: 'Quảng cáo', vi: 'Mẩu quảng cáo (Ads)', type: 'Marketing', example: '在抖音投放视频广告吸引年轻人群。' },
+  { hanzi: '竞争', pinyin: 'jìngzhēng', hv: 'Cạnh tranh', vi: 'Cạnh tranh thị trường', type: 'Kinh tế', example: '同行之间的竞争变得越来越激烈。' },
+  { hanzi: '利润', pinyin: 'lìrùn', hv: 'Lợi nhuận', vi: 'Lợi nhuận kinh doanh', type: 'Tài chính', example: '这个季度的净利润增长了百分之十五。' },
+  { hanzi: '成本', pinyin: 'chéngběn', hv: 'Thành bản', vi: 'Chi phí, giá vốn', type: 'Tài chính', example: '优化供应链有助于大幅降低运营成本。' },
+  { hanzi: '预算', pinyin: 'yùsuàn', hv: 'Dự toán', vi: 'Ngân sách kế hoạch', type: 'Tài chính', example: '这次展会活动的总预算是十万元。' },
+  { hanzi: '方案', pinyin: 'fāng\'àn', hv: 'Phương án', vi: 'Phương án, proposal', type: 'Công việc', example: '策划部提交了一套很有创意的方案。' },
+
+  // Nhóm Chăm sóc khách hàng & Xử lý phản hồi (HSK 4)
+  { hanzi: '反馈', pinyin: 'fǎnkuì', hv: 'Phản quế', vi: 'Phản hồi, góp ý (feedback)', type: 'Dịch vụ', example: '非常感谢您的宝贵反馈，我们会认真改进。' },
+  { hanzi: '投诉', pinyin: 'tóusù', hv: 'Đầu tố', vi: 'Khiếu nại của khách', type: 'Dịch vụ', example: '客服部门正在积极处理用户的投诉。' },
+  { hanzi: '满意', pinyin: 'mǎnyì', hv: 'Mãn ý', vi: 'Hài lòng, vừa ý', type: 'Cảm xúc', example: '客户对我们交付的产品质量感到非常满意。' },
+  { hanzi: '解释', pinyin: 'jiěshì', hv: 'Giải thích', vi: 'Trần tình, giải thích rõ', type: 'Giao tiếp', example: '请允许我向您详细解释事情的原因。' },
+  { hanzi: '保证', pinyin: 'bǎozhèng', hv: 'Bảo chứng', vi: 'Đảm bảo, cam kết', type: 'Cam kết', example: '我们保证在三个工作日内完成交付。' },
+  { hanzi: '质量', pinyin: 'zhìliàng', hv: 'Chất lượng', vi: 'Chất lượng sản phẩm', type: 'Sản phẩm', example: '产品质量是企业生存的根本。' },
+  { hanzi: '包装', pinyin: 'bāozhuāng', hv: 'Bao trang', vi: 'Quy cách đóng gói', type: 'Vận chuyển', example: '出口产品的包装一定要防潮防震。' },
+  { hanzi: '物流', pinyin: 'wùliú', hv: 'Vật lưu', vi: 'Vận chuyển Logistics', type: 'Vận tải', example: '跨国物流通常需要五到七个工作日。' },
+  { hanzi: '跟踪', pinyin: 'gēnzōng', hv: 'Căn tung', vi: 'Theo dõi đơn hàng / tiến độ', type: 'Công việc', example: '随时在系统上跟踪货物的运输状态。' },
+  { hanzi: '效率', pinyin: 'xiàolǜ', hv: 'Hiệu suất', vi: 'Hiệu quả làm việc', type: 'Năng suất', example: '采用新技术可以大幅提升团队工作效率。' }
+];
+
 /**
  * Lấy danh sách 12 từ vựng thực chiến độc lập theo từng ngày (1 - 90)
+ * Thiết kế lộ trình chuẩn từ HSK 1 -> HSK 4 cho Đời sống & Công sở
  */
 export function getDailyChineseVocabularies(dayNum, rawDay) {
-  // 1. Kiểm tra bảng từ vựng chuyên biệt 14 ngày đầu
+  // 1. Kiểm tra bảng từ vựng chuyên biệt các ngày đầu (Days 1 - 20)
   if (DAILY_ZH_VOCABULARY_MAP[dayNum]) {
     return DAILY_ZH_VOCABULARY_MAP[dayNum];
   }
 
-  // 2. Nếu ngày >= 15, trích xuất thông minh từ HSK_1000_VOCABULARY đảm bảo mỗi ngày KHÔNG TRÙNG NHAU
-  const totalHSK = HSK_1000_VOCABULARY.length; // 1,000 words
-  const startIndex = ((dayNum - 1) * 11) % (totalHSK - 12);
-  const selectedSlice = HSK_1000_VOCABULARY.slice(startIndex, startIndex + 12);
+  // 2. GIAI ĐOẠN 1 (Ngày 21 - 30): HSK 1 & HSK 2 Nền móng đời sống & công sở
+  if (dayNum <= 30) {
+    const totalHSK = Math.min(300, HSK_1000_VOCABULARY.length);
+    const startIndex = ((dayNum - 21) * 12) % (totalHSK - 12);
+    const slice = HSK_1000_VOCABULARY.slice(startIndex, startIndex + 12);
+    return slice.map((item) => ({
+      hanzi: item.hanzi,
+      pinyin: item.pinyin,
+      hv: item.hv || '',
+      vi: item.vi,
+      type: item.topic || 'HSK 1 - 2',
+      example: item.sample || `${item.hanzi}很好。`
+    }));
+  }
 
-  return selectedSlice.map((item, idx) => ({
-    hanzi: item.hanzi,
-    pinyin: item.pinyin,
-    hv: item.hv || '',
-    vi: item.vi,
-    type: item.topic || 'Từ vựng',
-    example: item.sample || `${item.hanzi}很好。`
-  }));
+  // 3. GIAI ĐOẠN 2 (Ngày 31 - 60): HSK 2+ & HSK 3 Thực chiến đời sống & họp hành, văn phòng
+  if (dayNum <= 60) {
+    const offset = 200;
+    const poolSize = 400; // HSK 2 - 3 range
+    const startIndex = offset + (((dayNum - 31) * 12) % poolSize);
+    const slice = HSK_1000_VOCABULARY.slice(startIndex, startIndex + 12);
+    return slice.map((item) => ({
+      hanzi: item.hanzi,
+      pinyin: item.pinyin,
+      hv: item.hv || '',
+      vi: item.vi,
+      type: item.topic || 'HSK 3 Đời sống',
+      example: item.sample || `${item.hanzi}非常重要。`
+    }));
+  }
+
+  // 4. GIAI ĐOẠN 3 (Ngày 61 - 90): HSK 3+ & HSK 4 Công sở chuyên sâu, Đàm phán, Marketing & Booking
+  const poolLen = CHINESE_WORKPLACE_HSK4_POOL.length;
+  const startIndex = ((dayNum - 61) * 6) % poolLen;
+  const workplaceWords = [];
+  for (let i = 0; i < 12; i++) {
+    workplaceWords.push(CHINESE_WORKPLACE_HSK4_POOL[(startIndex + i) % poolLen]);
+  }
+  return workplaceWords;
 }
 
 export const TOPIC_EXTENSIONS = {
@@ -582,6 +756,113 @@ export const TOPIC_EXTENSIONS = {
       { audio: '这个价格太贵了，不能便宜。', statement: 'Nghĩa câu này là: "Cái này rẻ lắm, bớt thêm đi."', isTrue: false },
       { audio: '师傅，前面路口右拐靠边停。', statement: 'Nghĩa câu này là: "Bác tài, ngã tư phía trước rẽ phải tấp lề nhé."', isTrue: true },
     ]
+  },
+
+  // Giai đoạn 3 (Ngày 61 - 90): HSK 3+ & HSK 4 Công sở chuyên sâu, Đàm phán, Booking & Marketing
+  stage3Commerce: {
+    extraSentences: [
+      { hanzi: '如果在原报价基础上给予百分之五的折扣，我们可以当场签约。', pinyin: 'Rúguǒ zài yuán bàojià jīchǔ shàng jǐyǔ bǎifēnzhī wǔ de zhékòu, wǒmen kěyǐ dāngchǎng qiānyuē.', vi: 'Nếu trên cơ sở báo giá gốc giảm thêm 5% chiết khấu, chúng tôi có thể ký hợp đồng ngay tại chỗ.', tag: 'Đàm phán giá cả HSK 4', breakdown: '原报价 (báo giá gốc) + 折扣 (chiết khấu) + 签约 (ký hợp đồng)' },
+      { hanzi: '双方代表经过友好协商，正式达成了为期三年的战略合作协议。', pinyin: 'Shuāngfāng dàibiǎo jīngguò yǒuhǎo xiéshāng, zhèngshì dáchéng le wéiqī sān nián de zhànlüè hézuò xiéyì.', vi: 'Đại diện hai bên sau khi bàn bạc hữu nghị đã chính thức đạt được thỏa thuận hợp tác chiến lược 3 năm.', tag: 'Ký kết hợp tác', breakdown: '协商 (bàn bạc/thương lượng) + 达成 (đạt được) + 协议 (thỏa thuận)' },
+      { hanzi: '我们已经在网上成功预订了五间豪华单人房，请协助办理入住。', pinyin: 'Wǒmen yǐjīng zài wǎngshàng chénggōng yùdìng le wǔ jiān háohuá dānrén fáng, qǐng xiézhù bànlǐ rùzhù.', vi: 'Chúng tôi đã đặt trước thành công 5 phòng đơn cao cấp trên mạng, xin vui lòng hỗ trợ làm thủ tục nhận phòng.', tag: 'Dịch vụ Booking', breakdown: '预订 (đặt trước) + 豪华 (sang trọng) + 办理入住 (làm thủ tục check-in)' },
+      { hanzi: '这次新产品的线上营销推广活动，带来了超过百分之三十的业绩增长。', pinyin: 'Zhè cì xīn chǎnpǐn de xiànshàng yíngxiāo tuīguǎng huódòng, dài lái le chāoguò bǎifēnzhī sānshí de yèjì zēngzhǎng.', vi: 'Chiến dịch marketing quảng bá trực tuyến cho sản phẩm mới lần này đã mang lại mức tăng trưởng doanh số hơn 30%.', tag: 'Chiến dịch Marketing', breakdown: '营销推广 (marketing quảng bá) + 业绩增长 (tăng trưởng doanh số)' },
+      { hanzi: '对于此次发货延误给贵公司造成的损失，我们深表歉意并将全力补偿。', pinyin: 'Duìyú cǐ cì fāhuò yánwù gěi guì gōngsī zàochéng de sǔnshī, wǒmen shēn biǎo qiànyì bìng jiāng quánlì bǔcháng.', vi: 'Đối với những tổn thất do chậm trễ giao hàng gây ra cho quý công ty, chúng tôi thành thật cáo lỗi và sẽ dốc sức bồi thường.', tag: 'Xử lý sự cố đối tác', breakdown: '延误 (chậm trễ/delay) + 深表歉意 (thành thật cáo lỗi) + 补偿 (bồi thường)' },
+    ],
+    readingPassage: {
+      title: '商务实践课：国际商务谈判与战略合作 (Bài Đọc HSK 4: Đàm Phán Thương Mại & Hợp Tác Chiến Lược)',
+      description: 'Luyện đọc đoạn văn thực tế về đàm phán hợp đồng, phân tích chiết khấu và marketing sản phẩm mới trong môi trường doanh nghiệp Trung - Việt.',
+      hanzi: '今天上午，海越科技公司与中国合作伙伴在深圳举行了商务洽谈会。会议主要讨论了智能设备代理采购的合同条款以及下半年的市场营销方案。中方代表李经理表示，如果订单采购总量达到一万台以上，他们愿意在出厂价格的基础上给予百分之八的特别折扣，并提供全面的售后技术支持。越方代表认真审核了质量检测报告和运输物流方案后，双方顺利签署了长期供货协议。这次合作不仅降低了采购成本，也为双方开拓东南亚新兴市场打下了坚实的基础。',
+      pinyin: 'Jīntiān shàngwǔ, Hǎiyuè Kējì Gōngsī yǔ Zhōngguó hézuò huǒbàn zài Shēnzhèn jǔxíng le shāngwù qiàtánhuì. Huìyì zhǔyào tǎolùn le zhìnéng shèbèi dàilǐ cǎigòu de hétong tiáokuǎn yǐjí xiàbànnián de shìchǎng yíngxiāo fāng\'àn. Zhōngfāng dàibiǎo Lǐ Jīnglǐ biǎoshì, rúguǒ dìngdān cǎigòu zǒngliàng dádào yí wàn tái yǐshàng, tāmen yuànyì zài chūchǎng jiàgé de jīchǔ shàng jǐyǔ bǎifēnzhī bā de tèbié zhékòu, bìng tígōng quánmiàn de shòuhòu jìshù zhīchí. Yuèfāng dàibiǎo rènzhēn shěnhé le zhìliàng jiǎncè bàogào hé yùnshū wùliú fāng\'àn hòu, shuāngfāng shùnlì qiānshǔ le chángqī gōnghuò xiéyì. Zhè cì hézuò bùjǐn jiàngdī le cǎigòu chéngběn, yě wèi shuāngfāng kāituò Dōngnányà xīnxīng shìchǎng dǎxià le jiānshí de jīchǔ.',
+      vi: 'Sáng nay, Công ty Công nghệ Hải Việt cùng đối tác Trung Quốc đã tổ chức buổi đàm phán thương mại tại Thâm Quyến. Hội nghị chủ yếu thảo luận về các điều khoản hợp đồng thu mua đại lý thiết bị thông minh cùng phương án tiếp thị marketing nửa cuối năm. Đại diện phía Trung Quốc, Giám đốc Lý cho biết, nếu tổng lượng đơn đặt hàng đạt trên 10.000 máy, họ sẵn sàng giảm chiết khấu đặc biệt 8% trên giá xuất xưởng, đồng thời cung cấp hỗ trợ kỹ thuật hậu mãi toàn diện. Đại diện phía Việt Nam sau khi thẩm định kỹ lưỡng báo cáo kiểm định chất lượng và phương án vận tải logistics, hai bên đã thuận lợi ký kết thỏa thuận cung ứng hàng dài hạn. Sự hợp tác lần này không chỉ giúp cắt giảm chi phí thu mua, mà còn đặt nền móng vững chắc cho hai bên cùng khai phá thị trường mới nổi tại Đông Nam Á.',
+      tokens: [
+        { zh: '合作伙伴', py: 'hézuò huǒbàn', vi: 'đối tác hợp tác' },
+        { zh: '合同条款', py: 'hétong tiáokuǎn', vi: 'điều khoản hợp đồng' },
+        { zh: '营销方案', py: 'yíngxiāo fāng\'àn', vi: 'phương án marketing' },
+        { zh: '特别折扣', py: 'tèbié zhékòu', vi: 'chiết khấu đặc biệt' },
+        { zh: '售后支持', py: 'shòuhòu zhīchí', vi: 'hỗ trợ hậu mãi' },
+        { zh: '签署协议', py: 'qiānshǔ xiéyì', vi: 'ký kết thỏa thuận' },
+        { zh: '采购成本', py: 'cǎigòu chéngběn', vi: 'chi phí thu mua' },
+        { zh: '开拓市场', py: 'kāituò shìchǎng', vi: 'mở rộng thị trường' }
+      ],
+      questions: [
+        {
+          q: '想要获得8%的特别折扣，采购总量需要达到多少？(Muốn nhận chiết khấu 8%, lượng đặt mua cần đạt bao nhiêu?)',
+          options: ['一千台 (1.000 máy)', '一万台以上 (Trên 10.000 máy)', '五千台 (5.000 máy)'],
+          correct: 1,
+          explain: 'Bài đọc nêu rõ: "如果订单采购总量达到一万台以上，他们愿意在出厂价格的基础上给予百分之八的特别折扣。"'
+        },
+        {
+          q: '签署长期协议后，双方将共同开拓哪里的新兴市场？(Sau khi ký thỏa thuận, hai bên sẽ cùng mở rộng thị trường mới nào?)',
+          options: ['欧洲市场 (Thị trường châu Âu)', '东南亚市场 (Thị trường Đông Nam Á)', '北美市场 (Thị trường Bắc Mỹ)'],
+          correct: 1,
+          explain: 'Bài đọc viết: "也为双方开拓东南亚新兴市场打下了坚实的基础。"'
+        }
+      ]
+    },
+    dialogue: {
+      title: 'Đàm phán hợp đồng kinh tế & Chiết khấu số lượng lớn',
+      roleA: 'Đại diện công ty (A)',
+      roleB: 'Đối tác Trung Quốc Lý Giám đốc (B)',
+      lines: [
+        { speaker: 'A', zh: '李经理，我们对贵公司的智能产品非常感兴趣，但报价稍微偏高了一点。', py: 'Lǐ Jīnglǐ, wǒmen duì guì gōngsī de zhìnéng chǎnpǐn fēicháng gǎn xìngqù, dàn bàojià shāowēi piāngāo le yìdiǎn.', vi: 'Giám đốc Lý, chúng tôi rất quan tâm đến sản phẩm thông minh của quý công ty, nhưng báo giá hơi cao một chút.' },
+        { speaker: 'B', zh: '这是最新的出厂价。如果你们首批订单能达到五千台，我们可以给九折优惠。', py: 'Zhè shì zuìxīn de chūchǎngjià. Rúguǒ nǐmen shǒupī dìngdān néng dádào wǔqiān tái, wǒmen kěyǐ gěi jiǔ zhé yōuhuì.', vi: 'Đây là giá xuất xưởng mới nhất rồi. Nếu đợt đặt hàng đầu tiên đạt 5.000 máy, chúng tôi có thể giảm 10% (đánh 9折).' },
+        { speaker: 'A', zh: '太好了！另外关于售后服务和发票开具，合同里能明确写清楚吗？', py: 'Tài hǎo le! Lìngwài guānyú shòuhòu fúwù hé fāpiào kāijù, hétong lǐ néng míngquè xiě qīngchu ma?', vi: 'Tuyệt quá! Ngoài ra về dịch vụ hậu mãi và xuất hóa đơn VAT, trong hợp đồng có thể ghi rõ ràng được không?' },
+        { speaker: 'B', zh: '没问题，我们法务部今天下午就会把修改好的正式合同发给您审核。', py: 'Méi wèntí, wǒmen fǎwùbù jīntiān xiàwǔ jiù huì bǎ xiūgǎi hǎo de zhèngshì hétong fā gěi nín shěnhé.', vi: 'Không thành vấn đề, bộ phận pháp chế của chúng tôi chiều nay sẽ gửi bản hợp đồng chính thức đã sửa đổi cho anh xem xét.' },
+        { speaker: 'A', zh: '好的，核对无误后我们立刻签字盖章，期待合作愉快！', py: 'Hǎo de, héduì wúwù hòu wǒmen lìkè qiānzì gàizhāng, qīdài hézuò yúkuài!', vi: 'Vâng, kiểm tra đối chiếu không sai sót chúng tôi sẽ lập tức ký tên đóng dấu, chúc đôi bên hợp tác vui vẻ!' },
+        { speaker: 'B', zh: '合作愉快！今晚我做东，请各位品尝地道的广东早茶和晚宴！', py: 'Hézuò yúkuài! Jīnwǎn wǒ zuòdōng, qǐng gèwèi pǐncháng dìdao de Guǎngdōng zǎochá hé wǎnyàn!', vi: 'Hợp tác vui vẻ! Tối nay tôi làm chủ chi, mời mọi người thưởng thức trà và tiệc tối chuẩn vị Quảng Đông!' },
+      ]
+    },
+    scrambleList: [
+      {
+        prompt: 'Câu 1: "Sau khi đối chiếu không sai sót, chúng tôi lập tức ký tên đóng dấu."',
+        targetZh: '核对无误后我们立刻签字盖章。',
+        targetPy: 'Héduì wúwù hòu wǒmen lìkè qiānzì gàizhāng.',
+        words: ['签字盖章。', '核对无误后', '我们立刻']
+      },
+      {
+        prompt: 'Câu 2: "Rất cảm ơn những phản hồi quý báu của quý khách."',
+        targetZh: '非常感谢您的宝贵反馈。',
+        targetPy: 'Fēicháng gǎnxiè nín de bǎoguì fǎnkuì.',
+        words: ['宝贵反馈。', '非常感谢', '您的']
+      },
+      {
+        prompt: 'Câu 3: "Đơn đặt hàng đạt trên 5.000 máy sẽ được chiết khấu 10%."',
+        targetZh: '订单达到五千台可以打九折。',
+        targetPy: 'Dìngdān dádào wǔqiān tái kěyǐ dǎ jiǔ zhé.',
+        words: ['可以打九折。', '订单达到五千台']
+      }
+    ],
+    reflexQuestions: [
+      {
+        question: 'Khi muốn đề nghị đối tác giảm giá thêm dựa trên số lượng mua lớn:',
+        options: ['如果批量采购，能给我们多少折扣？', '我不买了', '太便宜了'],
+        correct: 0,
+        explain: '折扣 (Zhékòu) = Chiết khấu/giảm giá. 批量采购 = Mua sỉ số lượng lớn.'
+      },
+      {
+        question: 'Khi nhận phòng khách sạn (check-in) và đã đặt trước trên ứng dụng:',
+        options: ['你好，我在网上预订了房间，办理入住。', '退房', '没有房间'],
+        correct: 0,
+        explain: '网上预订 = Đặt trên mạng. 办理入住 = Làm thủ tục nhận phòng.'
+      },
+      {
+        question: 'Tại buổi đàm phán khi đối tác đưa ra phương án hợp lý, bạn nói:',
+        options: ['这个方案很合理，期待合作愉快！', '我不懂', '太差了'],
+        correct: 0,
+        explain: '期待合作愉快 (Qīdài hézuò yúkuài) = Chúc đôi bên hợp tác vui vẻ thành công!'
+      }
+    ],
+    gapFill: {
+      question: 'Điền từ: "双方在平等互利的基础上顺利____了合作合同。"',
+      options: ['签署 (ký kết)', '退货', '取消'],
+      correct: 0,
+      audioText: '双方在平等互利的基础上顺利签署了合作合同。',
+      explain: '签署 (Qiānshǔ) = Ký kết văn bản, hợp đồng chính thức.'
+    },
+    trueFalseDrill: [
+      { audio: '双方已经正式签署了合作合同。', statement: 'Nghĩa câu này là: "Đôi bên đã chính thức ký kết hợp đồng hợp tác."', isTrue: true },
+      { audio: '由于产品质量问题，客户要求全额退款。', statement: 'Nghĩa câu này là: "Khách hàng rất khen ngợi sản phẩm."', isTrue: false },
+      { audio: '我们保证在三个工作日内完成交付。', statement: 'Nghĩa câu này là: "Chúng tôi cam kết hoàn tất bàn giao trong 3 ngày làm việc."', isTrue: true },
+    ]
   }
 };
 
@@ -595,6 +876,7 @@ export function enrichDayData(rawDay) {
   let template = TOPIC_EXTENSIONS.week1;
   if (weekNum === 1) template = TOPIC_EXTENSIONS.week1;
   else if (weekNum === 2) template = TOPIC_EXTENSIONS.week2;
+  else if (dayNum > 60) template = TOPIC_EXTENSIONS.stage3Commerce;
   else template = TOPIC_EXTENSIONS.defaultTemplate;
 
   // 1. TỪ VỰNG THỰC CHIẾN ĐỘC LẬP TỪNG NGÀY (KHÔNG BỊ TRÙNG KHI CHUYỂN NGÀY)
