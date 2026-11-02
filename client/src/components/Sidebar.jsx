@@ -11,6 +11,7 @@ import {
   Layers,
   GraduationCap,
   BarChart3,
+  Languages,
   X,
 } from 'lucide-react';
 
@@ -20,11 +21,12 @@ export default function Sidebar({ isOpen, onClose }) {
     { path: '/listening', label: '2. Kỹ Năng Nghe (听力)', icon: Headphones },
     { path: '/speaking', label: '3. Luyện Nói AI (口语)', icon: Mic },
     { path: '/ai-chat', label: '4. AI Trò Chuyện Song Song (智能对话)', icon: Bot, isNew: true },
-    { path: '/writing', label: '5. Luyện Viết (书写)', icon: PenTool },
-    { path: '/matching', label: '6. Game Ghép Chữ & Ghép Câu (游戏)', icon: Gamepad2 },
-    { path: '/scenario', label: '7. Tình Huống Thực Tế (情景)', icon: Compass },
-    { path: '/formula', label: '8. Công Thức Ghép Câu (句型)', icon: Layers },
-    { path: '/vocab1000', label: '9. Kho 1000 Từ HSK (词汇)', icon: GraduationCap },
+    { path: '/translation', label: '5. Luyện Dịch Câu (翻译练习)', icon: Languages, isNew: true },
+    { path: '/writing', label: '6. Luyện Viết (书写)', icon: PenTool },
+    { path: '/matching', label: '7. Game Ghép Chữ & Ghép Câu (游戏)', icon: Gamepad2 },
+    { path: '/scenario', label: '8. Tình Huống Thực Tế (情景)', icon: Compass },
+    { path: '/formula', label: '9. Công Thức Ghép Câu (句型)', icon: Layers },
+    { path: '/vocab1000', label: '10. Kho 1000 Từ HSK (词汇)', icon: GraduationCap },
     { path: '/dashboard', label: 'Tiến Độ & Thống Kê', icon: BarChart3 },
   ];
 

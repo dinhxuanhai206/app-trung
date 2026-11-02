@@ -14,6 +14,7 @@ import FormulaView from './components/FormulaView';
 import Vocab1000View from './components/Vocab1000View';
 import DashboardView from './components/DashboardView';
 import AiLiveChatView from './components/AiLiveChatView';
+import TranslationExerciseView from './components/TranslationExerciseView';
 import axiosClient from './api/axiosClient';
 import { LESSONS_DATA } from './data/lessonsData';
 
@@ -160,6 +161,14 @@ export default function App() {
               path="/ai-chat"
               element={
                 <AiLiveChatView
+                  onGainXP={handleGainXP}
+                />
+              }
+            />
+            <Route
+              path="/translation"
+              element={
+                <TranslationExerciseView
                   onGainXP={handleGainXP}
                 />
               }

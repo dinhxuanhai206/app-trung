@@ -3,6 +3,7 @@ import { HSK_1000_VOCABULARY } from '../data/vocab1000Data';
 import axiosClient from '../api/axiosClient';
 import { getWordRadicalAndMnemonic } from '../data/radicalHelper';
 import { getVocabIllustration } from '../data/vocabImageHelper';
+import { CONTEXTUAL_CATEGORIES, CONTEXTUAL_PHRASES } from '../data/contextualPhrasesData';
 import HandwritingModal from './HandwritingModal';
 import {
   Search,
@@ -18,9 +19,17 @@ import {
   GraduationCap,
   Filter,
   Maximize2,
+  Lightbulb,
+  Compass,
+  CheckCircle2,
+  MessageSquare
 } from 'lucide-react';
 
 export default function Vocab1000View({ onGainXP }) {
+  // Modes: 'phrases' (Học theo cụm từ & hoàn cảnh), 'vocab' (Tra cứu 1,000 từ vựng)
+  const [viewMode, setViewMode] = useState('phrases');
+
+  // Vocab dataset state
   const [vocabList, setVocabList] = useState(HSK_1000_VOCABULARY || []);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState('all');
@@ -30,6 +39,10 @@ export default function Vocab1000View({ onGainXP }) {
   const [activeHandwritingWord, setActiveHandwritingWord] = useState(null);
   const [previewImageWord, setPreviewImageWord] = useState(null);
   const pageSize = 24;
+
+  // Contextual phrases state
+  const [phraseCategory, setPhraseCategory] = useState('all');
+  const [phraseSearchQuery, setPhraseSearchQuery] = useState('');
 
   // Connect to NestJS backend API
   useEffect(() => {
@@ -44,6 +57,25 @@ export default function Vocab1000View({ onGainXP }) {
         // Fallback to local vocab dataset
       });
   }, []);
+
+  // Filter contextual phrases
+  const filteredPhrases = useMemo(() => {
+    return CONTEXTUAL_PHRASES.filter((item) => {
+      if (phraseCategory !== 'all' && item.category !== phraseCategory) {
+        return false;
+      }
+      if (phraseSearchQuery.trim()) {
+        const q = phraseSearchQuery.toLowerCase().trim();
+        const matchHanzi = item.phraseHanzi.toLowerCase().includes(q);
+        const matchPinyin = item.phrasePinyin.toLowerCase().includes(q);
+        const matchVi = item.phraseVi.toLowerCase().includes(q);
+        const matchSentence = item.sentenceHanzi.toLowerCase().includes(q);
+        const matchSit = item.situation.toLowerCase().includes(q);
+        if (!matchHanzi && !matchPinyin && !matchVi && !matchSentence && !matchSit) return false;
+      }
+      return true;
+    });
+  }, [phraseCategory, phraseSearchQuery]);
 
   // Extract unique topics
   const topics = useMemo(() => {
@@ -79,12 +111,12 @@ export default function Vocab1000View({ onGainXP }) {
     return filteredList.slice(start, start + pageSize);
   }, [filteredList, currentPage, pageSize]);
 
-  const speakChinese = (text) => {
+  const speakChinese = (text, speed = 0.85) => {
     if ('speechSynthesis' in window && text) {
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = 'zh-CN';
-      u.rate = 0.85;
+      u.rate = speed;
       window.speechSynthesis.speak(u);
     }
   };
@@ -113,303 +145,508 @@ export default function Vocab1000View({ onGainXP }) {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
           <span className="px-3 py-1 bg-rose-100 text-rose-800 text-xs font-extrabold rounded-full tracking-wider uppercase">
-            TỪ ĐIỂN MINH HỌA • BỘ THỦ • TẬP VIẾT CHUẨN
+            HỌC TỪ THEO HOÀN CẢNH • CỤM TỪ THỰC CHIẾN • TẬP VIẾT CHUẨN
           </span>
           <h2 className="text-2xl font-extrabold text-slate-900 mt-1 flex items-center gap-2">
             <GraduationCap className="text-rose-600 w-7 h-7" />
-            <span>Kho 1,000 Từ Vựng HSK Minh Họa Toàn Diện</span>
+            <span>Kho Từ Vựng & Cụm Từ Giao Tiếp Thực Tế</span>
           </h2>
           <p className="text-slate-600 text-sm mt-0.5 max-w-3xl leading-relaxed">
-            Tra cứu đầy đủ 1,000 từ vựng cốt lõi kèm <strong>Hình ảnh minh họa thực tế</strong>, <strong>Phân tích Bộ Thủ</strong>, <strong>Mẹo Chiết Tự Ghi Nhớ</strong> và <strong>Công cụ Tập Viết Chữ Hán Thông Minh (米字格)</strong>.
+            Học từ vựng gắn liền với <strong>Cụm từ cố định trong đời sống</strong> và <strong>Câu giao tiếp theo từng hoàn cảnh thực tế</strong>, thay vì học từ đơn lẻ rời rạc.
           </p>
         </div>
 
-        <div className="flex items-center gap-3 self-start md:self-auto flex-wrap">
-          <button
-            onClick={() => setShowIllustrations(!showIllustrations)}
-            className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border shadow-2xs ${
-              showIllustrations
-                ? 'bg-rose-50 text-rose-700 border-rose-300'
-                : 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200'
-            }`}
-            title="Bật/Tắt hiển thị hình ảnh minh họa cho các từ vựng"
-          >
-            <ImageIcon size={16} />
-            <span>{showIllustrations ? 'Ẩn ảnh minh họa' : 'Hiện ảnh minh họa'}</span>
-          </button>
+        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
+          {viewMode === 'vocab' && (
+            <button
+              onClick={() => setShowIllustrations(!showIllustrations)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all border shadow-2xs ${
+                showIllustrations
+                  ? 'bg-rose-50 text-rose-700 border-rose-300'
+                  : 'bg-white text-slate-600 hover:bg-slate-50 border-slate-200'
+              }`}
+              title="Bật/Tắt hiển thị hình ảnh minh họa cho các từ vựng"
+            >
+              <ImageIcon size={16} />
+              <span>{showIllustrations ? 'Ẩn ảnh minh họa' : 'Hiện ảnh minh họa'}</span>
+            </button>
+          )}
 
-          <span className="px-4 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs sm:text-sm border border-slate-200 shadow-2xs">
-            Hiển thị: {filteredList.length} / {vocabList.length} từ
+          <span className="px-3.5 py-2 bg-slate-100 text-slate-700 font-bold rounded-xl text-xs border border-slate-200 shadow-2xs">
+            {viewMode === 'phrases'
+              ? `${filteredPhrases.length} cụm từ thực tế`
+              : `${filteredList.length} / ${vocabList.length} từ vựng`}
           </span>
         </div>
       </div>
 
-      {/* Search & Filter Bar */}
-      <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
-        <div className="flex flex-col md:flex-row gap-3">
-          <div className="relative flex-1">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Tìm theo Chữ Hán, Pinyin, Hán Việt, hoặc Tiếng Việt... (Ví dụ: 学习, xuexi, học tập)"
-              className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:bg-white focus:border-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-500/10 transition-all"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1.5 transition-colors"
-              >
-                <X size={16} />
-              </button>
-            )}
-          </div>
+      {/* VIEW MODE SELECTOR (Cụm từ thực tế vs 1,000 Từ vựng) */}
+      <div className="bg-white p-2 rounded-2xl border border-slate-200 shadow-sm flex flex-wrap gap-2">
+        <button
+          onClick={() => setViewMode('phrases')}
+          className={`flex-1 min-w-[220px] py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all ${
+            viewMode === 'phrases'
+              ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+              : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <Sparkles size={16} />
+          <span>Học Theo Cụm Từ & Mẫu Câu Hoàn Cảnh</span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] bg-amber-400 text-slate-950 font-black">
+            Khuyên dùng
+          </span>
+        </button>
 
-          <div className="flex items-center gap-2">
-            <Filter size={18} className="text-slate-400 hidden sm:block" />
-            <select
-              value={selectedTopic}
-              onChange={(e) => {
-                setSelectedTopic(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 focus:bg-white focus:border-rose-500 focus:outline-none transition-all cursor-pointer shadow-2xs"
-            >
-              <option value="all">Tất cả chủ đề ({topics.length} chủ đề)</option>
-              {topics.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Level Filter Tabs */}
-        <div className="flex flex-wrap gap-2 pt-1">
-          {levelTabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setSelectedLevel(tab.id);
-                setCurrentPage(1);
-              }}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                selectedLevel === tab.id
-                  ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <button
+          onClick={() => setViewMode('vocab')}
+          className={`flex-1 min-w-[220px] py-3 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2.5 transition-all ${
+            viewMode === 'vocab'
+              ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+              : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
+          }`}
+        >
+          <BookOpen size={16} />
+          <span>Tra Cứu 1,000 Từ Vựng HSK & Bộ Thủ</span>
+        </button>
       </div>
 
-      {/* Vocab Cards Grid */}
-      {currentItems.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 text-slate-500 space-y-2">
-          <Search className="w-10 h-10 mx-auto text-slate-300" />
-          <p className="text-sm font-medium">Không tìm thấy từ vựng nào phù hợp với điều kiện tìm kiếm.</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {currentItems.map((item) => {
-            const levelColor =
-              item.level === 'HSK 1'
-                ? 'bg-blue-100 text-blue-800 border-blue-200'
-                : item.level === 'HSK 2'
-                ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                : item.level === 'HSK 3'
-                ? 'bg-amber-100 text-amber-800 border-amber-200'
-                : 'bg-purple-100 text-purple-800 border-purple-200';
+      {/* ============================================================== */}
+      {/* VIEW 1: HỌC THEO CỤM TỪ & MẪU CÂU HOÀN CẢNH                    */}
+      {/* ============================================================== */}
+      {viewMode === 'phrases' && (
+        <div className="space-y-6">
+          {/* Situation Filter & Search Bar */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+              <input
+                type="text"
+                value={phraseSearchQuery}
+                onChange={(e) => setPhraseSearchQuery(e.target.value)}
+                placeholder="Tìm cụm từ, câu mẫu, hoặc hoàn cảnh... (Ví dụ: 来一份, bớt cay, taxi, trả giá, cafe...)"
+                className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:bg-white focus:border-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-500/10 transition-all"
+              />
+              {phraseSearchQuery && (
+                <button
+                  onClick={() => setPhraseSearchQuery('')}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1.5 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
 
-            const radicalInfo = getWordRadicalAndMnemonic(item);
-            const illustrationUrl = getVocabIllustration(item);
+            {/* Category Pills */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {CONTEXTUAL_CATEGORIES.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setPhraseCategory(cat.id)}
+                  className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    phraseCategory === cat.id
+                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  <span>{cat.icon}</span>
+                  <span>{cat.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
 
-            return (
-              <div
-                key={item.id}
-                className="bg-white p-5 rounded-3xl border border-slate-200 hover:border-rose-300 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-3.5 shadow-2xs"
-              >
-                <div className="space-y-3">
-                  {/* Top Row: Hanzi + Pinyin + Meaning (Left) & Compact Rounded Image Thumbnail (Right Corner) */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1 space-y-1">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <div
-                          onClick={() => setActiveHandwritingWord(item)}
-                          className="text-3xl font-black text-slate-900 chinese-font hover:text-rose-600 cursor-pointer transition-colors flex items-center gap-1.5 group/h tracking-wide"
-                          title="Bấm vào để mở bảng tập viết chữ này trên ô Mễ"
-                        >
-                          <span>{item.hanzi}</span>
-                          <span className="text-xs text-rose-500 opacity-0 group-hover/h:opacity-100 transition-opacity p-1 rounded-md bg-rose-50">
-                            <PenTool size={12} />
-                          </span>
+          {/* Phrases Grid */}
+          {filteredPhrases.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 text-slate-500 space-y-2">
+              <Search className="w-10 h-10 mx-auto text-slate-300" />
+              <p className="text-sm font-medium">Không tìm thấy cụm từ nào phù hợp với tìm kiếm.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              {filteredPhrases.map((phrase) => (
+                <div
+                  key={phrase.id}
+                  className="bg-white rounded-3xl p-6 border border-slate-200 hover:border-rose-300 hover:shadow-lg transition-all space-y-4 flex flex-col justify-between"
+                >
+                  <div className="space-y-3">
+                    {/* Header: Category & Situation */}
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 font-extrabold text-[11px] border border-rose-200">
+                        {phrase.categoryName}
+                      </span>
+                      <span className="text-xs text-slate-500 font-medium">
+                        🎯 {phrase.situation}
+                      </span>
+                    </div>
+
+                    {/* Phrasal Chunk Box */}
+                    <div className="p-4 rounded-2xl bg-gradient-to-r from-rose-50 to-orange-50 border border-rose-100 flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-2xl font-black text-rose-950 chinese-font">
+                          {phrase.phraseHanzi}
                         </div>
-                        <span className={`px-2 py-0.5 rounded-lg text-[10px] font-black border uppercase tracking-wider ${levelColor}`}>
-                          {item.level}
+                        <div className="text-xs font-bold text-amber-700 mt-0.5">
+                          {phrase.phrasePinyin}
+                        </div>
+                        <div className="text-xs font-black text-slate-800 mt-1">
+                          👉 {phrase.phraseVi}
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => speakChinese(phrase.phraseHanzi, 0.8)}
+                        className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all flex-shrink-0"
+                        title="Nghe phát âm cụm từ này"
+                      >
+                        <Volume2 size={14} />
+                        <span>Nghe cụm từ</span>
+                      </button>
+                    </div>
+
+                    {/* Full Real-life Sentence */}
+                    <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                          Mẫu câu giao tiếp hoàn cảnh:
                         </span>
+                        <button
+                          onClick={() => speakChinese(phrase.sentenceHanzi, 0.85)}
+                          className="text-xs text-blue-600 font-bold hover:text-blue-700 inline-flex items-center gap-1"
+                        >
+                          <Volume2 size={13} />
+                          <span>Nghe câu mẫu</span>
+                        </button>
                       </div>
 
-                      <div className="text-sm font-bold text-rose-600">
-                        {item.pinyin}
+                      <div className="text-lg font-bold text-slate-900 chinese-font leading-relaxed">
+                        {phrase.sentenceHanzi}
                       </div>
 
-                      {item.hv && (
-                        <div className="text-[11px] text-slate-400 font-medium">
-                          Hán Việt: <strong className="text-slate-700">{item.hv}</strong>
-                        </div>
-                      )}
+                      <div className="text-xs font-semibold text-amber-600">
+                        {phrase.sentencePinyin}
+                      </div>
 
-                      <div className="text-sm font-extrabold text-slate-900 leading-snug flex items-center gap-1.5 pt-0.5">
-                        <Sparkles size={13} className="text-amber-500 flex-shrink-0" />
-                        <span className="truncate">{item.vi}</span>
+                      <div className="text-xs text-slate-600 font-medium mt-1 leading-normal">
+                        {phrase.sentenceVi}
                       </div>
                     </div>
 
-                    {/* High-Definition Rounded Image Thumbnail in Corner (To rõ, bo góc đẹp, dễ nhìn) */}
-                    {showIllustrations && (
-                      <div className="relative flex-shrink-0">
-                        <div
-                          onClick={() => setPreviewImageWord(item)}
-                          className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl overflow-hidden bg-slate-100 border-2 border-slate-100 shadow-sm hover:border-rose-400 hover:shadow-xl transition-all duration-300 relative group/img cursor-pointer"
-                          title="Bấm vào để phóng to hình ảnh chi tiết"
-                        >
-                          <img
-                            src={illustrationUrl}
-                            alt={item.hanzi}
-                            loading="lazy"
-                            className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
-                            onError={(e) => {
-                              e.target.src =
-                                'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80';
-                            }}
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
-                          
-                          {/* Hover Zoom Icon Badge */}
-                          <div className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-xs opacity-0 group-hover/img:opacity-100 transition-opacity">
-                            <Maximize2 size={12} />
-                          </div>
-
-                          {item.topic && (
-                            <span className="absolute bottom-1.5 left-1.5 right-1.5 text-center text-[10px] font-bold text-white bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded-lg truncate">
-                              {item.topic}
-                            </span>
-                          )}
-                        </div>
+                    {/* Native Tip */}
+                    {phrase.tip && (
+                      <div className="p-3 rounded-xl bg-amber-50/70 border border-amber-200/70 text-xs text-amber-950 flex items-start gap-2">
+                        <Lightbulb size={14} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                        <p className="text-[11px] leading-relaxed">
+                          <strong>Mẹo thực tế:</strong> {phrase.tip}
+                        </p>
                       </div>
                     )}
                   </div>
 
-                  {/* Radical Info Box (Giải thích Bộ Thủ) */}
-                  <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs space-y-1 text-purple-950">
-                    <div className="flex items-center justify-between font-bold text-purple-900">
-                      <span className="flex items-center gap-1.5">
-                        <Layers size={14} className="text-purple-600" />
-                        <span>Bộ thủ: {radicalInfo.radical}</span>
-                      </span>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200 text-purple-800 font-bold">
-                        {radicalInfo.strokeCount} nét
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-slate-600 leading-tight">
-                      <strong>Ý nghĩa:</strong> {radicalInfo.radicalMeaning}
-                    </p>
-                  </div>
-
-                  {/* Mnemonic Story Box (Cách Nhớ Từ Vựng & Chiết Tự) */}
-                  <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs space-y-1 text-amber-950">
-                    <div className="font-bold text-amber-900 flex items-center gap-1.5">
-                      <BookOpen size={14} className="text-amber-700" />
-                      <span>Cách nhớ từ & Chiết tự:</span>
-                    </div>
-                    <p className="text-[11px] text-amber-900 leading-relaxed italic">
-                      {radicalInfo.mnemonic}
-                    </p>
-                  </div>
-
-                  {/* Sample Sentence (if available) */}
-                  {item.sample && (
-                    <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200/70 text-xs text-slate-700 flex items-center justify-between gap-2 italic">
-                      <span className="chinese-font">{item.sample}</span>
-                      <button
-                        onClick={() => speakChinese(item.sample)}
-                        className="w-7 h-7 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white text-slate-600 flex items-center justify-center transition-all flex-shrink-0"
-                        title="Nghe câu ví dụ"
-                      >
-                        <Volume2 size={13} />
-                      </button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Bottom Action Bar: Tập Viết & Phát Âm */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
-                  <button
-                    onClick={() => setActiveHandwritingWord(item)}
-                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95"
-                    title="Mở bảng tập viết chữ Hán trên ô Mễ"
-                  >
-                    <PenTool size={13} />
-                    <span>Tập viết</span>
-                  </button>
-
-                  <div className="flex items-center gap-2">
+                  {/* Actions */}
+                  <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
                     <button
-                      onClick={() => speakChinese(item.hanzi)}
-                      className="w-9 h-9 rounded-full bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 flex items-center justify-center text-sm font-bold transition-all shadow-2xs"
-                      title="Phát âm từ vựng"
+                      onClick={() =>
+                        setActiveHandwritingWord({
+                          hanzi: phrase.phraseHanzi.replace(/[^一-龥]/g, '')[0] || '你',
+                          pinyin: phrase.phrasePinyin.split(' ')[0] || 'nǐ',
+                          vi: phrase.phraseVi,
+                        })
+                      }
+                      className="text-xs text-slate-700 hover:text-rose-600 font-bold flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-rose-50 transition-all"
                     >
-                      <Volume2 size={16} />
+                      <PenTool size={13} />
+                      <span>Tập viết chữ cụm này</span>
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        onGainXP(5, `Ghi nhớ cụm từ: ${phrase.phraseHanzi}`);
+                      }}
+                      className="text-xs text-emerald-600 hover:text-emerald-700 font-bold flex items-center gap-1"
+                    >
+                      <CheckCircle2 size={13} />
+                      <span>Đã thuộc cụm này (+5 XP)</span>
                     </button>
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Pagination Controls */}
-      <div className="flex items-center justify-center gap-4 py-6">
-        <button
-          onClick={() => {
-            if (currentPage > 1) {
-              setCurrentPage((p) => p - 1);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-          disabled={currentPage <= 1}
-          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs flex items-center gap-1.5"
-        >
-          <ChevronLeft size={16} />
-          <span>Trang trước</span>
-        </button>
-        <span className="text-sm font-bold text-slate-600">
-          Trang {currentPage} / {totalPages}
-        </span>
-        <button
-          onClick={() => {
-            if (currentPage < totalPages) {
-              setCurrentPage((p) => p + 1);
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-          }}
-          disabled={currentPage >= totalPages}
-          className="px-5 py-2.5 bg-white border border-slate-200 rounded-xl font-bold text-sm text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-2xs flex items-center gap-1.5"
-        >
-          <span>Trang tiếp</span>
-          <ChevronRight size={16} />
-        </button>
-      </div>
+      {/* ============================================================== */}
+      {/* VIEW 2: TRA CỨU 1,000 TỪ VỰNG & BỘ THỦ                         */}
+      {/* ============================================================== */}
+      {viewMode === 'vocab' && (
+        <div className="space-y-6">
+          {/* Search & Filter Bar */}
+          <div className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Tìm theo Chữ Hán, Pinyin, Hán Việt, hoặc Tiếng Việt... (Ví dụ: 学习, xuexi, học tập)"
+                  className="w-full pl-11 pr-10 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:bg-white focus:border-rose-500 focus:outline-none focus:ring-4 focus:ring-rose-500/10 transition-all"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1.5 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
 
-      {/* Interactive Handwriting Practice Modal */}
+              <div className="flex items-center gap-2">
+                <Filter size={18} className="text-slate-400 hidden sm:block" />
+                <select
+                  value={selectedTopic}
+                  onChange={(e) => {
+                    setSelectedTopic(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-700 focus:bg-white focus:border-rose-500 focus:outline-none transition-all cursor-pointer shadow-2xs"
+                >
+                  <option value="all">Tất cả chủ đề ({topics.length} chủ đề)</option>
+                  {topics.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Level Filter Tabs */}
+            <div className="flex flex-wrap gap-2 pt-1">
+              {levelTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => {
+                    setSelectedLevel(tab.id);
+                    setCurrentPage(1);
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+                    selectedLevel === tab.id
+                      ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Vocab Cards Grid */}
+          {currentItems.length === 0 ? (
+            <div className="text-center py-16 bg-white rounded-3xl border border-slate-200 text-slate-500 space-y-2">
+              <Search className="w-10 h-10 mx-auto text-slate-300" />
+              <p className="text-sm font-medium">Không tìm thấy từ vựng nào phù hợp với điều kiện tìm kiếm.</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {currentItems.map((item) => {
+                const levelColor =
+                  item.level === 'HSK 1'
+                    ? 'bg-blue-100 text-blue-800 border-blue-200'
+                    : item.level === 'HSK 2'
+                    ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                    : item.level === 'HSK 3'
+                    ? 'bg-amber-100 text-amber-800 border-amber-200'
+                    : 'bg-purple-100 text-purple-800 border-purple-200';
+
+                const radicalInfo = getWordRadicalAndMnemonic(item);
+                const illustrationUrl = getVocabIllustration(item);
+
+                return (
+                  <div
+                    key={item.id}
+                    className="bg-white p-5 rounded-3xl border border-slate-200 hover:border-blue-300 hover:shadow-xl hover:-translate-y-1 transition-all flex flex-col justify-between group space-y-3.5 shadow-2xs"
+                  >
+                    <div className="space-y-3">
+                      {/* Top Row: Hanzi + Pinyin + Meaning */}
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1 space-y-1">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div
+                              onClick={() => setActiveHandwritingWord(item)}
+                              className="text-3xl font-black text-slate-900 chinese-font hover:text-blue-600 cursor-pointer transition-colors flex items-center gap-1.5 group/h tracking-wide"
+                              title="Bấm vào để mở bảng tập viết chữ này trên ô Mễ"
+                            >
+                              <span>{item.hanzi}</span>
+                              <span className="text-xs text-blue-500 opacity-0 group-hover/h:opacity-100 transition-opacity p-1 rounded-md bg-blue-50">
+                                <PenTool size={12} />
+                              </span>
+                            </div>
+                            <span
+                              className={`px-2 py-0.5 rounded-lg text-[10px] font-black border uppercase tracking-wider ${levelColor}`}
+                            >
+                              {item.level}
+                            </span>
+                          </div>
+
+                          <div className="text-sm font-bold text-rose-600">
+                            {item.pinyin}
+                          </div>
+
+                          {item.hv && (
+                            <div className="text-[11px] text-slate-400 font-medium">
+                              Hán Việt: <strong className="text-slate-700">{item.hv}</strong>
+                            </div>
+                          )}
+
+                          <div className="text-sm font-extrabold text-slate-900 leading-snug flex items-center gap-1.5 pt-0.5">
+                            <Sparkles size={13} className="text-amber-500 flex-shrink-0" />
+                            <span className="truncate">{item.vi}</span>
+                          </div>
+                        </div>
+
+                        {/* Image Thumbnail */}
+                        {showIllustrations && (
+                          <div className="relative flex-shrink-0">
+                            <div
+                              onClick={() => setPreviewImageWord(item)}
+                              className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-slate-100 border-2 border-slate-100 shadow-sm hover:border-blue-400 hover:shadow-xl transition-all duration-300 relative group/img cursor-pointer"
+                              title="Bấm vào để phóng to hình ảnh chi tiết"
+                            >
+                              <img
+                                src={illustrationUrl}
+                                alt={item.hanzi}
+                                loading="lazy"
+                                className="w-full h-full object-cover group-hover/img:scale-110 transition-transform duration-500"
+                                onError={(e) => {
+                                  e.target.src =
+                                    'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=600&q=80';
+                                }}
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+
+                              <div className="absolute top-2 right-2 p-1.5 rounded-full bg-black/40 text-white backdrop-blur-xs opacity-0 group-hover/img:opacity-100 transition-opacity">
+                                <Maximize2 size={12} />
+                              </div>
+
+                              {item.topic && (
+                                <span className="absolute bottom-1.5 left-1.5 right-1.5 text-center text-[10px] font-bold text-white bg-black/50 backdrop-blur-xs px-1.5 py-0.5 rounded-lg truncate">
+                                  {item.topic}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Radical Info Box */}
+                      <div className="p-3 rounded-2xl bg-purple-50/70 border border-purple-100 text-xs space-y-1 text-purple-950">
+                        <div className="flex items-center justify-between font-bold text-purple-900">
+                          <span className="flex items-center gap-1.5">
+                            <Layers size={14} className="text-purple-600" />
+                            <span>Bộ thủ: {radicalInfo.radical}</span>
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-200 text-purple-800 font-bold">
+                            {radicalInfo.strokeCount} nét
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-600 leading-tight">
+                          <strong>Ý nghĩa:</strong> {radicalInfo.radicalMeaning}
+                        </p>
+                      </div>
+
+                      {/* Mnemonic Story Box */}
+                      <div className="p-3 rounded-2xl bg-amber-50/70 border border-amber-200/60 text-xs space-y-1 text-amber-950">
+                        <div className="font-bold text-amber-900 flex items-center gap-1.5">
+                          <BookOpen size={14} className="text-amber-700" />
+                          <span>Cách nhớ từ & Chiết tự:</span>
+                        </div>
+                        <p className="text-[11px] text-amber-900 leading-relaxed italic">
+                          {radicalInfo.mnemonic}
+                        </p>
+                      </div>
+
+                      {/* Sample Sentence (Contextual) */}
+                      {item.sample && (
+                        <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                              Câu ngữ cảnh thực tế:
+                            </span>
+                            <button
+                              onClick={() => speakChinese(item.sample, 0.85)}
+                              className="text-xs text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
+                              title="Nghe câu ví dụ"
+                            >
+                              <Volume2 size={12} />
+                              <span>Nghe</span>
+                            </button>
+                          </div>
+                          <div className="chinese-font font-bold text-slate-900 text-sm">
+                            {item.sample}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Bottom Action Bar */}
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 mt-2">
+                      <button
+                        onClick={() => setActiveHandwritingWord(item)}
+                        className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-blue-600 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95"
+                        title="Mở bảng tập viết chữ Hán trên ô Mễ"
+                      >
+                        <PenTool size={13} />
+                        <span>Tập viết</span>
+                      </button>
+
+                      <button
+                        onClick={() => speakChinese(item.hanzi, 0.8)}
+                        className="px-3.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-600 text-blue-700 hover:text-white font-bold text-xs flex items-center gap-1.5 transition-all border border-blue-200 active:scale-95"
+                        title="Phát âm từ vựng"
+                      >
+                        <Volume2 size={14} />
+                        <span>Phát âm</span>
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-2 pt-6">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft size={18} />
+              </button>
+
+              <span className="px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700">
+                Trang {currentPage} / {totalPages}
+              </span>
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Handwriting Modal */}
       {activeHandwritingWord && (
         <HandwritingModal
           word={activeHandwritingWord}
@@ -418,35 +655,34 @@ export default function Vocab1000View({ onGainXP }) {
         />
       )}
 
-      {/* Image Detail Lightbox Modal (Xem ảnh chi tiết độ nét cao) */}
+      {/* Image Preview Modal */}
       {previewImageWord && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-in fade-in duration-200"
           onClick={() => setPreviewImageWord(null)}
+          className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn"
         >
           <div
-            className="bg-white rounded-3xl overflow-hidden shadow-2xl max-w-lg w-full border border-slate-100 relative animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-scaleUp"
           >
-            {/* Close Button */}
-            <button
-              onClick={() => setPreviewImageWord(null)}
-              className="absolute top-3.5 right-3.5 z-20 w-9 h-9 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all backdrop-blur-xs cursor-pointer shadow-md"
-              title="Đóng (Esc)"
-            >
-              <X size={18} />
-            </button>
-
-            {/* High-Definition Image Display */}
-            <div className="relative aspect-video sm:aspect-4/3 w-full bg-slate-900 overflow-hidden">
+            <div className="relative aspect-4/3 w-full bg-slate-900">
               <img
                 src={getVocabIllustration(previewImageWord)}
                 alt={previewImageWord.hanzi}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src =
+                    'https://images.unsplash.com/photo-1528459801416-a9e53bbf4e17?auto=format&fit=crop&w=800&q=80';
+                }}
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-              
-              <div className="absolute bottom-4 left-5 right-5 flex items-end justify-between text-white">
+              <button
+                onClick={() => setPreviewImageWord(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white backdrop-blur-md transition-all cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-black/85 via-black/40 to-transparent text-white flex items-end justify-between">
                 <div>
                   <div className="text-4xl font-black chinese-font tracking-wide drop-shadow-md">
                     {previewImageWord.hanzi}
@@ -457,7 +693,7 @@ export default function Vocab1000View({ onGainXP }) {
                 </div>
 
                 <button
-                  onClick={() => speakChinese(previewImageWord.hanzi)}
+                  onClick={() => speakChinese(previewImageWord.hanzi, 0.8)}
                   className="p-3 rounded-full bg-rose-600 hover:bg-rose-500 text-white transition-all shadow-lg active:scale-95 cursor-pointer"
                   title="Phát âm từ vựng"
                 >
@@ -466,7 +702,6 @@ export default function Vocab1000View({ onGainXP }) {
               </div>
             </div>
 
-            {/* Word Details in Modal */}
             <div className="p-6 space-y-4">
               <div className="flex items-center justify-between gap-3">
                 <div className="text-lg font-black text-slate-900">
@@ -494,7 +729,7 @@ export default function Vocab1000View({ onGainXP }) {
                 <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs text-slate-700 flex items-center justify-between gap-2 italic">
                   <span className="chinese-font font-medium text-sm text-slate-900">{previewImageWord.sample}</span>
                   <button
-                    onClick={() => speakChinese(previewImageWord.sample)}
+                    onClick={() => speakChinese(previewImageWord.sample, 0.85)}
                     className="p-2 rounded-full bg-slate-200 hover:bg-rose-500 hover:text-white transition-all flex-shrink-0 cursor-pointer"
                     title="Nghe câu ví dụ"
                   >

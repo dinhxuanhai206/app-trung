@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Bot,
   Settings,
@@ -25,6 +25,7 @@ import {
 import {
   AI_PERSONAS,
   QUICK_VOICE_TOPICS,
+  PRACTICAL_SPEAKING_TOPICS_CATEGORIZED,
   sendChatMessageToAi,
 } from '../data/aiChatEngine';
 
@@ -41,6 +42,15 @@ export default function AiLiveChatView({ onGainXP }) {
   const [inputText, setInputText] = useState('');
   const [interimTranscript, setInterimTranscript] = useState('');
   const [expandedThoughts, setExpandedThoughts] = useState({});
+  const [selectedTopicCategory, setSelectedTopicCategory] = useState('dining');
+
+  // Active category sentences
+  const activeCategoryData = useMemo(() => {
+    return (
+      PRACTICAL_SPEAKING_TOPICS_CATEGORIZED.find((t) => t.id === selectedTopicCategory) ||
+      PRACTICAL_SPEAKING_TOPICS_CATEGORIZED[0]
+    );
+  }, [selectedTopicCategory]);
 
   // Real AI Configuration (stored in localStorage or loaded via .env)
   const USER_DEFAULT_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || '';
@@ -616,19 +626,46 @@ export default function AiLiveChatView({ onGainXP }) {
         <div ref={chatBottomRef} />
       </div>
 
-      {/* Suggested Quick Starters */}
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-        <span className="text-xs font-bold text-slate-400 flex-shrink-0">Gợi ý câu:</span>
-        {QUICK_VOICE_TOPICS.map((topic, idx) => (
-          <button
-            key={idx}
-            onClick={() => handleSendUserMessage(topic.text)}
-            className="px-3 py-1.5 rounded-xl bg-white hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-700 hover:text-rose-700 text-xs font-semibold whitespace-nowrap transition-all shadow-2xs flex-shrink-0"
-            title={`${topic.pinyin} - ${topic.vi}`}
-          >
-            {topic.text}
-          </button>
-        ))}
+      {/* Categorized Practical Speaking Topic Starters */}
+      <div className="bg-white rounded-2xl p-3 border border-slate-200 shadow-xs space-y-2.5">
+        {/* Category Tabs */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold text-slate-400 flex-shrink-0 uppercase tracking-wider">
+            Chủ đề nói:
+          </span>
+          {PRACTICAL_SPEAKING_TOPICS_CATEGORIZED.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedTopicCategory(cat.id)}
+              className={`px-3 py-1 rounded-xl text-xs font-bold whitespace-nowrap transition-all flex items-center gap-1.5 flex-shrink-0 ${
+                selectedTopicCategory === cat.id
+                  ? 'bg-rose-600 text-white shadow-sm'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
+            >
+              <span>{cat.icon}</span>
+              <span>{cat.name.split(' (')[0]}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Sentences in Active Category */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+          <span className="text-[11px] font-bold text-slate-400 flex-shrink-0">Gợi ý câu:</span>
+          {activeCategoryData.sentences.map((sentenceItem, sIdx) => (
+            <button
+              key={sIdx}
+              onClick={() => handleSendUserMessage(sentenceItem.text)}
+              className="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-rose-50 border border-slate-200 hover:border-rose-300 text-slate-800 hover:text-rose-700 text-xs font-semibold whitespace-nowrap transition-all shadow-2xs flex-shrink-0 flex items-center gap-1.5 group"
+              title={`${sentenceItem.pinyin} - ${sentenceItem.vi}`}
+            >
+              <span className="chinese-font">{sentenceItem.text}</span>
+              <span className="text-[10px] text-slate-400 group-hover:text-rose-500 font-normal">
+                ({sentenceItem.vi.slice(0, 15)}...)
+              </span>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Voice & Text Interaction Bar */}
