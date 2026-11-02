@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import {
   Flame,
   Star,
@@ -12,9 +13,13 @@ import {
   BarChart3,
   Lightbulb,
   CheckCircle2,
-  ChevronRight
+  ChevronRight,
+  Calendar,
+  Sparkles,
+  Zap,
 } from 'lucide-react';
 import { LESSONS_DATA } from '../data/lessonsData';
+import { ROADMAP_STAGES } from '../data/roadmap90DaysData';
 
 export default function DashboardView({ xp, streak, skills }) {
   const totalLessons = LESSONS_DATA.length;
@@ -120,6 +125,56 @@ export default function DashboardView({ xp, streak, skills }) {
             </div>
           );
         })}
+      </div>
+
+      {/* 90-Day Spoken Chinese Roadmap Banner */}
+      <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-rose-950 via-slate-900 to-slate-950 text-white border border-rose-900/40 shadow-xl relative overflow-hidden">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-xl">
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 text-[11px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                <Sparkles size={12} />
+                Lộ Trình Ưu Tiên • 3 Tháng
+              </span>
+              <span className="text-xs text-rose-300 font-bold">15 Phút / Ngày • Chống Nản</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+              Lộ Trình 90 Ngày Bứt Phá Nghe Nói Giao Tiếp
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+              Tập trung 100% vào phát âm chuẩn, nhại giọng Shadowing và phản xạ tình huống thực tế. Không tạo áp lực viết chữ Hán, chia đều 3 Tháng giúp bạn kiên trì đến đích.
+            </p>
+
+            <div className="grid grid-cols-3 gap-2 pt-2">
+              <div className="bg-white/5 rounded-xl p-2.5 border border-white/10 text-center">
+                <div className="text-[10px] text-slate-400">Tháng 1</div>
+                <div className="text-xs font-bold text-rose-300">Bật âm sinh tồn</div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-2.5 border border-white/10 text-center">
+                <div className="text-[10px] text-slate-400">Tháng 2</div>
+                <div className="text-xs font-bold text-emerald-300">Phản xạ đời sống</div>
+              </div>
+              <div className="bg-white/5 rounded-xl p-2.5 border border-white/10 text-center">
+                <div className="text-[10px] text-slate-400">Tháng 3</div>
+                <div className="text-xs font-bold text-blue-300">Thực chiến độc lập</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-center sm:items-end gap-3 flex-shrink-0">
+            <Link
+              to="/roadmap"
+              className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white font-black text-sm shadow-xl shadow-rose-900/50 transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-95"
+            >
+              <Calendar size={18} />
+              <span>Vào Học Lộ Trình Hôm Nay</span>
+              <ChevronRight size={16} />
+            </Link>
+            <span className="text-[11px] text-slate-400 font-medium">
+              Bấm để bắt đầu buổi luyện 15 phút ngay
+            </span>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">

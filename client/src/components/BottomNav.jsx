@@ -1,13 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { BookOpen, Gamepad2, Bot, Headphones, MessageSquare, Menu } from 'lucide-react';
+import { Calendar, Mic, Bot, Headphones, MessageSquare, Menu } from 'lucide-react';
 
 export default function BottomNav({ onOpenMore }) {
   const primaryTabs = [
-    { path: '/reading', label: 'Đọc', icon: BookOpen },
-    { path: '/matching', label: 'Ghép chữ', icon: Gamepad2 },
-    { path: '/ai-chat', label: 'AI Nói', icon: Bot },
+    { path: '/roadmap', label: 'Lộ trình', icon: Calendar },
+    { path: '/speaking', label: 'Luyện nói', icon: Mic },
     { path: '/listening', label: 'Nghe', icon: Headphones },
+    { path: '/ai-chat', label: 'AI Nói', icon: Bot },
     { path: '/scenario', label: 'Thực tế', icon: MessageSquare },
   ];
 

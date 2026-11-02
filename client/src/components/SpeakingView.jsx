@@ -24,7 +24,14 @@ import {
   ShoppingBag,
   Car,
   Briefcase,
-  Lightbulb
+  Lightbulb,
+  Hotel,
+  Activity,
+  Coffee,
+  Home,
+  Package,
+  Users,
+  Shuffle
 } from 'lucide-react';
 import { SENTENCE_PUZZLE_TOPICS, ALL_SENTENCE_PUZZLES } from '../data/sentencePuzzlesData';
 
@@ -454,6 +461,46 @@ export default function SpeakingView({ lesson, onGainXP }) {
     }
   };
 
+  const handleRandomSentence = () => {
+    if (sentences.length <= 1) return;
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * sentences.length);
+    } while (nextIdx === currentIdx && sentences.length > 1);
+    setCurrentIdx(nextIdx);
+  };
+
+  const renderTopicIcon = (id) => {
+    switch (id) {
+      case 'lesson_active':
+        return <Target size={14} />;
+      case 'dining_order':
+        return <UtensilsCrossed size={14} />;
+      case 'shopping_bargain':
+        return <ShoppingBag size={14} />;
+      case 'travel_direction':
+        return <Car size={14} />;
+      case 'work_lifestyle':
+        return <Briefcase size={14} />;
+      case 'hotel_travel':
+        return <Hotel size={14} />;
+      case 'hospital_health':
+        return <Activity size={14} />;
+      case 'cafe_drink':
+        return <Coffee size={14} />;
+      case 'rent_living':
+        return <Home size={14} />;
+      case 'delivery_online':
+        return <Package size={14} />;
+      case 'social_party':
+        return <Users size={14} />;
+      case 'interview_career':
+        return <Briefcase size={14} />;
+      default:
+        return <MessageSquare size={14} />;
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fadeIn pb-12">
       {/* 1. Header Banner Studio */}
@@ -467,6 +514,9 @@ export default function SpeakingView({ lesson, onGainXP }) {
               <span className="px-3 py-1 rounded-full bg-rose-600/90 text-white text-xs font-black tracking-wider uppercase shadow-md shadow-rose-900/40 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
                 AI Voice Lab 4.0
+              </span>
+              <span className="px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold backdrop-blur-md border border-amber-500/30">
+                240+ Câu Luyện Nói Đời Sống (12 Chủ Đề)
               </span>
               <span className="px-3 py-1 rounded-full bg-white/10 text-rose-200 text-xs font-semibold backdrop-blur-md border border-white/10">
                 Thẩm âm bản xứ & Đối chiếu giọng đọc
@@ -566,19 +616,7 @@ export default function SpeakingView({ lesson, onGainXP }) {
                   : 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600'
               }`}
             >
-              {top.id === 'lesson_active' ? (
-                <Target size={14} />
-              ) : top.id === 'dining_order' ? (
-                <UtensilsCrossed size={14} />
-              ) : top.id === 'shopping_bargain' ? (
-                <ShoppingBag size={14} />
-              ) : top.id === 'travel_direction' ? (
-                <Car size={14} />
-              ) : top.id === 'work_lifestyle' ? (
-                <Briefcase size={14} />
-              ) : (
-                <MessageSquare size={14} />
-              )}
+              {renderTopicIcon(top.id)}
               <span>{top.name}</span>
             </button>
           ))}
@@ -612,6 +650,15 @@ export default function SpeakingView({ lesson, onGainXP }) {
             >
               <span>◀</span>
               <span className="hidden sm:inline">Câu trước</span>
+            </button>
+
+            <button
+              onClick={handleRandomSentence}
+              className="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 font-semibold text-xs transition-all flex items-center gap-1.5"
+              title="Luyện phản xạ ngẫu nhiên một câu bất kỳ"
+            >
+              <Shuffle size={13} className="text-amber-600" />
+              <span>Ngẫu nhiên</span>
             </button>
 
             <button

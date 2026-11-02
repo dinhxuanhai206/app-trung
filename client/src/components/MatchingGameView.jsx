@@ -15,7 +15,8 @@ import {
   ChevronRight,
   BookOpen,
   Clock,
-  Play
+  Play,
+  Shuffle
 } from 'lucide-react';
 import { getLessonSentenceBuilding } from '../data/lessonEnricher';
 import { VOCAB_TOPICS } from '../data/matchingVocabData';
@@ -280,6 +281,18 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
 
   const handleNextPuzzle = () => {
     setActivePuzzleIdx((prev) => (prev + 1) % sentencePuzzles.length);
+    setSelectedPuzzleTokens([]);
+    setPuzzleFeedback(null);
+    setShowHint(false);
+  };
+
+  const handleRandomPuzzle = () => {
+    if (sentencePuzzles.length <= 1) return;
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * sentencePuzzles.length);
+    } while (nextIdx === activePuzzleIdx && sentencePuzzles.length > 1);
+    setActivePuzzleIdx(nextIdx);
     setSelectedPuzzleTokens([]);
     setPuzzleFeedback(null);
     setShowHint(false);
@@ -646,6 +659,9 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
               </p>
             </div>
             <div className="flex items-center gap-3">
+              <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 font-bold text-xs">
+                240+ Câu (12 Chủ Đề)
+              </span>
               <span className="px-3.5 py-1.5 rounded-full bg-blue-600 text-white font-bold text-xs shadow-xs flex items-center gap-1.5">
                 <Trophy size={14} />
                 <span>Điểm Puzzle: {puzzleScore} XP</span>
@@ -696,9 +712,19 @@ export default function MatchingGameView({ lesson, showPinyin, onGainXP }) {
                   <Layers size={13} className="text-slate-400" />
                   <span>Chọn câu hỏi trong chủ đề:</span>
                 </span>
-                <span className="text-[11px] text-slate-500 font-medium">
-                  Đang làm: Câu {activePuzzleIdx + 1} / {sentencePuzzles.length}
-                </span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleRandomPuzzle}
+                    className="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold flex items-center gap-1 transition-all"
+                    title="Luyện phản xạ với một câu ngẫu nhiên"
+                  >
+                    <Shuffle size={12} className="text-amber-600" />
+                    <span>Ngẫu nhiên</span>
+                  </button>
+                  <span className="text-[11px] text-slate-500 font-medium">
+                    Đang làm: Câu {activePuzzleIdx + 1} / {sentencePuzzles.length}
+                  </span>
+                </div>
               </div>
               <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
                 {sentencePuzzles.map((puz, idx) => (

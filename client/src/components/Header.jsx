@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import {
   Menu,
   MapPin,
+  Calendar,
   Languages,
   Flame,
   Sparkles,
@@ -62,15 +64,28 @@ export default function Header({
             </button>
           )}
 
+          {/* 90-Day Roadmap Quick Button */}
+          <Link
+            to="/roadmap"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white font-extrabold text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex-shrink-0 animate-pulse-slow"
+            title="Lộ trình 90 Ngày Nghe Nói Giao Tiếp - Không Nản"
+          >
+            <Calendar size={15} />
+            <span className="hidden sm:inline">Lộ trình 90 Ngày</span>
+            <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-[10px]">
+              3 Tháng
+            </span>
+          </Link>
+
           {/* Roadmap Modal Trigger Button */}
           <button
             onClick={() => setShowRoadmapModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-rose-600 hover:from-rose-600 hover:to-rose-700 text-white font-bold text-xs sm:text-sm shadow-sm transition-all active:scale-95 flex-shrink-0"
-            title="Xem toàn bộ lộ trình bài học"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm transition-all active:scale-95 flex-shrink-0"
+            title="Xem toàn bộ 20 bài học"
           >
-            <MapPin size={15} />
-            <span className="hidden xs:inline">Lộ trình bài học</span>
-            <span className="bg-white/25 px-1.5 py-0.5 rounded-full text-[10px]">
+            <MapPin size={15} className="text-rose-600" />
+            <span className="hidden md:inline">20 Bài HSK</span>
+            <span className="bg-slate-200 px-1.5 py-0.5 rounded-full text-[10px]">
               {currentLessonIndex + 1}/{lessons.length}
             </span>
           </button>

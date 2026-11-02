@@ -29,9 +29,46 @@ export const SENTENCE_PUZZLE_TOPICS = [
     name: 'Công Sở & Đời Sống (20 câu)',
     icon: 'work',
   },
+  {
+    id: 'hotel_travel',
+    name: 'Khách Sạn & Du Lịch (20 câu)',
+    icon: 'hotel',
+  },
+  {
+    id: 'hospital_health',
+    name: 'Khám Bệnh & Sức Khỏe (20 câu)',
+    icon: 'hospital',
+  },
+  {
+    id: 'cafe_drink',
+    name: 'Cà Phê & Đồ Uống (20 câu)',
+    icon: 'cafe',
+  },
+  {
+    id: 'rent_living',
+    name: 'Thuê Nhà & Sinh Hoạt (20 câu)',
+    icon: 'rent',
+  },
+  {
+    id: 'delivery_online',
+    name: 'Nhận Hàng & Chuyển Phát (20 câu)',
+    icon: 'delivery',
+  },
+  {
+    id: 'social_party',
+    name: 'Tụ Tập Bạn Bè & Xã Giao (20 câu)',
+    icon: 'social',
+  },
+  {
+    id: 'interview_career',
+    name: 'Phỏng Vấn & Sự Nghiệp (20 câu)',
+    icon: 'interview',
+  },
 ];
 
-export const ALL_SENTENCE_PUZZLES = [
+import { EXTRA_SENTENCE_PUZZLES } from './extraSentencePuzzles.js';
+
+const BASE_SENTENCE_PUZZLES = [
   // =========================================================================
   // CHỦ ĐỀ 1: CHÀO HỎI & LÀM QUEN & GIỚI THIỆU BẢN THÂN (20 CÂU)
   // =========================================================================
@@ -1152,3 +1189,5 @@ export const ALL_SENTENCE_PUZZLES = [
     explanation: 'Lời chúc ngày mới công việc suôn sẻ: 工作顺利.',
   },
 ];
+
+export const ALL_SENTENCE_PUZZLES = [...BASE_SENTENCE_PUZZLES, ...EXTRA_SENTENCE_PUZZLES];

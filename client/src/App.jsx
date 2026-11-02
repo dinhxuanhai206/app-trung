@@ -15,6 +15,7 @@ import Vocab1000View from './components/Vocab1000View';
 import DashboardView from './components/DashboardView';
 import AiLiveChatView from './components/AiLiveChatView';
 import TranslationExerciseView from './components/TranslationExerciseView';
+import Roadmap90DaysView from './components/Roadmap90DaysView';
 import axiosClient from './api/axiosClient';
 import { LESSONS_DATA } from './data/lessonsData';
 
@@ -75,7 +76,15 @@ export default function App() {
         {/* Responsive padding: p-3.5 on mobile, p-6 on tablet, p-8 on desktop; pb-24 for mobile bottom bar */}
         <main className="flex-1 p-3.5 sm:p-6 md:p-8 pb-28 lg:pb-8 max-w-7xl w-full mx-auto">
           <Routes>
-            <Route path="/" element={<Navigate to="/reading" replace />} />
+            <Route path="/" element={<Navigate to="/roadmap" replace />} />
+            <Route
+              path="/roadmap"
+              element={
+                <Roadmap90DaysView
+                  onGainXP={handleGainXP}
+                />
+              }
+            />
             <Route
               path="/reading"
               element={

@@ -1,6 +1,8 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import {
+  Calendar,
+  Sparkles,
   BookOpen,
   Headphones,
   Mic,
@@ -17,16 +19,23 @@ import {
 
 export default function Sidebar({ isOpen, onClose }) {
   const navItems = [
-    { path: '/reading', label: '1. Kỹ Năng Đọc (阅读)', icon: BookOpen },
+    {
+      path: '/roadmap',
+      label: '⭐ Lộ Trình 90 Ngày Nghe Nói (3 Tháng)',
+      icon: Calendar,
+      isHot: true,
+      badge: 'Chống nản',
+    },
+    { path: '/speaking', label: '1. Luyện Nói AI (口语)', icon: Mic },
     { path: '/listening', label: '2. Kỹ Năng Nghe (听力)', icon: Headphones },
-    { path: '/speaking', label: '3. Luyện Nói AI (口语)', icon: Mic },
-    { path: '/ai-chat', label: '4. AI Trò Chuyện Song Song (智能对话)', icon: Bot, isNew: true },
-    { path: '/translation', label: '5. Luyện Dịch Câu (翻译练习)', icon: Languages, isNew: true },
-    { path: '/writing', label: '6. Luyện Viết (书写)', icon: PenTool },
-    { path: '/matching', label: '7. Game Ghép Chữ & Ghép Câu (游戏)', icon: Gamepad2 },
-    { path: '/scenario', label: '8. Tình Huống Thực Tế (情景)', icon: Compass },
-    { path: '/formula', label: '9. Công Thức Ghép Câu (句型)', icon: Layers },
-    { path: '/vocab1000', label: '10. Kho 1000 Từ HSK (词汇)', icon: GraduationCap },
+    { path: '/ai-chat', label: '3. AI Trò Chuyện Song Song (智能对话)', icon: Bot, isNew: true },
+    { path: '/scenario', label: '4. Tình Huống Thực Tế (情景)', icon: Compass },
+    { path: '/formula', label: '5. Công Thức Ghép Câu (句型)', icon: Layers },
+    { path: '/translation', label: '6. Luyện Dịch Câu (翻译练习)', icon: Languages, isNew: true },
+    { path: '/reading', label: '7. Kỹ Năng Đọc (阅读)', icon: BookOpen },
+    { path: '/matching', label: '8. Game Ghép Chữ & Ghép Câu (游戏)', icon: Gamepad2 },
+    { path: '/vocab1000', label: '9. Kho 1000 Từ HSK (词汇)', icon: GraduationCap },
+    { path: '/writing', label: '10. Luyện Viết (书写 - Bổ trợ)', icon: PenTool },
     { path: '/dashboard', label: 'Tiến Độ & Thống Kê', icon: BarChart3 },
   ];
 
@@ -82,8 +91,13 @@ export default function Sidebar({ isOpen, onClose }) {
             >
               <IconComponent className="w-5 h-5 flex-shrink-0" />
               <span className="truncate flex-1">{item.label}</span>
+              {item.badge && (
+                <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-400 to-orange-400 text-slate-950 text-[10px] font-black uppercase tracking-wider shadow-xs">
+                  {item.badge}
+                </span>
+              )}
               {item.isNew && (
-                <span className="px-1.5 py-0.5 rounded-full bg-amber-400 text-slate-950 text-[10px] font-black uppercase tracking-wider">
+                <span className="px-1.5 py-0.5 rounded-full bg-rose-500 text-white text-[10px] font-black uppercase tracking-wider">
                   Live
                 </span>
               )}
