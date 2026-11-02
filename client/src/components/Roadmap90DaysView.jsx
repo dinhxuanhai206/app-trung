@@ -44,32 +44,62 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { ROADMAP_STAGES, ROADMAP_DAYS_DATA, ANTI_BURNOUT_TIPS } from '../data/roadmap90DaysData';
 import { enrichDayData } from '../data/roadmapEnricher';
+import { ROADMAP_ENGLISH_STAGES, ROADMAP_ENGLISH_DAYS_DATA, ANTI_BURNOUT_ENGLISH_TIPS } from '../data/roadmapEnglish90DaysData';
+import { enrichEnglishDayData } from '../data/roadmapEnglishEnricher';
+import { getDailyChunksData } from '../data/roadmapChunksData';
 
 export default function Roadmap90DaysView({ onGainXP }) {
   const navigate = useNavigate();
 
-  // Local storage keys
-  const STORAGE_KEY_CURRENT_DAY = 'hsk_roadmap_current_day';
-  const STORAGE_KEY_COMPLETED_DAYS = 'hsk_roadmap_completed_days';
+  // Learning Language: 'zh' (Chinese) | 'en' (English)
+  const STORAGE_KEY_LANG = 'hsk_learning_language';
+  const [currentLang, setCurrentLang] = useState(() => {
+    return localStorage.getItem(STORAGE_KEY_LANG) || 'zh';
+  });
+
+  const activeStages = currentLang === 'en' ? ROADMAP_ENGLISH_STAGES : ROADMAP_STAGES;
+  const activeDaysData = currentLang === 'en' ? ROADMAP_ENGLISH_DAYS_DATA : ROADMAP_DAYS_DATA;
+  const activeTips = currentLang === 'en' ? ANTI_BURNOUT_ENGLISH_TIPS : ANTI_BURNOUT_TIPS;
+  const activeEnricher = currentLang === 'en' ? enrichEnglishDayData : enrichDayData;
+
+  const STORAGE_KEY_CURRENT_DAY = `hsk_roadmap_current_day_${currentLang}`;
+  const STORAGE_KEY_COMPLETED_DAYS = `hsk_roadmap_completed_days_${currentLang}`;
 
   // State
   const [selectedDayNum, setSelectedDayNum] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_CURRENT_DAY);
+    const saved = localStorage.getItem(`hsk_roadmap_current_day_${currentLang}`);
     return saved ? parseInt(saved, 10) : 1;
   });
 
   const [completedDays, setCompletedDays] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY_COMPLETED_DAYS);
+      const saved = localStorage.getItem(`hsk_roadmap_completed_days_${currentLang}`);
       return saved ? JSON.parse(saved) : [1];
     } catch {
       return [1];
     }
   });
 
+  const handleLanguageSwitch = (lang) => {
+    setCurrentLang(lang);
+    localStorage.setItem(STORAGE_KEY_LANG, lang);
+    const savedDay = localStorage.getItem(`hsk_roadmap_current_day_${lang}`);
+    setSelectedDayNum(savedDay ? parseInt(savedDay, 10) : 1);
+    try {
+      const savedDone = localStorage.getItem(`hsk_roadmap_completed_days_${lang}`);
+      setCompletedDays(savedDone ? JSON.parse(savedDone) : [1]);
+    } catch {
+      setCompletedDays([1]);
+    }
+    setActiveTab(1);
+    stopAutoPlay();
+  };
+
   const [activeStageId, setActiveStageId] = useState(1);
   const [showPinyinOnly, setShowPinyinOnly] = useState(false);
   const [showTipsModal, setShowTipsModal] = useState(false);
+  const [mobileHeroExpanded, setMobileHeroExpanded] = useState(false);
+  const [mobileSelectedWeek, setMobileSelectedWeek] = useState(1);
 
   // 6 Main Tabs:
   // 1: Từ vựng (12 từ), 2: Câu thực tế (8-10 câu), 3: Luyện nói AI, 4: Hội thoại A-B, 5: Bài khóa thuần chữ Hán, 6: Đấu trường Game
@@ -124,9 +154,92 @@ export default function Roadmap90DaysView({ onGainXP }) {
   // Speech Recognition Ref
   const recognitionRef = useRef(null);
 
-  // Enrich current day with full 12 vocabularies, 8-10 sentences, dialogues, pure hanzi passage, and games
-  const rawDayData = ROADMAP_DAYS_DATA.find((d) => d.day === selectedDayNum) || ROADMAP_DAYS_DATA[0];
-  const currentDayData = useMemo(() => enrichDayData(rawDayData), [rawDayData]);
+  // Chunking Lego Engine (Tư duy ghép cụm từ 3000 từ vựng cốt lõi)
+  const [selectedChunkA, setSelectedChunkA] = useState(0);
+  const [selectedChunkB, setSelectedChunkB] = useState(0);
+  const [selectedChunkC, setSelectedChunkC] = useState(0);
+  const [show3000VocabModal, setShow3000VocabModal] = useState(false);
+  const [chunkFeedback, setChunkFeedback] = useState(null);
+  const [chunkTranscript, setChunkTranscript] = useState('');
+  const [chunkRecording, setChunkRecording] = useState(false);
+
+  const dailyChunks = useMemo(() => {
+    return getDailyChunksData(selectedDayNum, currentLang);
+  }, [selectedDayNum, currentLang]);
+
+  const activeChunkA = dailyChunks.columnA[selectedChunkA] || dailyChunks.columnA[0];
+  const activeChunkB = dailyChunks.columnB[selectedChunkB] || dailyChunks.columnB[0];
+  const activeChunkC = dailyChunks.columnC[selectedChunkC] || dailyChunks.columnC[0];
+
+  const combinedTargetText = useMemo(() => {
+    if (currentLang === 'en') {
+      return `${activeChunkA.text} ${activeChunkB.text} ${activeChunkC.text}`;
+    }
+    return `${activeChunkA.text.replace('...', '')}${activeChunkB.text}，${activeChunkC.text}`;
+  }, [activeChunkA, activeChunkB, activeChunkC, currentLang]);
+
+  const combinedPhoneticText = useMemo(() => {
+    if (currentLang === 'en') {
+      return `${activeChunkA.ipa || activeChunkA.pinyin} ${activeChunkB.ipa || activeChunkB.pinyin} ${activeChunkC.ipa || activeChunkC.pinyin}`;
+    }
+    return `${activeChunkA.pinyin.replace('...', '')} ${activeChunkB.pinyin}, ${activeChunkC.pinyin}`;
+  }, [activeChunkA, activeChunkB, activeChunkC, currentLang]);
+
+  const combinedMeaningText = useMemo(() => {
+    return `${activeChunkA.vi.replace('...', '')} ${activeChunkB.vi} ${activeChunkC.vi}`;
+  }, [activeChunkA, activeChunkB, activeChunkC]);
+
+  const handleRandomizeChunks = () => {
+    setSelectedChunkA(Math.floor(Math.random() * dailyChunks.columnA.length));
+    setSelectedChunkB(Math.floor(Math.random() * dailyChunks.columnB.length));
+    setSelectedChunkC(Math.floor(Math.random() * dailyChunks.columnC.length));
+    setChunkFeedback(null);
+    setChunkTranscript('');
+  };
+
+  const toggleChunkRecording = () => {
+    if (chunkRecording) {
+      if (recognitionRef.current) recognitionRef.current.stop();
+      setChunkRecording(false);
+      return;
+    }
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Trình duyệt chưa hỗ trợ nhận diện giọng nói.');
+      return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
+    recognition.interimResults = false;
+    recognition.continuous = false;
+    recognitionRef.current = recognition;
+
+    setChunkFeedback('Đang lắng nghe cụm từ bạn nói...');
+    setChunkTranscript('');
+    setChunkRecording(true);
+
+    recognition.onresult = (e) => {
+      const res = e.results[0][0].transcript;
+      setChunkTranscript(res);
+      const evalRes = evaluatePronunciation(res, combinedTargetText);
+      setChunkFeedback(`Độ chuẩn: ${evalRes.score}% • ${evalRes.feedback}`);
+      if (evalRes.score >= 60 && onGainXP) {
+        onGainXP(15, 'Ghép và nói cụm từ chuẩn');
+      }
+    };
+    recognition.onerror = () => {
+      setChunkFeedback('Không nhận diện được giọng nói. Hãy thử lại!');
+      setChunkRecording(false);
+    };
+    recognition.onend = () => {
+      setChunkRecording(false);
+    };
+    recognition.start();
+  };
+
+  // Enrich current day with full 12 vocabularies, 8-10 sentences, dialogues, reading passage, and games
+  const rawDayData = activeDaysData.find((d) => d.day === selectedDayNum) || activeDaysData[0];
+  const currentDayData = useMemo(() => activeEnricher(rawDayData), [rawDayData, currentLang]);
 
   // Sync state when selected day changes
   useEffect(() => {
@@ -297,12 +410,17 @@ export default function Roadmap90DaysView({ onGainXP }) {
     if (!('speechSynthesis' in window) || !text) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = 'zh-CN';
+    utterance.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
     utterance.rate = rate;
 
     const voices = window.speechSynthesis.getVoices();
-    const zhVoice = voices.find((v) => v.lang.includes('zh') || v.lang.includes('cmn'));
-    if (zhVoice) utterance.voice = zhVoice;
+    if (currentLang === 'en') {
+      const enVoice = voices.find((v) => v.lang.startsWith('en'));
+      if (enVoice) utterance.voice = enVoice;
+    } else {
+      const zhVoice = voices.find((v) => v.lang.includes('zh') || v.lang.includes('cmn'));
+      if (zhVoice) utterance.voice = zhVoice;
+    }
 
     utterance.onend = () => {
       setPlayingSentenceIdx(null);
@@ -345,8 +463,9 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
     setPlayingSentenceIdx(idx);
     const item = currentDayData.sentences[idx];
+    const speechText = currentLang === 'en' ? item.en : item.hanzi;
 
-    playTTS(item.hanzi, 0.9, () => {
+    playTTS(speechText, 0.9, () => {
       autoPlayTimeoutRef.current = setTimeout(() => {
         const nextIdx = idx + 1;
         autoPlayIndexRef.current = nextIdx;
@@ -373,7 +492,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
     try {
       const recognition = new SpeechRecognition();
-      recognition.lang = 'zh-CN';
+      recognition.lang = currentLang === 'en' ? 'en-US' : 'zh-CN';
       recognition.continuous = false;
       recognition.interimResults = false;
 
@@ -392,7 +511,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
       recognition.onerror = (e) => {
         console.error('Speech recognition error:', e);
         setIsRecording(false);
-        setFeedbackMsg('Chưa nhận diện rõ âm thanh, hãy nói to và thử lại nhé!');
+        setFeedbackMsg(currentLang === 'en' ? 'Could not hear clearly, please speak louder!' : 'Chưa nhận diện rõ âm thanh, hãy nói to và thử lại nhé!');
       };
 
       recognition.onend = () => {
@@ -409,28 +528,39 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
   // Evaluate Pronunciation similarity
   const evaluatePronunciation = (spoken) => {
-    const target = currentDayData.sentences[selectedSentenceIdx]?.hanzi || '';
+    const item = currentDayData.sentences[selectedSentenceIdx];
+    const target = (currentLang === 'en' ? item?.en : item?.hanzi) || '';
     if (!target) return;
 
-    const cleanSpoken = spoken.replace(/[^\u4e00-\u9fa5]/g, '');
-    const cleanTarget = target.replace(/[^\u4e00-\u9fa5]/g, '');
-
-    let matches = 0;
-    for (const char of cleanSpoken) {
-      if (cleanTarget.includes(char)) matches++;
+    let score = 0;
+    if (currentLang === 'en') {
+      const cleanSpoken = spoken.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+      const cleanTarget = target.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(Boolean);
+      let matches = 0;
+      for (const w of cleanSpoken) {
+        if (cleanTarget.includes(w)) matches++;
+      }
+      score = Math.min(100, Math.round((matches / Math.max(cleanTarget.length, 1)) * 100));
+    } else {
+      const cleanSpoken = spoken.replace(/[^\u4e00-\u9fa5]/g, '');
+      const cleanTarget = target.replace(/[^\u4e00-\u9fa5]/g, '');
+      let matches = 0;
+      for (const char of cleanSpoken) {
+        if (cleanTarget.includes(char)) matches++;
+      }
+      score = Math.min(100, Math.round((matches / Math.max(cleanTarget.length, 1)) * 100));
     }
 
-    const score = Math.min(100, Math.round((matches / Math.max(cleanTarget.length, 1)) * 100));
     setMatchScore(score);
 
-    if (score >= 75) {
-      setFeedbackMsg('🎉 Xuất sắc! Phát âm và khẩu ngữ rất chuẩn bản xứ.');
+    if (score >= 70) {
+      setFeedbackMsg(currentLang === 'en' ? '🎉 Excellent! Very clear pronunciation and natural rhythm!' : '🎉 Xuất sắc! Phát âm và khẩu ngữ rất chuẩn bản xứ.');
       setTabCompleted((prev) => ({ ...prev, 3: true }));
       if (onGainXP) onGainXP(25, 'Shadowing chuẩn xác');
     } else if (score >= 40) {
-      setFeedbackMsg('👍 Rất khá! Hãy thử nhại lại lần nữa để âm thanh dứt khoát hơn nhé.');
+      setFeedbackMsg(currentLang === 'en' ? '👍 Good attempt! Try speaking with confidence and link words together.' : '👍 Rất khá! Hãy thử nhại lại lần nữa để âm thanh dứt khoát hơn nhé.');
     } else {
-      setFeedbackMsg('💪 Cố lên! Hãy nghe chậm 0.75x rồi bắt chước lại khẩu hình nhé.');
+      setFeedbackMsg(currentLang === 'en' ? '💪 Keep going! Listen to the 0.75x slow audio and repeat.' : '💪 Cố lên! Hãy nghe chậm 0.75x rồi bắt chước lại khẩu hình nhé.');
     }
   };
 
@@ -439,110 +569,183 @@ export default function Roadmap90DaysView({ onGainXP }) {
   const completedCount = completedDays.length;
   const progressPercent = Math.min(100, Math.round((completedCount / totalDays) * 100));
 
-  const currentStage = ROADMAP_STAGES.find((s) => s.id === activeStageId) || ROADMAP_STAGES[0];
+  const currentStage = activeStages.find((s) => s.id === activeStageId) || activeStages[0];
+
+  // Current Week data for instant mobile 7-day strip
+  const currentWeekData = useMemo(() => {
+    for (const stg of activeStages) {
+      for (const wk of stg.weeks) {
+        if (wk.days.includes(selectedDayNum)) {
+          return { ...wk, stageId: stg.id, stageName: stg.name };
+        }
+      }
+    }
+    return activeStages[0].weeks[0];
+  }, [selectedDayNum, activeStages]);
 
   return (
-    <div className="space-y-6 animate-fadeIn pb-12">
-      {/* 1. HERO BANNER: 90-DAY SPEAKING ROADMAP */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-rose-950 text-white p-6 sm:p-8 shadow-2xl border border-rose-900/30">
+    <div className="space-y-4 sm:space-y-6 animate-fadeIn pb-28 sm:pb-14">
+      {/* 1. HERO BANNER: Responsive & Compact on Mobile */}
+      <div className={`relative overflow-hidden rounded-2xl sm:rounded-3xl text-white p-4 sm:p-7 shadow-xl border transition-all ${
+        currentLang === 'en'
+          ? 'bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 border-indigo-900/40'
+          : 'bg-gradient-to-br from-slate-950 via-slate-900 to-rose-950 border-rose-900/30'
+      }`}>
         <div className="absolute top-0 right-0 -mr-16 -mt-16 w-80 h-80 rounded-full bg-rose-500/10 blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-1/3 -mb-20 w-60 h-60 rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-300 font-extrabold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-xs">
-                <Sparkles size={13} className="text-amber-400" />
-                Lộ Trình Khẩu Ngữ Chống Nản • 3 Tháng (90 Ngày)
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/30 text-amber-300 text-xs font-bold">
-                15 - 20 phút / ngày
-              </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-bold">
-                12 Từ vựng • 8-10 Câu • Đọc Chữ Hán • Đấu Trường Game
-              </span>
-            </div>
-
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
-              Bứt Phá Nghe Nói Tiếng Trung <br className="hidden sm:inline" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-300 to-amber-300">
-                Tự Tin Giao Tiếp Thực Chiến
-              </span>
-            </h1>
-
-            <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-              Thiết kế chuyên sâu: <strong className="text-white">12 Từ vựng thực chiến • 8-10 Câu khẩu ngữ đời sống • Bài khóa thuần chữ Hán (ẩn Pinyin) • Game ghép thẻ & Game ghép câu</strong>. Tối đa hóa thực hành và loại bỏ cảm giác nản lòng.
-            </p>
-
-            <div className="flex flex-wrap items-center gap-3 pt-1">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-4 sm:gap-6">
+          <div className="space-y-2.5 max-w-2xl">
+            {/* Language Switcher: 🇨🇳 Tiếng Trung vs 🇬🇧 Tiếng Anh */}
+            <div className="flex items-center gap-1.5 p-1 bg-white/10 backdrop-blur-md rounded-2xl border border-white/15 w-fit">
               <button
-                onClick={() => setShowTipsModal(true)}
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-slate-200 transition-all flex items-center gap-2 hover:scale-[1.02] active:scale-95"
-              >
-                <ShieldCheck size={16} className="text-emerald-400" />
-                <span>5 Bí quyết học 3 tháng không nản</span>
-              </button>
-
-              <button
-                onClick={() => setShowPinyinOnly(!showPinyinOnly)}
-                className={`px-3.5 py-2 rounded-xl border text-xs font-bold transition-all flex items-center gap-2 active:scale-95 ${
-                  showPinyinOnly
-                    ? 'bg-rose-500 border-rose-400 text-white shadow-lg shadow-rose-900/40'
-                    : 'bg-white/10 border-white/15 text-slate-200 hover:bg-white/20'
+                onClick={() => handleLanguageSwitch('zh')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+                  currentLang === 'zh'
+                    ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 ring-2 ring-rose-400'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
-                <Sliders size={15} />
-                <span>{showPinyinOnly ? 'Đang bật: Ưu tiên Pinyin' : 'Chế độ: Đầy đủ Hán tự + Pinyin'}</span>
+                <span>🇨🇳</span>
+                <span>Tiếng Trung</span>
+              </button>
+
+              <button
+                onClick={() => handleLanguageSwitch('en')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-black transition-all flex items-center gap-1.5 active:scale-95 ${
+                  currentLang === 'en'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-400'
+                    : 'text-slate-300 hover:text-white'
+                }`}
+              >
+                <span>🇬🇧</span>
+                <span>Tiếng Anh</span>
               </button>
             </div>
+
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <span className="px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-rose-500/20 border border-rose-400/30 text-rose-300 font-extrabold text-[11px] sm:text-xs uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                <Sparkles size={12} className="text-amber-400" />
+                {currentLang === 'en' ? 'Lộ Trình 3 Tháng • 90 Ngày Tiếng Anh' : 'Lộ Trình 3 Tháng • 90 Ngày Tiếng Trung'}
+              </span>
+              <span className="px-2 py-0.5 rounded-full bg-amber-400/20 border border-amber-400/30 text-amber-300 text-[11px] font-bold">
+                15-20p/ngày
+              </span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[11px] font-bold">
+                12 Từ • 8-10 Câu • Bài Đọc • Game
+              </span>
+            </div>
+
+            <h1 className="text-xl sm:text-3xl md:text-4xl font-black tracking-tight leading-tight">
+              {currentLang === 'en' ? (
+                <>
+                  Bứt Phá Nghe Nói Tiếng Anh <br className="hidden sm:inline" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-emerald-300">
+                    Giao Tiếp Phản Xạ Quốc Tế Không Nản
+                  </span>
+                </>
+              ) : (
+                <>
+                  Bứt Phá Nghe Nói Tiếng Trung <br className="hidden sm:inline" />
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-rose-400 via-pink-300 to-amber-300">
+                    Giao Tiếp Thực Chiến Không Nản
+                  </span>
+                </>
+              )}
+            </h1>
+
+            {/* Mobile collapsible content */}
+            <div className={`${mobileHeroExpanded ? 'block' : 'hidden sm:block'} space-y-2.5 pt-1 animate-fadeIn`}>
+              <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                {currentLang === 'en' ? (
+                  <>
+                    Thiết kế chuyên sâu: <strong className="text-white">12 Từ vựng giao tiếp • 8-10 Câu khẩu ngữ bản xứ (kèm IPA) • Bài đọc tiếng Anh • Đấu trường 4 Game</strong>.
+                  </>
+                ) : (
+                  <>
+                    Thiết kế chuyên sâu: <strong className="text-white">12 Từ vựng thực chiến • 8-10 Câu khẩu ngữ • Bài khóa thuần chữ Hán (ẩn Pinyin) • Đấu trường 4 Game</strong>.
+                  </>
+                )}
+              </p>
+
+              <div className="flex flex-wrap items-center gap-2 pt-1">
+                <button
+                  onClick={() => setShowTipsModal(true)}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-xs font-bold text-slate-200 transition-all flex items-center gap-1.5 active:scale-95"
+                >
+                  <ShieldCheck size={14} className="text-emerald-400" />
+                  <span>5 Bí quyết chống nản</span>
+                </button>
+
+                <button
+                  onClick={() => setShowPinyinOnly(!showPinyinOnly)}
+                  className={`px-3 py-1.5 rounded-xl border text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 ${
+                    showPinyinOnly
+                      ? 'bg-rose-500 border-rose-400 text-white shadow-xs'
+                      : 'bg-white/10 border-white/15 text-slate-200 hover:bg-white/20'
+                  }`}
+                >
+                  <Sliders size={13} />
+                  <span>{showPinyinOnly ? 'Ưu tiên Pinyin' : 'Đầy đủ Hán tự + Pinyin'}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile toggle details button */}
+            <button
+              onClick={() => setMobileHeroExpanded(!mobileHeroExpanded)}
+              className="sm:hidden text-[11px] font-bold text-rose-300 hover:text-white flex items-center gap-1 pt-0.5"
+            >
+              <span>{mobileHeroExpanded ? '▲ Thu gọn bớt' : '▼ Xem bí quyết & hướng dẫn'}</span>
+            </button>
           </div>
 
-          {/* Quick Metrics Card */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/15 min-w-[280px] space-y-4">
-            <div className="flex items-center justify-between">
+          {/* Quick Metrics Bar / Card */}
+          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3.5 sm:p-5 border border-white/15 min-w-0 sm:min-w-[280px] space-y-2.5 sm:space-y-4">
+            <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[11px] uppercase font-bold text-slate-400">Tiến độ tổng thể</div>
-                <div className="text-2xl font-black text-white">
-                  Ngày {selectedDayNum} <span className="text-sm font-normal text-slate-300">/ 90 ngày</span>
+                <div className="text-[10px] sm:text-[11px] uppercase font-bold text-slate-400">Tiến độ 3 tháng</div>
+                <div className="text-xl sm:text-2xl font-black text-white">
+                  Ngày {selectedDayNum} <span className="text-xs sm:text-sm font-normal text-slate-300">/ 90 ngày</span>
                 </div>
               </div>
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center font-black text-lg text-white shadow-lg">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gradient-to-tr from-rose-500 to-amber-500 flex items-center justify-center font-black text-sm sm:text-lg text-white shadow-md">
                 {progressPercent}%
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-white/10">
+            <div className="space-y-1">
+              <div className="w-full h-2 sm:h-2.5 bg-slate-800 rounded-full overflow-hidden p-0.5 border border-white/10">
                 <div
                   className="h-full bg-gradient-to-r from-rose-500 to-amber-400 rounded-full transition-all duration-500"
                   style={{ width: `${progressPercent}%` }}
                 />
               </div>
-              <div className="flex justify-between text-[11px] text-slate-400 font-semibold">
+              <div className="flex justify-between text-[10px] sm:text-[11px] text-slate-400 font-semibold">
                 <span>Đã xong: {completedCount} ngày</span>
                 <span>Còn lại: {90 - completedCount} ngày</span>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 pt-1 border-t border-white/10 text-center">
-              <div className="bg-white/5 rounded-xl p-2">
-                <div className="text-[10px] text-slate-400">Chặng hiện tại</div>
+            <div className="grid grid-cols-2 gap-1.5 sm:gap-2 pt-1 border-t border-white/10 text-center">
+              <div className="bg-white/5 rounded-xl p-1.5 sm:p-2">
+                <div className="text-[9px] sm:text-[10px] text-slate-400">Chặng</div>
                 <div className="text-xs font-bold text-amber-300">Tháng {currentDayData.stage}/3</div>
               </div>
-              <div className="bg-white/5 rounded-xl p-2">
-                <div className="text-[10px] text-slate-400">Lượng nội dung</div>
-                <div className="text-xs font-bold text-emerald-300">12 Từ • 8-10 Câu</div>
+              <div className="bg-white/5 rounded-xl p-1.5 sm:p-2">
+                <div className="text-[9px] sm:text-[10px] text-slate-400">Thời lượng</div>
+                <div className="text-xs font-bold text-emerald-300">15-20 Phút</div>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* 2. THREE STAGES SELECTOR TABS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-        {ROADMAP_STAGES.map((stage) => {
+      {/* 2. THREE STAGES: Segmented 3-Cols on Mobile & Desktop */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        {activeStages.map((stage) => {
           const isActive = activeStageId === stage.id;
-          const stageDays = ROADMAP_DAYS_DATA.filter((d) => d.stage === stage.id);
+          const stageDays = activeDaysData.filter((d) => d.stage === stage.id);
           const stageCompleted = stageDays.filter((d) => completedDays.includes(d.day)).length;
           const stagePercent = Math.round((stageCompleted / stageDays.length) * 100);
 
@@ -556,33 +759,33 @@ export default function Roadmap90DaysView({ onGainXP }) {
                   setSelectedDayNum(firstDayOfStage);
                 }
               }}
-              className={`p-4 rounded-2xl text-left border transition-all relative overflow-hidden ${
+              className={`p-2.5 sm:p-4 rounded-2xl text-left border transition-all relative overflow-hidden ${
                 isActive
-                  ? 'bg-white border-rose-500 shadow-xl shadow-rose-500/10 ring-2 ring-rose-500/20 -translate-y-0.5'
-                  : 'bg-white/80 hover:bg-white border-slate-200 hover:border-slate-300 shadow-xs'
+                  ? 'bg-white border-rose-500 shadow-md shadow-rose-500/10 ring-2 ring-rose-500/20'
+                  : 'bg-white/85 hover:bg-white border-slate-200'
               }`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1">
                 <span
-                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full ${
+                  className={`text-[9px] sm:text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md sm:rounded-full ${
                     isActive ? 'bg-rose-100 text-rose-700' : 'bg-slate-100 text-slate-600'
                   }`}
                 >
-                  {stage.badge}
+                  Tháng {stage.id}
                 </span>
-                <span className="text-xs font-bold text-slate-500">
-                  {stageCompleted}/{stageDays.length} ngày ({stagePercent}%)
+                <span className="text-[10px] sm:text-[11px] font-bold text-slate-500">
+                  {stagePercent}%
                 </span>
               </div>
 
-              <h2 className="font-extrabold text-sm sm:text-base text-slate-900 leading-snug">
-                {stage.name}
+              <h2 className="font-extrabold text-xs sm:text-base text-slate-900 leading-snug truncate">
+                {stage.id === 1 ? 'Khởi Động' : stage.id === 2 ? 'Tăng Tốc' : 'Bứt Phá'}
               </h2>
-              <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
+              <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5 line-clamp-1 leading-relaxed hidden sm:block">
                 {stage.subtitle}
               </p>
 
-              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden mt-3">
+              <div className="w-full h-1 sm:h-1.5 bg-slate-100 rounded-full overflow-hidden mt-1.5 sm:mt-2.5">
                 <div
                   className={`h-full bg-gradient-to-r ${stage.gradient} transition-all duration-300`}
                   style={{ width: `${stagePercent}%` }}
@@ -591,6 +794,77 @@ export default function Roadmap90DaysView({ onGainXP }) {
             </button>
           );
         })}
+      </div>
+
+      {/* 2.5. WEEKLY 7-DAY QUICK STRIP: Mobile 1-Tap Navigation */}
+      <div className="p-3 sm:p-4 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse flex-shrink-0" />
+            <h3 className="text-xs sm:text-sm font-extrabold text-slate-900 truncate">
+              {currentWeekData.title}
+            </h3>
+          </div>
+          <div className="flex items-center gap-1 flex-shrink-0">
+            <button
+              onClick={() => setSelectedDayNum((prev) => Math.max(1, prev - 7))}
+              disabled={selectedDayNum <= 7}
+              className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
+              title="Tuần trước"
+            >
+              <ChevronLeft size={15} />
+            </button>
+            <span className="text-[10px] sm:text-xs font-bold text-slate-500 px-1">
+              Tuần {currentDayData.week}/12
+            </span>
+            <button
+              onClick={() => setSelectedDayNum((prev) => Math.min(90, prev + 7))}
+              disabled={selectedDayNum >= 84}
+              className="p-1 rounded-lg border border-slate-200 hover:bg-slate-100 text-slate-600 disabled:opacity-30 disabled:pointer-events-none transition-all active:scale-95"
+              title="Tuần sau"
+            >
+              <ChevronRight size={15} />
+            </button>
+          </div>
+        </div>
+
+        {/* 7 Days Quick Row */}
+        <div className="grid grid-cols-7 gap-1 sm:gap-2">
+          {currentWeekData.days.map((dNum, idx) => {
+            const isSelected = selectedDayNum === dNum;
+            const isDone = completedDays.includes(dNum);
+            const dayNames = ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'];
+            const dayLabel = dayNames[idx % 7] || `N${idx + 1}`;
+
+            return (
+              <button
+                key={dNum}
+                onClick={() => setSelectedDayNum(dNum)}
+                className={`py-2 px-1 rounded-xl text-center flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${
+                  isSelected
+                    ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30 scale-102 ring-2 ring-rose-400'
+                    : isDone
+                    ? 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                    : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200/80'
+                }`}
+              >
+                <span className="text-[9px] font-bold uppercase opacity-75">
+                  {dayLabel}
+                </span>
+                <span className="text-xs sm:text-sm font-black">
+                  {dNum}
+                </span>
+                {isDone ? (
+                  <CheckCircle2 size={12} className={isSelected ? 'text-white' : 'text-emerald-600'} />
+                ) : isSelected ? (
+                  <div className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
+                ) : (
+                  <div className="w-1 h-1 rounded-full bg-slate-300" />
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 3. TODAY'S RICH 6-TAB WORKSPACE */}
@@ -619,23 +893,34 @@ export default function Roadmap90DaysView({ onGainXP }) {
             </p>
           </div>
 
-          {/* Prev / Next Day Controls */}
-          <div className="flex items-center gap-2 self-start sm:self-center">
+          {/* Quick Day Jumper & Prev/Next Controls */}
+          <div className="flex items-center gap-1.5 self-start sm:self-center flex-shrink-0">
             <button
               onClick={() => setSelectedDayNum((prev) => Math.max(1, prev - 1))}
               disabled={selectedDayNum === 1}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95"
               title="Ngày trước"
             >
               <ChevronLeft size={18} />
             </button>
-            <span className="text-xs font-extrabold text-slate-700 px-2">
-              {selectedDayNum} / 90
-            </span>
+
+            {/* Quick jump select dropdown */}
+            <select
+              value={selectedDayNum}
+              onChange={(e) => setSelectedDayNum(Number(e.target.value))}
+              className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-xs sm:text-sm font-black text-slate-800 outline-none focus:border-rose-500 cursor-pointer shadow-2xs"
+            >
+              {activeDaysData.map((d) => (
+                <option key={d.day} value={d.day}>
+                  Ngày {d.day}: {d.title.split(':')[0]}
+                </option>
+              ))}
+            </select>
+
             <button
               onClick={() => setSelectedDayNum((prev) => Math.min(90, prev + 1))}
               disabled={selectedDayNum === 90}
-              className="p-2 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all active:scale-95"
+              className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-700 disabled:opacity-40 disabled:pointer-events-none transition-all flex items-center justify-center active:scale-95"
               title="Ngày tiếp theo"
             >
               <ChevronRight size={18} />
@@ -644,12 +929,12 @@ export default function Roadmap90DaysView({ onGainXP }) {
         </div>
 
         {/* Motivational Anti-Burnout Tip of the Day */}
-        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-start gap-3">
-          <div className="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
-            <Smile size={18} />
+        <div className="p-3.5 sm:p-4 rounded-2xl bg-amber-50 border border-amber-200/80 flex items-start gap-2.5 sm:gap-3">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <Smile size={16} />
           </div>
           <div>
-            <div className="text-xs font-black uppercase text-amber-800 tracking-wide">
+            <div className="text-[11px] sm:text-xs font-black uppercase text-amber-800 tracking-wide">
               Bí Kíp Chống Nản Hôm Nay
             </div>
             <div className="text-xs sm:text-sm text-amber-900/90 font-medium mt-0.5 leading-relaxed">
@@ -658,83 +943,98 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         </div>
 
-        {/* 6 Workspace Tabs Navigation */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 p-1.5 bg-slate-100 rounded-2xl">
-          <button
-            onClick={() => setActiveTab(1)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 1
-                ? 'bg-white text-rose-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <BookOpen size={15} />
-            <span>1. Từ Vựng ({currentDayData.vocabularies?.length || 12})</span>
-          </button>
+        {/* 7 Workspace Tabs: Sticky & Horizontal Scroll on Mobile, 7-Cols on Desktop */}
+        <div className="sticky top-0 z-20 -mx-5 sm:mx-0 px-5 sm:px-0 py-2.5 bg-white/95 backdrop-blur-md border-b border-slate-100 shadow-2xs">
+          <div className="flex lg:grid lg:grid-cols-7 overflow-x-auto no-scrollbar gap-1.5 p-1 bg-slate-100 rounded-2xl scrollbar-none snap-x">
+            <button
+              onClick={() => setActiveTab(1)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 1
+                  ? 'bg-white text-rose-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <BookOpen size={15} />
+              <span>1. Từ Vựng ({currentDayData.vocabularies?.length || 12})</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab(2)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 2
-                ? 'bg-white text-rose-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Headphones size={15} />
-            <span>2. {currentDayData.sentences?.length || 8} Câu Thực Tế</span>
-          </button>
+            <button
+              onClick={() => setActiveTab(2)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 2
+                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm ring-2 ring-amber-300'
+                  : 'text-amber-800 bg-amber-50/80 hover:bg-amber-100/80 border border-amber-200/60'
+              }`}
+              title="Tư duy ghép cụm từ phản xạ tự nhiên"
+            >
+              <Layers size={15} />
+              <span>2. 🧩 Ghép Cụm</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab(3)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 3
-                ? 'bg-white text-rose-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Mic size={15} />
-            <span>3. Luyện Nói AI</span>
-          </button>
+            <button
+              onClick={() => setActiveTab(3)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 3
+                  ? 'bg-white text-rose-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Headphones size={15} />
+              <span>3. {currentDayData.sentences?.length || 8} Câu Khẩu Ngữ</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab(4)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 4
-                ? 'bg-white text-rose-600 shadow-sm'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <MessageSquare size={15} />
-            <span>4. Hội Thoại A-B</span>
-          </button>
+            <button
+              onClick={() => setActiveTab(4)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 4
+                  ? 'bg-white text-rose-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Mic size={15} />
+              <span>4. Luyện Nói AI</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab(5)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 5
-                ? 'bg-white text-rose-600 shadow-sm ring-2 ring-purple-400'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <FileText size={15} className="text-purple-600" />
-            <span>5. Đọc Chữ Hán (Ẩn Pinyin)</span>
-          </button>
+            <button
+              onClick={() => setActiveTab(5)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 5
+                  ? 'bg-white text-rose-600 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <MessageSquare size={15} />
+              <span>5. Hội Thoại A-B</span>
+            </button>
 
-          <button
-            onClick={() => setActiveTab(6)}
-            className={`py-2.5 px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 ${
-              activeTab === 6
-                ? 'bg-white text-amber-600 shadow-sm ring-2 ring-amber-400 font-black'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Gamepad2 size={16} className="text-amber-500" />
-            <span>6. Game & Ôn Tập</span>
-            {tabCompleted[6] && <CheckCircle2 size={14} className="text-emerald-500" />}
-          </button>
+            <button
+              onClick={() => setActiveTab(6)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 6
+                  ? 'bg-white text-purple-700 shadow-sm ring-2 ring-purple-400 font-extrabold'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <FileText size={15} className="text-purple-600" />
+              <span>6. {currentLang === 'en' ? 'Bài Đọc' : 'Đọc Chữ Hán'}</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab(7)}
+              className={`flex-shrink-0 snap-start py-2 sm:py-2.5 px-3.5 sm:px-2 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center justify-center gap-1.5 whitespace-nowrap ${
+                activeTab === 7
+                  ? 'bg-white text-amber-600 shadow-sm ring-2 ring-amber-400 font-black'
+                  : 'text-slate-600 hover:text-slate-900'
+              }`}
+            >
+              <Gamepad2 size={16} className="text-amber-500" />
+              <span>7. Game & Ôn Tập</span>
+              {tabCompleted[7] && <CheckCircle2 size={14} className="text-emerald-500" />}
+            </button>
+          </div>
         </div>
 
-        {/* TAB 1: 12 TỪ VỰNG THỰC CHIẾN (VOCABULARY HUB) */}
+        {/* TAB 1: 10-12 TỪ VỰNG THỰC CHIẾN (VOCABULARY HUB) */}
         {activeTab === 1 && (
           <div className="space-y-4 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -744,15 +1044,19 @@ export default function Roadmap90DaysView({ onGainXP }) {
                   <span>Kho {currentDayData.vocabularies?.length || 12} Từ Vựng Thực Chiến Hôm Nay</span>
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Nắm chắc chữ Hán, Pinyin, Hán Việt và ngữ cảnh ứng dụng trước khi ghép vào câu.
+                  {currentLang === 'en'
+                    ? 'Nắm chắc từ vựng, phát âm chuẩn IPA và ngữ cảnh thực tế trước khi ghép vào câu.'
+                    : 'Nắm chắc chữ Hán, Pinyin, Hán Việt và ngữ cảnh ứng dụng trước khi ghép vào câu.'}
                 </p>
               </div>
 
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    const allVocabZh = currentDayData.vocabularies.map((v) => v.hanzi).join('，');
-                    playTTS(allVocabZh, 0.9);
+                    const allVocabText = currentDayData.vocabularies
+                      .map((v) => (currentLang === 'en' ? v.word : v.hanzi))
+                      .join(currentLang === 'en' ? ', ' : '，');
+                    playTTS(allVocabText, 0.9);
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
                 >
@@ -761,71 +1065,322 @@ export default function Roadmap90DaysView({ onGainXP }) {
                 </button>
                 <button
                   onClick={() => setActiveTab(2)}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
+                  className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95 shadow-sm"
                 >
-                  <span>Sang phần câu thực tế</span>
+                  <span>Sang Ghép Cụm Nói Câu</span>
                   <ChevronRight size={14} />
                 </button>
               </div>
             </div>
 
-            {/* Vocab Grid (12 Cards) */}
+            {/* Vocab Grid (10-12 Cards) */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-              {currentDayData.vocabularies.map((v, idx) => (
-                <div
-                  key={idx}
-                  className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-rose-300 transition-all space-y-2 group shadow-2xs"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2.5">
-                      <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center flex-shrink-0">
-                        {idx + 1}
-                      </span>
-                      <div>
-                        {!showPinyinOnly && (
-                          <div className="text-xl font-black text-slate-900 chinese-font tracking-wide">
-                            {v.hanzi}
+              {currentDayData.vocabularies.map((v, idx) => {
+                const wordMain = currentLang === 'en' ? v.word : v.hanzi;
+                const phonetic = currentLang === 'en' ? v.ipa : v.pinyin;
+                return (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 hover:border-rose-300 transition-all space-y-2 group shadow-2xs"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center flex-shrink-0">
+                          {idx + 1}
+                        </span>
+                        <div>
+                          {!showPinyinOnly && (
+                            <div className={`text-xl font-black text-slate-900 tracking-wide ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                              {wordMain}
+                            </div>
+                          )}
+                          <div className="text-xs font-bold text-rose-600 tracking-wide">
+                            {phonetic}
                           </div>
-                        )}
-                        <div className="text-xs font-bold text-rose-600 tracking-wide">
-                          {v.pinyin}
                         </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5">
+                        <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-bold text-slate-500">
+                          {v.type}
+                        </span>
+                        <button
+                          onClick={() => playTTS(wordMain, 0.9)}
+                          className="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:border-rose-300 text-slate-600 hover:text-rose-600 flex items-center justify-center transition-all shadow-2xs active:scale-95"
+                          title="Phát âm từ vựng"
+                        >
+                          <Volume2 size={15} />
+                        </button>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-1.5">
-                      <span className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-[10px] font-bold text-slate-500">
-                        {v.type}
-                      </span>
-                      <button
-                        onClick={() => playTTS(v.hanzi, 0.9)}
-                        className="w-8 h-8 rounded-lg bg-white border border-slate-200 hover:border-rose-300 text-slate-600 hover:text-rose-600 flex items-center justify-center transition-all shadow-2xs active:scale-95"
-                        title="Phát âm từ vựng"
-                      >
-                        <Volume2 size={15} />
-                      </button>
+                    <div className="text-xs font-semibold text-slate-700 flex items-center gap-2">
+                      {v.hv && (
+                        <>
+                          <span className="text-slate-400 font-normal">Hán Việt: {v.hv}</span>
+                          <span>•</span>
+                        </>
+                      )}
+                      <span className="text-slate-900 font-bold">{v.vi}</span>
                     </div>
-                  </div>
 
-                  <div className="text-xs font-semibold text-slate-700 flex items-center gap-2">
-                    <span className="text-slate-400 font-normal">Hán Việt: {v.hv}</span>
-                    <span>•</span>
-                    <span className="text-slate-900 font-bold">{v.vi}</span>
+                    {v.example && (
+                      <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 space-y-0.5">
+                        <div className={`font-medium text-slate-700 ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                          {v.example}
+                        </div>
+                      </div>
+                    )}
                   </div>
-
-                  {v.example && (
-                    <div className="pt-2 border-t border-slate-200/60 text-[11px] text-slate-500 space-y-0.5">
-                      <div className="chinese-font font-medium text-slate-700">{v.example}</div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* TAB 2: 8-10 CÂU KHẨU NGỮ ĐỜI SỐNG (REAL-LIFE SENTENCES & AUTO PLAY) */}
+        {/* TAB 2: PHƯƠNG PHÁP GHÉP CỤM (CHUNKING METHOD) - 3000 TỪ THÔNG DỤNG */}
         {activeTab === 2 && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* Header with Philosophy */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-3xl bg-gradient-to-r from-amber-500/10 via-orange-500/10 to-rose-500/10 border border-amber-200">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-black uppercase tracking-wider flex items-center gap-1 shadow-xs">
+                    <Sparkles size={12} /> Tư Duy Học Để Nghe Nói
+                  </span>
+                  <span className="text-xs font-bold text-amber-800">
+                    Kho 3.000 Từ Thông Dụng Qua Cụm Từ
+                  </span>
+                </div>
+                <h3 className="text-lg sm:text-xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+                  <Layers size={20} className="text-amber-600" />
+                  <span>Ghép 2-3 Cụm Thành Câu Giao Tiếp Tự Nhiên</span>
+                </h3>
+                <p className="text-xs text-slate-600 max-w-2xl">
+                  Đừng học ngữ pháp rời rạc! Người bản xứ giao tiếp bằng cách kết nối các khối cụm từ (Chunks) đã định hình sẵn. Bấm chọn 1 khối ở mỗi cột bên dưới để tạo ra câu giao tiếp hoàn chỉnh.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0 self-start sm:self-center">
+                <button
+                  onClick={handleRandomizeChunks}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-800 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs active:scale-95"
+                  title="Ghép ngẫu nhiên các cụm để thử thách phản xạ"
+                >
+                  <RotateCcw size={14} />
+                  <span>🎲 Mix Ngẫu Nhiên</span>
+                </button>
+                <button
+                  onClick={() => setShow3000VocabModal(true)}
+                  className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95"
+                >
+                  <BookOpen size={14} />
+                  <span>Kho 3000 Từ Cốt Lõi</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Combined Sentence Output Card (The Masterpiece Preview) */}
+            <div className="p-6 sm:p-7 rounded-3xl bg-slate-900 text-white space-y-4 shadow-xl border border-slate-800 relative overflow-hidden">
+              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+                <span className="text-xs font-black uppercase text-amber-300 tracking-wider flex items-center gap-1.5">
+                  <Zap size={15} /> Câu Ghép Hoàn Chỉnh (Cột A + Cột B + Cột C):
+                </span>
+                <span className="text-[11px] font-bold text-slate-400">
+                  Phản xạ tự nhiên • Không cần dịch
+                </span>
+              </div>
+
+              {/* Big Text Target */}
+              <div className="space-y-1.5">
+                <div className={`text-2xl sm:text-3xl font-black text-white tracking-wide ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                  {combinedTargetText}
+                </div>
+                <div className="text-base sm:text-lg font-bold text-rose-400 tracking-wide">
+                  {combinedPhoneticText}
+                </div>
+                <div className="text-xs sm:text-sm text-slate-300 font-medium">
+                  {combinedMeaningText}
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center gap-2.5 pt-2">
+                <button
+                  onClick={() => playTTS(combinedTargetText, 0.75)}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
+                  title="Nghe tốc độ chậm"
+                >
+                  <Volume2 size={15} className="text-amber-400" />
+                  <span>Nghe chậm 0.75x</span>
+                </button>
+                <button
+                  onClick={() => playTTS(combinedTargetText, 1.0)}
+                  className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-rose-600/30 active:scale-95"
+                  title="Nghe tốc độ tự nhiên"
+                >
+                  <Play size={14} />
+                  <span>Nghe chuẩn 1.0x</span>
+                </button>
+                <button
+                  onClick={toggleChunkRecording}
+                  className={`px-5 py-2 rounded-xl font-bold text-xs transition-all flex items-center gap-1.5 active:scale-95 ${
+                    chunkRecording
+                      ? 'bg-red-500 text-white animate-pulse shadow-lg shadow-red-500/50'
+                      : 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-md'
+                  }`}
+                >
+                  {chunkRecording ? <MicOff size={16} /> : <Mic size={16} />}
+                  <span>{chunkRecording ? 'Đang lắng nghe... Bấm dừng' : '🎙️ Nói Nhại Lại (AI Chấm)'}</span>
+                </button>
+              </div>
+
+              {/* AI Feedback Banner */}
+              {(chunkTranscript || chunkFeedback) && (
+                <div className="p-3.5 rounded-2xl bg-white/10 border border-white/10 text-xs space-y-1 animate-fadeIn">
+                  {chunkTranscript && (
+                    <div className="text-slate-300">
+                      Bạn vừa nói: <strong className="text-white font-bold text-sm">{chunkTranscript}</strong>
+                    </div>
+                  )}
+                  {chunkFeedback && (
+                    <div className="text-amber-300 font-bold">
+                      {chunkFeedback}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* 3 Interactive Lego Columns */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Column A: Cụm Mở Đầu */}
+              <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <span className="text-xs font-black uppercase text-rose-600 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-md bg-rose-100 text-rose-700 flex items-center justify-center text-[10px]">A</span>
+                    Cụm 1: Mở Đầu / Ý Định
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">Chọn 1</span>
+                </div>
+                <div className="space-y-2">
+                  {dailyChunks.columnA.map((chunk, idx) => {
+                    const isSelected = selectedChunkA === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedChunkA(idx)}
+                        className={`w-full p-3.5 rounded-2xl border text-left transition-all space-y-1 active:scale-98 ${
+                          isSelected
+                            ? 'bg-rose-600 text-white border-rose-600 shadow-md shadow-rose-600/30'
+                            : 'bg-white border-slate-200 hover:border-rose-300 text-slate-800'
+                        }`}
+                      >
+                        <div className={`font-black text-sm ${isSelected ? 'text-white' : 'text-slate-900'} ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                          {chunk.text}
+                        </div>
+                        <div className={`text-[11px] font-semibold ${isSelected ? 'text-rose-200' : 'text-rose-600'}`}>
+                          {chunk.ipa || chunk.pinyin}
+                        </div>
+                        <div className={`text-xs ${isSelected ? 'text-slate-100' : 'text-slate-600'}`}>
+                          {chunk.vi}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Column B: Cụm Hành Động Cốt Lõi */}
+              <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <span className="text-xs font-black uppercase text-amber-600 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-md bg-amber-100 text-amber-700 flex items-center justify-center text-[10px]">B</span>
+                    Cụm 2: Hành Động Cốt Lõi
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">Chọn 1</span>
+                </div>
+                <div className="space-y-2">
+                  {dailyChunks.columnB.map((chunk, idx) => {
+                    const isSelected = selectedChunkB === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedChunkB(idx)}
+                        className={`w-full p-3.5 rounded-2xl border text-left transition-all space-y-1 active:scale-98 ${
+                          isSelected
+                            ? 'bg-amber-600 text-white border-amber-600 shadow-md shadow-amber-600/30'
+                            : 'bg-white border-slate-200 hover:border-amber-300 text-slate-800'
+                        }`}
+                      >
+                        <div className={`font-black text-sm ${isSelected ? 'text-white' : 'text-slate-900'} ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                          {chunk.text}
+                        </div>
+                        <div className={`text-[11px] font-semibold ${isSelected ? 'text-amber-200' : 'text-amber-600'}`}>
+                          {chunk.ipa || chunk.pinyin}
+                        </div>
+                        <div className={`text-xs ${isSelected ? 'text-slate-100' : 'text-slate-600'}`}>
+                          {chunk.vi}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Column C: Cụm Hoàn Cảnh / Điều Kiện */}
+              <div className="p-4 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-3">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-200">
+                  <span className="text-xs font-black uppercase text-indigo-600 flex items-center gap-1.5">
+                    <span className="w-5 h-5 rounded-md bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">C</span>
+                    Cụm 3: Hoàn Cảnh / Điều Kiện
+                  </span>
+                  <span className="text-[10px] font-bold text-slate-400">Chọn 1</span>
+                </div>
+                <div className="space-y-2">
+                  {dailyChunks.columnC.map((chunk, idx) => {
+                    const isSelected = selectedChunkC === idx;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => setSelectedChunkC(idx)}
+                        className={`w-full p-3.5 rounded-2xl border text-left transition-all space-y-1 active:scale-98 ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-600/30'
+                            : 'bg-white border-slate-200 hover:border-indigo-300 text-slate-800'
+                        }`}
+                      >
+                        <div className={`font-black text-sm ${isSelected ? 'text-white' : 'text-slate-900'} ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                          {chunk.text}
+                        </div>
+                        <div className={`text-[11px] font-semibold ${isSelected ? 'text-indigo-200' : 'text-indigo-600'}`}>
+                          {chunk.ipa || chunk.pinyin}
+                        </div>
+                        <div className={`text-xs ${isSelected ? 'text-slate-100' : 'text-slate-600'}`}>
+                          {chunk.vi}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Next Action Button */}
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setActiveTab(3)}
+                className="px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md active:scale-95"
+              >
+                <span>Sang Phần 3: Câu Khẩu Ngữ Đời Sống</span>
+                <ChevronRight size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: 8-10 CÂU KHẨU NGỮ ĐỜI SỐNG (REAL-LIFE SENTENCES & AUTO PLAY) */}
+        {activeTab === 3 && (
           <div className="space-y-4 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -854,7 +1409,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                 </button>
 
                 <button
-                  onClick={() => setActiveTab(3)}
+                  onClick={() => setActiveTab(4)}
                   className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
                 >
                   <span>Luyện nói AI</span>
@@ -866,6 +1421,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
             <div className="space-y-3">
               {currentDayData.sentences.map((sent, idx) => {
                 const isItemPlaying = playingSentenceIdx === idx;
+                const sentText = currentLang === 'en' ? sent.en : sent.hanzi;
+                const sentPhonetic = currentLang === 'en' ? sent.ipa : sent.pinyin;
                 return (
                   <div
                     key={idx}
@@ -883,22 +1440,22 @@ export default function Roadmap90DaysView({ onGainXP }) {
                           </span>
                         </div>
                         {!showPinyinOnly && (
-                          <div className="text-xl sm:text-2xl font-black text-slate-900 tracking-wide chinese-font">
-                            {sent.hanzi}
+                          <div className={`text-xl sm:text-2xl font-black text-slate-900 tracking-wide ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                            {sentText}
                           </div>
                         )}
                         <div className="text-sm sm:text-base font-bold text-rose-600 tracking-wide">
-                          {sent.pinyin}
+                          {sentPhonetic}
                         </div>
                         <div className="text-xs sm:text-sm font-semibold text-slate-700">
                           {sent.vi}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 self-start sm:self-center flex-shrink-0">
+                      <div className="w-full sm:w-auto flex items-center gap-2 pt-2 sm:pt-0 flex-shrink-0">
                         <button
-                          onClick={() => playTTS(sent.hanzi, 0.75)}
-                          className="px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-600 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs active:scale-95"
+                          onClick={() => playTTS(sentText, 0.75)}
+                          className="flex-1 sm:flex-initial justify-center px-3 py-2 rounded-xl bg-white border border-slate-200 hover:border-rose-300 hover:text-rose-600 text-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs active:scale-95"
                           title="Nghe tốc độ chậm"
                         >
                           <Volume2 size={15} />
@@ -906,8 +1463,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
                         </button>
 
                         <button
-                          onClick={() => playTTS(sent.hanzi, 1.0)}
-                          className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-rose-600/30 active:scale-95"
+                          onClick={() => playTTS(sentText, 1.0)}
+                          className="flex-1 sm:flex-initial justify-center px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm shadow-rose-600/30 active:scale-95"
                           title="Nghe tốc độ chuẩn"
                         >
                           <Play size={14} />
@@ -929,8 +1486,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         )}
 
-        {/* TAB 3: SHADOWING & LUYỆN NÓI AI (VOICE DRILL) */}
-        {activeTab === 3 && (
+        {/* TAB 4: SHADOWING & LUYỆN NÓI AI (VOICE DRILL) */}
+        {activeTab === 4 && (
           <div className="space-y-5 animate-fadeIn">
             <div>
               <h3 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
@@ -944,29 +1501,34 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
             {/* Sentence selector pills */}
             <div className="flex flex-wrap gap-2">
-              {currentDayData.sentences.map((sent, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setSelectedSentenceIdx(idx);
-                    setTranscript('');
-                    setMatchScore(null);
-                    setFeedbackMsg('');
-                  }}
-                  className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
-                    selectedSentenceIdx === idx
-                      ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
-                      : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                  }`}
-                >
-                  Câu {idx + 1}: {sent.pinyin.split(' ')[0]}...
-                </button>
-              ))}
+              {currentDayData.sentences.map((sent, idx) => {
+                const previewText = currentLang === 'en' ? sent.en : sent.pinyin;
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => {
+                      setSelectedSentenceIdx(idx);
+                      setTranscript('');
+                      setMatchScore(null);
+                      setFeedbackMsg('');
+                    }}
+                    className={`px-3 py-1.5 rounded-xl font-bold text-xs transition-all ${
+                      selectedSentenceIdx === idx
+                        ? 'bg-rose-600 text-white shadow-md shadow-rose-600/30'
+                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                    }`}
+                  >
+                    Câu {idx + 1}: {(previewText || '').split(' ')[0]}...
+                  </button>
+                );
+              })}
             </div>
 
             {/* Target card */}
             {(() => {
               const currentSentence = currentDayData.sentences[selectedSentenceIdx] || currentDayData.sentences[0];
+              const targetText = currentLang === 'en' ? currentSentence.en : currentSentence.hanzi;
+              const phoneticText = currentLang === 'en' ? currentSentence.ipa : currentSentence.pinyin;
               return (
                 <div className="p-6 rounded-3xl bg-gradient-to-br from-slate-900 to-slate-950 text-white space-y-4 shadow-xl">
                   <div className="space-y-1.5 text-center">
@@ -974,12 +1536,12 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       {currentSentence.tag || 'Mẫu câu luyện nói'}
                     </span>
                     {!showPinyinOnly && (
-                      <div className="text-2xl sm:text-3xl font-black text-white chinese-font tracking-wide">
-                        {currentSentence.hanzi}
+                      <div className={`text-2xl sm:text-3xl font-black text-white tracking-wide ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                        {targetText}
                       </div>
                     )}
                     <div className="text-lg font-bold text-rose-400">
-                      {currentSentence.pinyin}
+                      {phoneticText}
                     </div>
                     <div className="text-xs sm:text-sm text-slate-300">
                       {currentSentence.vi}
@@ -989,7 +1551,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                   {/* Actions */}
                   <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
                     <button
-                      onClick={() => playTTS(currentSentence.hanzi, 0.8)}
+                      onClick={() => playTTS(targetText, 0.8)}
                       className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-2 transition-all active:scale-95"
                     >
                       <Volume2 size={16} className="text-amber-400" />
@@ -1014,7 +1576,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                     <div className="p-4 rounded-2xl bg-white/10 border border-white/10 space-y-2 text-center animate-fadeIn">
                       {transcript && (
                         <div className="text-xs text-slate-300">
-                          Bạn vừa nói: <strong className="text-white font-bold chinese-font text-sm">{transcript}</strong>
+                          Bạn vừa nói: <strong className={`text-white font-bold text-sm ${currentLang === 'en' ? '' : 'chinese-font'}`}>{transcript}</strong>
                         </div>
                       )}
                       {matchScore !== null && (
@@ -1046,7 +1608,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
             <div className="flex justify-end">
               <button
-                onClick={() => setActiveTab(4)}
+                onClick={() => setActiveTab(5)}
                 className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
               >
                 <span>Sang Hội thoại A-B</span>
@@ -1056,8 +1618,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         )}
 
-        {/* TAB 4: HỘI THOẠI THỰC TẾ & ĐÓNG VAI (ROLEPLAY A-B) */}
-        {activeTab === 4 && (
+        {/* TAB 5: HỘI THOẠI THỰC TẾ & ĐÓNG VAI (ROLEPLAY A-B) */}
+        {activeTab === 5 && (
           <div className="space-y-4 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
@@ -1073,7 +1635,9 @@ export default function Roadmap90DaysView({ onGainXP }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => {
-                    const fullText = currentDayData.dialogue.lines.map((l) => l.zh).join('，');
+                    const fullText = currentDayData.dialogue.lines
+                      .map((l) => (currentLang === 'en' ? l.en : l.zh))
+                      .join(currentLang === 'en' ? '. ' : '，');
                     playTTS(fullText, 0.9);
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
@@ -1082,10 +1646,10 @@ export default function Roadmap90DaysView({ onGainXP }) {
                   <span>Nghe toàn bộ hội thoại</span>
                 </button>
                 <button
-                  onClick={() => setActiveTab(5)}
+                  onClick={() => setActiveTab(6)}
                   className="px-3.5 py-1.5 rounded-xl bg-purple-700 hover:bg-purple-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
                 >
-                  <span>Sang Đọc chữ Hán (Ẩn Pinyin)</span>
+                  <span>{currentLang === 'en' ? 'Sang Đọc hiểu bài khóa' : 'Sang Đọc chữ Hán (Ẩn Pinyin)'}</span>
                   <ChevronRight size={14} />
                 </button>
               </div>
@@ -1095,6 +1659,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
             <div className="p-4 sm:p-6 rounded-3xl bg-slate-50 border border-slate-200/80 space-y-4">
               {currentDayData.dialogue?.lines.map((line, idx) => {
                 const isA = line.speaker === 'A';
+                const lineText = currentLang === 'en' ? line.en : line.zh;
+                const linePhonetic = currentLang === 'en' ? line.ipa : line.py;
                 return (
                   <div
                     key={idx}
@@ -1112,11 +1678,11 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-3">
-                        <div className="text-base sm:text-lg font-black chinese-font">
-                          {line.zh}
+                        <div className={`text-base sm:text-lg font-black ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                          {lineText}
                         </div>
                         <button
-                          onClick={() => playTTS(line.zh, 0.9)}
+                          onClick={() => playTTS(lineText, 0.9)}
                           className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0 ${
                             isA
                               ? 'bg-slate-100 hover:bg-slate-200 text-slate-700'
@@ -1128,7 +1694,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       </div>
 
                       <div className={`text-xs font-bold ${isA ? 'text-rose-600' : 'text-rose-200'}`}>
-                        {line.py}
+                        {linePhonetic}
                       </div>
                       <div className={`text-xs font-medium ${isA ? 'text-slate-600' : 'text-slate-100'}`}>
                         {line.vi}
@@ -1141,16 +1707,18 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         )}
 
-        {/* TAB 5: BÀI KHÓA LUYỆN ĐỌC THUẦN CHỮ HÁN (ẨN PINYIN MẶC ĐỊNH) */}
-        {activeTab === 5 && (
+        {/* TAB 6: BÀI KHÓA LUYỆN ĐỌC THUẦN (ẨN PHIÊN ÂM MẶC ĐỊNH) */}
+        {activeTab === 6 && (
           <div className="space-y-5 animate-fadeIn">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2">
                   <span className="px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-700 text-[10px] font-black uppercase tracking-wider">
-                    Thuần Chữ Hán • Không Hiện Pinyin
+                    {currentLang === 'en' ? 'Đoạn Văn Thuần Tiếng Anh • Tự Nhiên' : 'Thuần Chữ Hán • Không Hiện Pinyin'}
                   </span>
-                  <span className="text-xs text-slate-400">Rèn luyện nhận diện mặt chữ bản xứ</span>
+                  <span className="text-xs text-slate-400">
+                    {currentLang === 'en' ? 'Rèn luyện phản xạ ngữ cảnh tự nhiên' : 'Rèn luyện nhận diện mặt chữ bản xứ'}
+                  </span>
                 </div>
                 <h3 className="font-extrabold text-base sm:text-lg text-slate-900 mt-1 flex items-center gap-2">
                   <FileText size={18} className="text-purple-600" />
@@ -1167,14 +1735,23 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       ? 'bg-purple-600 border-purple-600 text-white shadow-xs'
                       : 'bg-white border-slate-200 hover:bg-slate-100 text-slate-700'
                   }`}
-                  title="Hiện hoặc ẩn toàn bộ Pinyin bài đọc"
+                  title="Hiện hoặc ẩn toàn bộ phiên âm bài đọc"
                 >
                   {showPassagePinyin ? <EyeOff size={14} /> : <Eye size={14} />}
-                  <span>{showPassagePinyin ? 'Đang hiện Pinyin (Bấm để ẩn)' : 'Xem Pinyin đối chiếu'}</span>
+                  <span>
+                    {showPassagePinyin
+                      ? (currentLang === 'en' ? 'Đang hiện IPA/Dịch (Bấm để ẩn)' : 'Đang hiện Pinyin (Bấm để ẩn)')
+                      : (currentLang === 'en' ? 'Xem IPA đối chiếu' : 'Xem Pinyin đối chiếu')}
+                  </span>
                 </button>
 
                 <button
-                  onClick={() => playTTS(currentDayData.readingPassage?.hanzi, 0.85)}
+                  onClick={() => {
+                    const passageText = currentLang === 'en'
+                      ? currentDayData.readingPassage?.text
+                      : currentDayData.readingPassage?.hanzi;
+                    playTTS(passageText, 0.85);
+                  }}
                   className="px-3.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
                 >
                   <Volume2 size={14} />
@@ -1189,17 +1766,19 @@ export default function Roadmap90DaysView({ onGainXP }) {
                 💡 <em>Mẹo luyện đọc:</em> Hãy đọc thử bằng mắt trước. Nếu quên từ nào, hãy <strong>bấm trực tiếp vào các từ khóa bên dưới</strong> để tra nghĩa tức thì!
               </div>
 
-              {/* Hanzi Text */}
-              <div className="text-xl sm:text-2xl font-bold leading-relaxed tracking-wider chinese-font text-slate-100">
-                {currentDayData.readingPassage?.hanzi}
+              {/* Main Reading Text */}
+              <div className={`text-xl sm:text-2xl font-bold leading-relaxed tracking-wider text-slate-100 ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                {currentLang === 'en' ? currentDayData.readingPassage?.text : currentDayData.readingPassage?.hanzi}
               </div>
 
-              {/* Optional Pinyin (Revealed when clicked) */}
+              {/* Optional Phonetic & Translation (Revealed when clicked) */}
               {showPassagePinyin && (
                 <div className="p-4 rounded-2xl bg-white/10 border border-white/10 space-y-2 animate-fadeIn">
-                  <div className="text-xs uppercase font-bold text-amber-300">Phiên âm Pinyin toàn bài:</div>
+                  <div className="text-xs uppercase font-bold text-amber-300">
+                    {currentLang === 'en' ? 'Phiên âm IPA toàn bài:' : 'Phiên âm Pinyin toàn bài:'}
+                  </div>
                   <div className="text-sm font-semibold text-rose-300 leading-relaxed tracking-wide">
-                    {currentDayData.readingPassage?.pinyin}
+                    {currentLang === 'en' ? currentDayData.readingPassage?.ipa : currentDayData.readingPassage?.pinyin}
                   </div>
                   <div className="text-xs text-slate-300 leading-relaxed pt-2 border-t border-white/10">
                     <strong>Bản dịch:</strong> {currentDayData.readingPassage?.vi}
@@ -1213,25 +1792,29 @@ export default function Roadmap90DaysView({ onGainXP }) {
                   Bấm để tra cứu nhanh từ vựng trong bài đọc:
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {currentDayData.readingPassage?.tokens?.map((tok, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => {
-                        setSelectedTokenInfo(tok);
-                        playTTS(tok.zh, 1.0);
-                      }}
-                      className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
-                    >
-                      <span className="chinese-font">{tok.zh}</span>
-                    </button>
-                  ))}
+                  {currentDayData.readingPassage?.tokens?.map((tok, idx) => {
+                    const tokWord = currentLang === 'en' ? tok.en : tok.zh;
+                    return (
+                      <button
+                        key={idx}
+                        onClick={() => {
+                          setSelectedTokenInfo(tok);
+                          playTTS(tokWord, 1.0);
+                        }}
+                        className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
+                      >
+                        <span className={currentLang === 'en' ? '' : 'chinese-font'}>{tokWord}</span>
+                      </button>
+                    );
+                  })}
                 </div>
 
                 {selectedTokenInfo && (
                   <div className="p-3.5 rounded-xl bg-purple-950/80 border border-purple-400/40 text-xs text-white space-y-1 animate-fadeIn mt-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-bold text-amber-300 text-sm chinese-font">
-                        {selectedTokenInfo.zh} [{selectedTokenInfo.py}]
+                      <span className={`font-bold text-amber-300 text-sm ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                        {(currentLang === 'en' ? selectedTokenInfo.en : selectedTokenInfo.zh)}{' '}
+                        [{(currentLang === 'en' ? selectedTokenInfo.ipa : selectedTokenInfo.py)}]
                       </span>
                       <button
                         onClick={() => setSelectedTokenInfo(null)}
@@ -1297,7 +1880,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
 
             <div className="flex justify-end">
               <button
-                onClick={() => setActiveTab(6)}
+                onClick={() => setActiveTab(7)}
                 className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center gap-1.5 transition-all active:scale-95"
               >
                 <span>Vào Đấu trường Game ôn tập</span>
@@ -1307,8 +1890,8 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         )}
 
-        {/* TAB 6: ĐẤU TRƯỜNG GAME ÔN TẬP TOÀN DIỆN (INTERACTIVE GAME ARENA) */}
-        {activeTab === 6 && (
+        {/* TAB 7: ĐẤU TRƯỜNG GAME ÔN TẬP TOÀN DIỆN (INTERACTIVE GAME ARENA) */}
+        {activeTab === 7 && (
           <div className="space-y-6 animate-fadeIn">
             {/* Arena Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -1368,7 +1951,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       <Trophy size={16} /> Game 1: Thử Thách Ghép Cặp Thẻ Từ Vựng
                     </div>
                     <p className="text-xs text-slate-600">
-                      Bấm vào một thẻ Chữ Hán và một thẻ Nghĩa tiếng Việt tương ứng để tạo thành cặp khớp!
+                      Bấm vào một thẻ {currentLang === 'en' ? 'Từ vựng tiếng Anh' : 'Chữ Hán'} và một thẻ Nghĩa tiếng Việt tương ứng để tạo thành cặp khớp!
                     </p>
                   </div>
 
@@ -1407,7 +1990,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                         disabled={isMatched}
                         className={`min-h-[70px] p-3 rounded-2xl border text-center transition-all flex items-center justify-center font-bold text-sm sm:text-base active:scale-95 ${cardClass}`}
                       >
-                        <span className={card.type === 'zh' ? 'chinese-font text-lg' : 'text-xs sm:text-sm'}>
+                        <span className={card.type === 'zh' || card.type === 'en' ? (currentLang === 'en' ? 'text-sm sm:text-base font-bold' : 'chinese-font text-lg') : 'text-xs sm:text-sm'}>
                           {card.text}
                         </span>
                       </button>
@@ -1433,7 +2016,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       <Gamepad2 size={16} /> Game 2: Ghép Các Từ Thành Câu Giao Tiếp
                     </div>
                     <p className="text-xs text-slate-600">
-                      Rèn luyện tư duy trật tự từ tiếng Trung: Chọn các khối từ để xếp câu hoàn chỉnh.
+                      Rèn luyện tư duy trật tự từ {currentLang === 'en' ? 'tiếng Anh' : 'tiếng Trung'}: Chọn các khối từ để xếp câu hoàn chỉnh.
                     </p>
                   </div>
 
@@ -1472,7 +2055,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                         onClick={() => handleReturnScrambleWord(word, idx)}
                         className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs sm:text-sm shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
                       >
-                        <span className="chinese-font">{word}</span>
+                        <span className={currentLang === 'en' ? '' : 'chinese-font'}>{word}</span>
                         <span className="text-[10px] opacity-75">✕</span>
                       </button>
                     ))
@@ -1487,7 +2070,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       onClick={() => handleSelectScrambleWord(word, idx)}
                       className="px-4 py-2.5 rounded-xl bg-white hover:bg-indigo-100 border border-slate-200 hover:border-indigo-400 text-slate-800 font-bold text-sm shadow-2xs transition-all active:scale-95"
                     >
-                      <span className="chinese-font">{word}</span>
+                      <span className={currentLang === 'en' ? '' : 'chinese-font'}>{word}</span>
                     </button>
                   ))}
                 </div>
@@ -1588,7 +2171,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                               disabled={isSubmitted}
                               className={`w-full p-3.5 rounded-xl border text-left font-semibold text-sm transition-all flex items-center justify-between shadow-2xs ${style}`}
                             >
-                              <span className="chinese-font">{opt}</span>
+                              <span className={currentLang === 'en' ? '' : 'chinese-font'}>{opt}</span>
                               {isSubmitted && isRight && <CheckCircle2 size={18} className="text-emerald-600" />}
                             </button>
                           );
@@ -1615,7 +2198,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                       <Zap size={16} /> Game 4: Thử Thách Đúng / Sai Thần Tốc
                     </div>
                     <p className="text-xs text-slate-600">
-                      Bấm nghe audio câu tiếng Trung và xác nhận xem nghĩa tiếng Việt có đúng không!
+                      Bấm nghe audio câu {currentLang === 'en' ? 'tiếng Anh' : 'tiếng Trung'} và xác nhận xem nghĩa tiếng Việt có đúng không!
                     </p>
                   </div>
 
@@ -1651,7 +2234,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                           className="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-95"
                         >
                           <Volume2 size={16} />
-                          <span>Bấm nghe câu tiếng Trung</span>
+                          <span>Bấm nghe câu {currentLang === 'en' ? 'tiếng Anh' : 'tiếng Trung'}</span>
                         </button>
                         <span className="text-xs font-semibold text-slate-700">
                           {item.statement}
@@ -1802,7 +2385,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
                 {wk.days.map((dayNum) => {
                   const isSelected = selectedDayNum === dayNum;
                   const isDone = completedDays.includes(dayNum);
-                  const dayObj = ROADMAP_DAYS_DATA.find((d) => d.day === dayNum);
+                  const dayObj = activeDaysData.find((d) => d.day === dayNum);
 
                   let cardStyle = 'bg-white border-slate-200 text-slate-700 hover:border-slate-300';
                   if (isSelected) {
@@ -1842,10 +2425,10 @@ export default function Roadmap90DaysView({ onGainXP }) {
                 </div>
                 <div>
                   <h3 className="font-extrabold text-lg text-slate-900">
-                    Cẩm Nang 5 Bí Quyết Học 3 Tháng Không Nản
+                    {currentLang === 'en' ? 'Cẩm Nang 5 Bí Quyết Luyện Tiếng Anh Không Nản' : 'Cẩm Nang 5 Bí Quyết Học 3 Tháng Không Nản'}
                   </h3>
                   <p className="text-xs text-slate-500">
-                    Đúc kết từ phương pháp phản xạ ngôn ngữ thực chiến bản xứ
+                    {currentLang === 'en' ? 'Phương pháp nhại giọng Shadowing & phản xạ tự nhiên của chuyên gia' : 'Đúc kết từ phương pháp phản xạ ngôn ngữ thực chiến bản xứ'}
                   </p>
                 </div>
               </div>
@@ -1858,7 +2441,7 @@ export default function Roadmap90DaysView({ onGainXP }) {
             </div>
 
             <div className="space-y-3.5">
-              {ANTI_BURNOUT_TIPS.map((tip, idx) => (
+              {activeTips.map((tip, idx) => (
                 <div key={idx} className="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-1">
                   <div className="font-black text-sm text-slate-900 flex items-center gap-2">
                     <span className="w-5 h-5 rounded-full bg-rose-600 text-white text-[11px] font-black flex items-center justify-center">
@@ -1884,6 +2467,134 @@ export default function Roadmap90DaysView({ onGainXP }) {
           </div>
         </div>
       )}
+
+      {/* KHO 3000 TỪ CỐT LÕI MODAL */}
+      {show3000VocabModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-7 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-2">
+                  <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-[10px] font-black uppercase">
+                    3.000 Từ Thông Dụng Nhất
+                  </span>
+                  <span className="text-xs text-slate-400">
+                    {currentLang === 'en' ? 'Oxford 3000 Core Words' : 'HSK 1-4 & Khẩu Ngữ 3000'}
+                  </span>
+                </div>
+                <h3 className="font-extrabold text-lg text-slate-900">
+                  Từ Vựng Cốt Lõi Được Tích Hợp Trong Cụm Hôm Nay
+                </h3>
+              </div>
+              <button
+                onClick={() => setShow3000VocabModal(false)}
+                className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center font-bold"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-600 leading-relaxed">
+              💡 <em>Tư duy học đúng:</em> Đây là các từ vựng có tần suất xuất hiện cao nhất trong đời sống thực tế, được đúc sẵn vào các khối Lego Cụm từ để bạn nghe và nói nhại liên tục mà không cần học lan man!
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              {dailyChunks.core3000List.map((item, idx) => (
+                <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start justify-between gap-2 shadow-2xs">
+                  <div className="space-y-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-base font-black text-slate-900 ${currentLang === 'en' ? '' : 'chinese-font'}`}>
+                        {item.word}
+                      </span>
+                      <span className="text-xs font-bold text-rose-600">
+                        {item.ipa || item.pinyin}
+                      </span>
+                    </div>
+                    <div className="text-xs font-semibold text-slate-700">
+                      {item.vi}
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      Loại từ: {item.type}
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 font-bold text-[10px]">
+                      Top #{item.rank}
+                    </span>
+                    <button
+                      onClick={() => playTTS(item.word, 0.9)}
+                      className="p-1.5 rounded-lg bg-white border border-slate-200 hover:border-amber-400 text-slate-600 hover:text-amber-600 transition-all active:scale-95"
+                      title="Phát âm từ"
+                    >
+                      <Volume2 size={13} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShow3000VocabModal(false)}
+              className="w-full py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+            >
+              Đóng và tiếp tục ghép cụm
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 6. MOBILE FLOATING STEP BAR (Sticky at Bottom for Seamless Touch Learning) */}
+      <div className="fixed bottom-14 left-0 right-0 sm:hidden z-30 px-3 py-2.5 bg-white/95 backdrop-blur-md border-t border-slate-200/90 shadow-2xl flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="w-6 h-6 rounded-lg bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center flex-shrink-0">
+            {activeTab}
+          </span>
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase font-bold text-slate-400">
+              Bước {activeTab}/7
+            </div>
+            <div className="text-xs font-black text-slate-800 truncate">
+              {activeTab === 1 && '1. Từ vựng cốt lõi'}
+              {activeTab === 2 && '2. 🧩 Ghép cụm nói câu'}
+              {activeTab === 3 && '3. Câu khẩu ngữ'}
+              {activeTab === 4 && '4. Luyện nói AI'}
+              {activeTab === 5 && '5. Hội thoại A-B'}
+              {activeTab === 6 && '6. Đọc bài khóa'}
+              {activeTab === 7 && '7. Game & Ôn tập'}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          {activeTab > 1 && (
+            <button
+              onClick={() => setActiveTab((prev) => Math.max(1, prev - 1))}
+              className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all active:scale-95"
+              title="Bước trước"
+            >
+              <ChevronLeft size={16} />
+            </button>
+          )}
+
+          {activeTab < 7 ? (
+            <button
+              onClick={() => setActiveTab((prev) => Math.min(7, prev + 1))}
+              className="px-3.5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs flex items-center gap-1 shadow-md shadow-rose-600/30 transition-all active:scale-95"
+            >
+              <span>Tiếp theo</span>
+              <ChevronRight size={14} />
+            </button>
+          ) : (
+            <button
+              onClick={markDayComplete}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/30 transition-all active:scale-95"
+            >
+              <CheckCircle2 size={15} />
+              <span>Xong Ngày {selectedDayNum}!</span>
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
