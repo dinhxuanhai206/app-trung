@@ -23,7 +23,8 @@ import {
   UtensilsCrossed,
   ShoppingBag,
   Car,
-  Briefcase
+  Briefcase,
+  Lightbulb
 } from 'lucide-react';
 import { SENTENCE_PUZZLE_TOPICS, ALL_SENTENCE_PUZZLES } from '../data/sentencePuzzlesData';
 
