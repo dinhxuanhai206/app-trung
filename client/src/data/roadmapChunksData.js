@@ -184,106 +184,175 @@ export const CHINESE_DAILY_CHUNKS = {
 };
 
 // BỘ CỤM TỪ TIẾNG ANH TỪNG NGÀY (ENGLISH DAILY CHUNKS)
+// Thiết kế từ A1 -> B1 cho Dân Công Sở, Văn Phòng, Marketing & Booking
 export const ENGLISH_DAILY_CHUNKS = {
-  // NGÀY 1: Chào hỏi thân thiện & Mở lời tự nhiên
+  // NGÀY 1: Giao tiếp văn phòng & Nhờ vả đồng nghiệp (Level A1 - Office Basics)
   1: {
     columnA: [
-      { id: 'en_a1', text: "I was wondering if you could...", ipa: '/aɪ wʌz ˈwʌndərɪŋ ɪf juː kʊd/', vi: 'Tôi tự hỏi không biết bạn có thể...' },
-      { id: 'en_a2', text: "Could you please help me...", ipa: '/kʊd juː pliːz hɛlp miː/', vi: 'Bạn có thể vui lòng giúp tôi...' },
-      { id: 'en_a3', text: "Excuse me, do you happen to know...", ipa: '/ɪkˈskjuːs miː duː juː ˈhæpən tuː noʊ/', vi: 'Xin lỗi, bạn có biết...' },
-      { id: 'en_a4', text: "I'm currently planning to...", ipa: '/aɪm ˈkɜːrəntli ˈplænɪŋ tuː/', vi: 'Tôi hiện đang lên kế hoạch để...' }
+      { id: 'en_a1', text: "Could you please help me...", ipa: '/kʊd juː pliːz hɛlp miː/', vi: 'Bạn có thể vui lòng giúp tôi...' },
+      { id: 'en_a2', text: "Can you send me...", ipa: '/kæn juː sɛnd miː/', vi: 'Bạn có thể gửi cho tôi...' },
+      { id: 'en_a3', text: "I need to check...", ipa: '/aɪ niːd tuː tʃɛk/', vi: 'Tôi cần kiểm tra lại...' },
+      { id: 'en_a4', text: "Are you free to...", ipa: '/ɑːr juː friː tuː/', vi: 'Bạn có rảnh để...' }
     ],
     columnB: [
-      { id: 'en_b1', text: "take a quick look at this document", ipa: '/teɪk ə kwɪk lʊk æt ðɪs ˈdɑːkjumənt/', vi: 'xem lướt qua tài liệu này giúp tôi' },
-      { id: 'en_b2', text: "find the nearest subway station", ipa: '/faɪnd ðə ˈnɪrɪst ˈsʌbweɪ ˈsteɪʃən/', vi: 'tìm trạm tàu điện ngầm gần nhất' },
-      { id: 'en_b3', text: "get in touch with the manager", ipa: '/ɡɛt ɪn tʌtʃ wɪð ðə ˈmænɪdʒər/', vi: 'liên hệ trực tiếp với người quản lý' },
-      { id: 'en_b4', text: "book a table for tonight", ipa: '/bʊk ə ˈteɪbəl fɔːr təˈnaɪt/', vi: 'đặt một bàn ăn cho tối nay' }
+      { id: 'en_b1', text: "check this new file today", ipa: '/tʃɛk ðɪs nuː faɪl təˈdeɪ/', vi: 'kiểm tra tệp tài liệu mới này hôm nay' },
+      { id: 'en_b2', text: "forward the email to our team", ipa: '/ˈfɔːrwərd ði ˈiːmeɪl tuː ˈaʊər tiːm/', vi: 'chuyển tiếp email tới nhóm chúng ta' },
+      { id: 'en_b3', text: "print out the meeting notes", ipa: '/prɪnt aʊt ðə ˈmiːtɪŋ noʊts/', vi: 'in tài liệu ghi chép cuộc họp' },
+      { id: 'en_b4', text: "have a quick talk with me", ipa: '/hæv ə kwɪk tɔːk wɪð miː/', vi: 'trao đổi nhanh một chút với tôi' }
     ],
     columnC: [
-      { id: 'en_c1', text: "as soon as you have time?", ipa: '/æz suːn æz juː hæv taɪm/', vi: 'ngay khi bạn có thời gian được không?' },
-      { id: 'en_c2', text: "before 5 PM this afternoon.", ipa: '/bɪˈfɔːr faɪv piː ɛm ðɪs ˌæftərˈnuːn/', vi: 'trước 5 giờ chiều nay.' },
+      { id: 'en_c1', text: "as soon as you can?", ipa: '/æz suːn æz juː kæn/', vi: 'ngay khi bạn có thể được không?' },
+      { id: 'en_c2', text: "before our afternoon meeting.", ipa: '/bɪˈfɔːr ˈaʊər ˌæftərˈnuːn ˈmiːtɪŋ/', vi: 'trước cuộc họp buổi chiều của chúng ta.' },
       { id: 'en_c3', text: "if it's not too much trouble.", ipa: '/ɪf ɪts nɑːt tuː mʌtʃ ˈtrʌbəl/', vi: 'nếu không quá phiền bạn.' },
-      { id: 'en_c4', text: "I would really appreciate it!", ipa: '/aɪ wʊd ˈriːəli əˈpriːʃieɪt ɪt/', vi: 'tôi thực sự rất cảm kích!' }
+      { id: 'en_c4', text: "thank you so much!", ipa: '/θæŋk juː soʊ mʌtʃ/', vi: 'cảm ơn bạn rất nhiều!' }
     ],
     core3000List: [
-      { word: 'wondering', ipa: '/ˈwʌndərɪŋ/', vi: 'tự hỏi, băn khoăn', type: 'Verb', rank: 310 },
-      { word: 'document', ipa: '/ˈdɑːkjumənt/', vi: 'tài liệu, văn bản', type: 'Noun', rank: 245 },
-      { word: 'subway', ipa: '/ˈsʌbweɪ/', vi: 'tàu điện ngầm', type: 'Noun', rank: 420 },
-      { word: 'manager', ipa: '/ˈmænɪdʒər/', vi: 'người quản lý', type: 'Noun', rank: 115 },
-      { word: 'appreciate', ipa: '/əˈpriːʃieɪt/', vi: 'cảm kích, trân trọng', type: 'Verb', rank: 180 },
-      { word: 'currently', ipa: '/ˈkɜːrəntli/', vi: 'hiện tại, lúc này', type: 'Adverb', rank: 260 },
-      { word: 'trouble', ipa: '/ˈtrʌbəl/', vi: 'rắc rối, phiền phức', type: 'Noun', rank: 195 },
-      { word: 'nearest', ipa: '/ˈnɪrɪst/', vi: 'gần nhất', type: 'Adjective', rank: 330 },
-      { word: 'touch', ipa: '/tʌtʃ/', vi: 'chạm, liên lạc', type: 'Noun/Verb', rank: 140 },
-      { word: 'planning', ipa: '/ˈplænɪŋ/', vi: 'lên kế hoạch', type: 'Verb/Noun', rank: 205 }
+      { word: 'help', ipa: '/hɛlp/', vi: 'giúp đỡ', type: 'Verb/Noun', rank: 45 },
+      { word: 'file', ipa: '/faɪl/', vi: 'tệp tài liệu', type: 'Noun', rank: 110 },
+      { word: 'send', ipa: '/sɛnd/', vi: 'gửi đi', type: 'Verb', rank: 80 },
+      { word: 'team', ipa: '/tiːm/', vi: 'nhóm, đội ngũ', type: 'Noun', rank: 65 },
+      { word: 'desk', ipa: '/dɛsk/', vi: 'bàn làm việc', type: 'Noun', rank: 190 },
+      { word: 'check', ipa: '/tʃɛk/', vi: 'kiểm tra', type: 'Verb', rank: 75 },
+      { word: 'call', ipa: '/kɔːl/', vi: 'gọi điện', type: 'Verb/Noun', rank: 55 },
+      { word: 'meet', ipa: '/miːt/', vi: 'gặp mặt, họp', type: 'Verb', rank: 90 },
+      { word: 'busy', ipa: '/ˈbɪzi/', vi: 'bận rộn', type: 'Adjective', rank: 125 },
+      { word: 'free', ipa: '/friː/', vi: 'rảnh rỗi, tự do', type: 'Adjective', rank: 85 }
     ]
   },
 
-  // NGÀY 2: Cảm ơn chân thành & Đáp lại lịch thiệp
+  // NGÀY 2: Đặt lịch họp & Họp nội bộ phòng ban (Level A1-A2 - Meetings & Schedule)
   2: {
     columnA: [
-      { id: 'en_a1', text: "Thank you so much for...", ipa: '/θæŋk juː soʊ mʌtʃ fɔːr/', vi: 'Cảm ơn bạn rất nhiều vì đã...' },
-      { id: 'en_a2', text: "I truly appreciate your...", ipa: '/aɪ ˈtruːli əˈpriːʃieɪt jɔːr/', vi: 'Tôi thực sự rất trân trọng...' },
-      { id: 'en_a3', text: "Don’t mention it, I was happy to...", ipa: '/doʊnt ˈmenʃn ɪt aɪ wʌz ˈhæpi tuː/', vi: 'Khách sáo làm gì, tôi rất vui lòng...' },
-      { id: 'en_a4', text: "Whenever you need assistance, please...", ipa: '/wenˈevər juː niːd əˈsɪstəns pliːz/', vi: 'Bất cứ khi nào bạn cần giúp đỡ, xin...' }
+      { id: 'en_a1', text: "Let's set up a meeting to...", ipa: '/lɛts sɛt ʌp ə ˈmiːtɪŋ tuː/', vi: 'Chúng ta hãy hẹn họp để...' },
+      { id: 'en_a2', text: "Can we change the time to...", ipa: '/kæn wiː tʃeɪndʒ ðə taɪm tuː/', vi: 'Chúng ta có thể dời giờ họp sang...' },
+      { id: 'en_a3', text: "I would like to share...", ipa: '/aɪ wʊd laɪk tuː ʃɛr/', vi: 'Tôi muốn chia sẻ...' },
+      { id: 'en_a4', text: "Please remind everyone to...", ipa: '/pliːz rɪˈmaɪnd ˈɛvriwʌn tuː/', vi: 'Xin nhắc mọi người...' }
     ],
     columnB: [
-      { id: 'en_b1', text: "lending me a helping hand today", ipa: '/ˈlendɪŋ miː ə ˈhelpɪŋ hænd təˈdeɪ/', vi: 'đã nhiệt tình ra tay giúp đỡ tôi hôm nay' },
-      { id: 'en_b2', text: "generous hospitality and kind support", ipa: '/ˈdʒenərəs ˌhɑːspɪˈtæləti ænd kaɪnd səˈpɔːrt/', vi: 'sự đón tiếp nồng hậu và ủng hộ chân tình' },
-      { id: 'en_b3', text: "guide you through the entire process", ipa: '/ɡaɪd juː θruː ðiː ɪnˈtaɪər ˈprɑːses/', vi: 'hướng dẫn bạn qua toàn bộ quy trình' },
-      { id: 'en_b4', text: "feel free to reach out anytime", ipa: '/fiːl friː tuː riːtʃ aʊt ˈenitaɪm/', vi: 'cứ thoải mái liên hệ bất cứ lúc nào' }
+      { id: 'en_b1', text: "review the weekly work plan", ipa: '/rɪˈvjuː ðə ˈwiːkli wɜːrk plæn/', vi: 'rà soát kế hoạch công việc tuần' },
+      { id: 'en_b2', text: "discuss our next marketing idea", ipa: '/dɪˈskʌs ˈaʊər nɛkst ˈmɑːrkətɪŋ aɪˈdiːə/', vi: 'thảo luận ý tưởng marketing tiếp theo' },
+      { id: 'en_b3', text: "book Meeting Room B on Floor 2", ipa: '/bʊk ˈmiːtɪŋ ruːm biː ɑːn flɔːr tuː/', vi: 'đặt phòng họp B ở tầng 2' },
+      { id: 'en_b4', text: "join the online call on time", ipa: '/dʒɔɪn ði ˈɑːnlaɪn kɔːl ɑːn taɪm/', vi: 'tham gia cuộc gọi trực tuyến đúng giờ' }
     ],
     columnC: [
-      { id: 'en_c1', text: "it really made my day!", ipa: '/ɪt ˈriːəli meɪd maɪ deɪ/', vi: 'nó thực sự làm một ngày của tôi tuyệt vời hơn!' },
-      { id: 'en_c2', text: "that is what good friends are for.", ipa: '/ðæt ɪz wʌt ɡʊd frendz ɑːr fɔːr/', vi: 'bạn bè tốt là để giúp nhau lúc này mà.' },
-      { id: 'en_c3', text: "hope to return the favor soon.", ipa: '/hoʊp tuː rɪˈtɜːrn ðə ˈfeɪvər suːn/', vi: 'hy vọng sẽ sớm có dịp đền đáp sự giúp đỡ.' },
-      { id: 'en_c4', text: "have a wonderful rest of your day!", ipa: '/hæv ə ˈwʌndərfl rest əv jɔːr deɪ/', vi: 'chúc bạn phần còn lại trong ngày thật tuyệt!' }
+      { id: 'en_c1', text: "at 10 AM tomorrow morning.", ipa: '/æt tɛn eɪ ɛm təˈmɔːroʊ ˈmɔːrnɪŋ/', vi: 'vào lúc 10 giờ sáng mai.' },
+      { id: 'en_c2', text: "before this Friday afternoon.", ipa: '/bɪˈfɔːr ðɪs ˈfraɪdeɪ ˌæftərˈnuːn/', vi: 'trước chiều thứ Sáu tuần này.' },
+      { id: 'en_c3', text: "so everyone stays updated.", ipa: '/soʊ ˈɛvriwʌn steɪz ʌpˈdeɪtɪd/', vi: 'để mọi người đều nắm thông tin mới nhất.' },
+      { id: 'en_c4', text: "if that works for you.", ipa: '/ɪf ðæt wɜːrks fɔːr juː/', vi: 'nếu thời gian đó phù hợp với bạn.' }
     ],
     core3000List: [
-      { word: 'hospitality', ipa: '/ˌhɑːspɪˈtæləti/', vi: 'lòng hiếu khách', type: 'Noun', rank: 350 },
-      { word: 'generous', ipa: '/ˈdʒenərəs/', vi: 'hào phóng, rộng rãi', type: 'Adjective', rank: 290 },
-      { word: 'assistance', ipa: '/əˈsɪstəns/', vi: 'sự hỗ trợ', type: 'Noun', rank: 210 },
-      { word: 'process', ipa: '/ˈprɑːses/', vi: 'quy trình', type: 'Noun', rank: 110 },
-      { word: 'entire', ipa: '/ɪnˈtaɪər/', vi: 'toàn bộ', type: 'Adjective', rank: 180 },
-      { word: 'favor', ipa: '/ˈfeɪvər/', vi: 'ân huệ, sự giúp đỡ', type: 'Noun', rank: 240 },
-      { word: 'support', ipa: '/səˈpɔːrt/', vi: 'ủng hộ, hỗ trợ', type: 'Verb/Noun', rank: 95 },
-      { word: 'guide', ipa: '/ɡaɪd/', vi: 'hướng dẫn', type: 'Verb/Noun', rank: 165 },
-      { word: 'reach', ipa: '/riːtʃ/', vi: 'với tới, liên lạc', type: 'Verb', rank: 140 },
-      { word: 'wonderful', ipa: '/ˈwʌndərfl/', vi: 'tuyệt vời', type: 'Adjective', rank: 120 }
+      { word: 'meeting', ipa: '/ˈmiːtɪŋ/', vi: 'cuộc họp', type: 'Noun', rank: 60 },
+      { word: 'plan', ipa: '/plæn/', vi: 'kế hoạch', type: 'Noun/Verb', rank: 70 },
+      { word: 'share', ipa: '/ʃɛr/', vi: 'chia sẻ', type: 'Verb', rank: 95 },
+      { word: 'discuss', ipa: '/dɪˈskʌs/', vi: 'thảo luận', type: 'Verb', rank: 115 },
+      { word: 'review', ipa: '/rɪˈvjuː/', vi: 'rà soát, xem lại', type: 'Verb/Noun', rank: 130 },
+      { word: 'online', ipa: '/ˈɑːnlaɪn/', vi: 'trực tuyến', type: 'Adjective/Adverb', rank: 85 },
+      { word: 'idea', ipa: '/aɪˈdiːə/', vi: 'ý tưởng', type: 'Noun', rank: 105 },
+      { word: 'floor', ipa: '/flɔːr/', vi: 'tầng nhà', type: 'Noun', rank: 180 },
+      { word: 'join', ipa: '/dʒɔɪn/', vi: 'tham gia', type: 'Verb', rank: 140 },
+      { word: 'remind', ipa: '/rɪˈmaɪnd/', vi: 'nhắc nhở', type: 'Verb', rank: 210 }
     ]
   },
 
-  // NGÀY 3: Lời xin lỗi & Giải thích khéo léo
+  // NGÀY 3: Đặt chỗ & Dịch vụ Booking (Level A1-A2 - Table, Room & Ticket Booking)
   3: {
     columnA: [
-      { id: 'en_a1', text: "I am terribly sorry for...", ipa: '/aɪ æm ˈterəbli ˈsɑːri fɔːr/', vi: 'Tôi vô cùng xin lỗi vì đã...' },
-      { id: 'en_a2', text: "I apologize for the delay, but...", ipa: '/aɪ əˈpɑːlədʒaɪz fɔːr ðə dɪˈleɪ bʌt/', vi: 'Tôi xin lỗi vì sự chậm trễ, nhưng...' },
-      { id: 'en_a3', text: "No worries at all, please don’t...", ipa: '/noʊ ˈwɜːriz æt ɔːl pliːz doʊnt/', vi: 'Không sao đâu, xin bạn đừng...' },
-      { id: 'en_a4', text: "It was an honest mistake, let me...", ipa: '/ɪt wʌz ən ˈɑːnɪst mɪˈsteɪk let miː/', vi: 'Đó là một sơ suất ngoài ý muốn, để tôi...' }
+      { id: 'en_a1', text: "I would like to book...", ipa: '/aɪ wʊd laɪk tuː bʊk/', vi: 'Tôi muốn đặt...' },
+      { id: 'en_a2', text: "Do you have any available...", ipa: '/duː juː hæv ˈɛni əˈveɪləbəl/', vi: 'Bạn còn trống...' },
+      { id: 'en_a3', text: "Could I reserve...", ipa: '/kʊd aɪ rɪˈzɜːrv/', vi: 'Tôi có thể giữ trước...' },
+      { id: 'en_a4', text: "Please confirm our booking for...", ipa: '/pliːz kənˈfɜːrm ˈaʊər ˈbʊkɪŋ fɔːr/', vi: 'Xin vui lòng xác nhận đặt chỗ cho...' }
     ],
     columnB: [
-      { id: 'en_b1', text: "keeping you waiting out in the rain", ipa: '/ˈkiːpɪŋ juː ˈweɪtɪŋ aʊt ɪn ðə reɪn/', vi: 'để bạn phải đứng chờ ngoài trời mưa' },
-      { id: 'en_b2', text: "heavy traffic jammed the highway", ipa: '/ˈhevi ˈtræfɪk dʒæmd ðə ˈhaɪweɪ/', vi: 'giao thông đông đúc làm tắc nghẽn đường cao tốc' },
-      { id: 'en_b3', text: "beat yourself up over this minor issue", ipa: '/biːt jɔːrˈself ʌp ˈoʊvər ðɪs ˈmaɪnər ˈɪʃuː/', vi: 'tự trách bản thân vì vấn đề nhỏ nhặt này' },
-      { id: 'en_b4', text: "sort this problem out immediately", ipa: '/sɔːrt ðɪs ˈprɑːbləm aʊt ɪˈmiːdiətli/', vi: 'giải quyết triệt để vấn đề này ngay lập tức' }
+      { id: 'en_b1', text: "a table for four people tonight", ipa: '/ə ˈteɪbəl fɔːr fɔːr ˈpiːpəl təˈnaɪt/', vi: 'một bàn cho 4 người tối nay' },
+      { id: 'en_b2', text: "a single room with high-speed wifi", ipa: '/ə ˈsɪŋɡəl ruːm wɪð haɪ spiːd ˈwaɪfaɪ/', vi: 'một phòng đơn có wifi tốc độ cao' },
+      { id: 'en_b3', text: "two round-trip flight tickets", ipa: '/tuː raʊnd trɪp flaɪt ˈtɪkɪts/', vi: 'hai vé máy bay khứ hồi' },
+      { id: 'en_b4', text: "a quiet corner for our business dinner", ipa: '/ə ˈkwaɪət ˈkɔːrnər fɔːr ˈaʊər ˈbɪznəs ˈdɪnər/', vi: 'một góc yên tĩnh cho tiệc tiếp đối tác' }
     ],
     columnC: [
-      { id: 'en_c1', text: "I promise it won’t happen again.", ipa: '/aɪ ˈprɑːmɪs ɪt woʊnt ˈhæpən əˈɡen/', vi: 'tôi hứa chuyện này sẽ không tái diễn.' },
-      { id: 'en_c2', text: "everyone completely understands.", ipa: '/ˈevriwʌn kəmˈpliːtli ˌʌndərˈstændz/', vi: 'mọi người đều hoàn toàn có thể hiểu được.' },
-      { id: 'en_c3', text: "thank you for your patience!", ipa: '/θæŋk juː fɔːr jɔːr ˈpeɪʃns/', vi: 'cảm ơn bạn vì đã rất kiên nhẫn!' },
-      { id: 'en_c4', text: "all is good and settled now.", ipa: '/ɔːl ɪz ɡʊd ænd ˈsetld naʊ/', vi: 'mọi thứ giờ đã ổn thỏa xong xuôi rồi.' }
+      { id: 'en_c1', text: "under the name of Mr. Hai.", ipa: '/ˈʌndər ðə neɪm əv ˈmɪstər haɪ/', vi: 'dưới tên anh Hải.' },
+      { id: 'en_c2', text: "for this coming weekend?", ipa: '/fɔːr ðɪs ˈkʌmɪŋ ˈwiːkˌɛnd/', vi: 'vào dịp cuối tuần này được không?' },
+      { id: 'en_c3', text: "with breakfast included.", ipa: '/wɪð ˈbrɛkfəst ɪnˈkluːdɪd/', vi: 'đã bao gồm bữa sáng.' },
+      { id: 'en_c4', text: "and send the confirmation via email.", ipa: '/ænd sɛnd ðə ˌkɑːnfərˈmeɪʃən ˈvaɪə ˈiːmeɪl/', vi: 'và gửi email xác nhận giúp tôi.' }
     ],
     core3000List: [
-      { word: 'terribly', ipa: '/ˈterəbli/', vi: 'vô cùng, tệ hại', type: 'Adverb', rank: 320 },
-      { word: 'traffic', ipa: '/ˈtræfɪk/', vi: 'giao thông, xe cộ', type: 'Noun', rank: 190 },
-      { word: 'patience', ipa: '/ˈpeɪʃns/', vi: 'sự kiên nhẫn', type: 'Noun', rank: 250 },
-      { word: 'immediately', ipa: '/ɪˈmiːdiətli/', vi: 'ngay lập tức', type: 'Adverb', rank: 140 },
-      { word: 'promise', ipa: '/ˈprɑːmɪs/', vi: 'hứa hẹn', type: 'Verb/Noun', rank: 160 },
-      { word: 'highway', ipa: '/ˈhaɪweɪ/', vi: 'đường cao tốc', type: 'Noun', rank: 380 },
-      { word: 'minor', ipa: '/ˈmaɪnər/', vi: 'nhỏ, không đáng kể', type: 'Adjective', rank: 215 },
-      { word: 'settled', ipa: '/ˈsetld/', vi: 'đã giải quyết xong', type: 'Adjective', rank: 290 },
-      { word: 'delay', ipa: '/dɪˈleɪ/', vi: 'trì hoãn, chậm trễ', type: 'Noun/Verb', rank: 220 },
-      { word: 'mistake', ipa: '/mɪˈsteɪk/', vi: 'sai lầm', type: 'Noun', rank: 110 }
+      { word: 'book', ipa: '/bʊk/', vi: 'đặt trước, giữ chỗ', type: 'Verb', rank: 50 },
+      { word: 'reserve', ipa: '/rɪˈzɜːrv/', vi: 'đặt chỗ, giữ trước', type: 'Verb', rank: 190 },
+      { word: 'available', ipa: '/əˈveɪləbəl/', vi: 'còn trống, có sẵn', type: 'Adjective', rank: 140 },
+      { word: 'hotel', ipa: '/hoʊˈtɛl/', vi: 'khách sạn', type: 'Noun', rank: 110 },
+      { word: 'ticket', ipa: '/ˈtɪkɪt/', vi: 'vé', type: 'Noun', rank: 135 },
+      { word: 'table', ipa: '/ˈteɪbəl/', vi: 'bàn ăn', type: 'Noun', rank: 70 },
+      { word: 'guest', ipa: '/ɡɛst/', vi: 'khách mời', type: 'Noun', rank: 160 },
+      { word: 'confirm', ipa: '/kənˈfɜːrm/', vi: 'xác nhận', type: 'Verb', rank: 120 },
+      { word: 'price', ipa: '/praɪs/', vi: 'giá tiền', type: 'Noun', rank: 80 },
+      { word: 'bill', ipa: '/bɪl/', vi: 'hóa đơn', type: 'Noun', rank: 95 }
+    ]
+  },
+
+  // NGÀY 4: Chiến dịch Marketing & Quảng bá mạng xã hội (Level A2 - Marketing & Social Ads)
+  4: {
+    columnA: [
+      { id: 'en_a1', text: "Our marketing team plans to...", ipa: '/ˈaʊər ˈmɑːrkətɪŋ tiːm plænz tuː/', vi: 'Đội marketing chúng tôi dự định...' },
+      { id: 'en_a2', text: "We should run ads to...", ipa: '/wiː ʃʊd rʌn ædz tuː/', vi: 'Chúng ta nên chạy quảng cáo để...' },
+      { id: 'en_a3', text: "Let's track the results of...", ipa: '/lɛts træk ðə rɪˈzʌlts əv/', vi: 'Hãy theo dõi số liệu kết quả của...' },
+      { id: 'en_a4', text: "We need more content to...", ipa: '/wiː niːd mɔːr ˈkɑːntɛnt tuː/', vi: 'Chúng ta cần thêm nội dung để...' }
+    ],
+    columnB: [
+      { id: 'en_b1', text: "launch a 20% discount campaign", ipa: '/lɔːntʃ ə ˈtwɛnti pərˈsɛnt ˈdɪskaʊnt kæmˈpeɪn/', vi: 'tung chiến dịch giảm giá 20%' },
+      { id: 'en_b2', text: "reach more young target customers", ipa: '/riːtʃ mɔːr jʌŋ ˈtɑːrɡɪt ˈkʌstəmərz/', vi: 'tiếp cận thêm khách hàng mục tiêu trẻ' },
+      { id: 'en_b3', text: "post attractive product videos on TikTok", ipa: '/poʊst əˈtræktɪv ˈprɑːdʌkt ˈvɪdioʊz ɑːn ˈtɪktɑːk/', vi: 'đăng video sản phẩm thu hút lên TikTok' },
+      { id: 'en_b4', text: "increase our website conversion rate", ipa: '/ɪnˈkriːs ˈaʊər ˈwɛbˌsaɪt kənˈvɜːrʒən reɪt/', vi: 'tăng tỉ lệ chuyển đổi trên trang web' }
+    ],
+    columnC: [
+      { id: 'en_c1', text: "starting from next Monday.", ipa: '/ˈstɑːrtɪŋ frʌm nɛkst ˈmʌndeɪ/', vi: 'bắt đầu từ thứ Hai tuần tới.' },
+      { id: 'en_c2', text: "within our monthly ad budget.", ipa: '/wɪˈðɪn ˈaʊər ˈmʌnθli æd ˈbʌdʒɪt/', vi: 'trong phạm vi ngân sách quảng cáo tháng.' },
+      { id: 'en_c3', text: "to boost our total sales.", ipa: '/tuː buːst ˈaʊər ˈtoʊtl seɪlz/', vi: 'nhằm đẩy mạnh tổng doanh số bán hàng.' },
+      { id: 'en_c4', text: "and attract new leads.", ipa: '/ænd əˈtrækt nuː liːdz/', vi: 'và thu hút tệp khách hàng tiềm năng mới.' }
+    ],
+    core3000List: [
+      { word: 'campaign', ipa: '/kæmˈpeɪn/', vi: 'chiến dịch', type: 'Noun', rank: 160 },
+      { word: 'target', ipa: '/ˈtɑːrɡɪt/', vi: 'mục tiêu', type: 'Noun/Verb', rank: 150 },
+      { word: 'customer', ipa: '/ˈkʌstəmər/', vi: 'khách hàng', type: 'Noun', rank: 75 },
+      { word: 'discount', ipa: '/ˈdɪskaʊnt/', vi: 'giảm giá', type: 'Noun', rank: 170 },
+      { word: 'budget', ipa: '/ˈbʌdʒɪt/', vi: 'ngân sách', type: 'Noun', rank: 185 },
+      { word: 'brand', ipa: '/brænd/', vi: 'thương hiệu', type: 'Noun', rank: 145 },
+      { word: 'post', ipa: '/poʊst/', vi: 'đăng bài', type: 'Verb/Noun', rank: 90 },
+      { word: 'ad', ipa: '/æd/', vi: 'quảng cáo', type: 'Noun', rank: 110 },
+      { word: 'reach', ipa: '/riːtʃ/', vi: 'tiếp cận', type: 'Verb', rank: 125 },
+      { word: 'rate', ipa: '/reɪt/', vi: 'tỉ lệ, mức', type: 'Noun', rank: 130 }
+    ]
+  },
+
+  // NGÀY 5: Xử lý thay đổi lịch & Phản hồi khách hàng (Level A2-B1 - Rescheduling & Feedback)
+  5: {
+    columnA: [
+      { id: 'en_a1', text: "I apologize for any inconvenience, but...", ipa: '/aɪ əˈpɑːlədʒaɪz fɔːr ˈɛni ˌɪnkənˈviːniəns bʌt/', vi: 'Tôi xin lỗi vì sự bất tiện, nhưng...' },
+      { id: 'en_a2', text: "Could we reschedule our...", ipa: '/kʊd wiː ˌriːˈskɛdʒuːl ˈaʊər/', vi: 'Chúng ta có thể dời lịch...' },
+      { id: 'en_a3', text: "Thank you for sharing your...", ipa: '/θæŋk juː fɔːr ˈʃɛrɪŋ jɔːr/', vi: 'Cảm ơn bạn đã chia sẻ...' },
+      { id: 'en_a4', text: "We will do our best to...", ipa: '/wiː wɪl duː ˈaʊər bɛst tuː/', vi: 'Chúng tôi sẽ nỗ lực hết sức để...' }
+    ],
+    columnB: [
+      { id: 'en_b1', text: "change the booking date to next Friday", ipa: '/tʃeɪndʒ ðə ˈbʊkɪŋ deɪt tuː nɛkst ˈfraɪdeɪ/', vi: 'đổi ngày đặt dịch vụ sang thứ Sáu tuần sau' },
+      { id: 'en_b2', text: "valuable feedback regarding our service", ipa: '/ˈvæljuəbəl ˈfiːdbæk rɪˈɡɑːrdɪŋ ˈaʊər ˈsɜːrvɪs/', vi: 'những phản hồi quý giá về dịch vụ của chúng tôi' },
+      { id: 'en_b3', text: "offer you a complimentary room upgrade", ipa: '/ˈɔːfər juː ə ˌkɑːmplɪˈmɛntri ruːm ˈʌpɡreɪd/', vi: 'tặng quý khách nâng cấp phòng miễn phí' },
+      { id: 'en_b4', text: "resolve this booking issue right now", ipa: '/rɪˈzɑːlv ðɪs ˈbʊkɪŋ ˈɪʃuː raɪt naʊ/', vi: 'giải quyết sự cố đặt chỗ này ngay bây giờ' }
+    ],
+    columnC: [
+      { id: 'en_c1', text: "without charging any extra fee.", ipa: '/wɪˈðaʊt ˈtʃɑːrdʒɪŋ ˈɛni ˈɛkstrə fiː/', vi: 'mà không thu thêm bất kỳ phụ phí nào.' },
+      { id: 'en_c2', text: "to make sure you have the best experience.", ipa: '/tuː meɪk ʃʊr juː hæv ðə bɛst ɪkˈspɪriəns/', vi: 'để đảm bảo quý khách có trải nghiệm tốt nhất.' },
+      { id: 'en_c3', text: "and send you an updated invoice.", ipa: '/ænd sɛnd juː ən ʌpˈdeɪtɪd ˈɪnvɔɪs/', vi: 'và gửi kèm hóa đơn cập nhật mới cho bạn.' },
+      { id: 'en_c4', text: "thank you for your kind patience!", ipa: '/θæŋk juː fɔːr jɔːr kaɪnd ˈpeɪʃns/', vi: 'cảm ơn quý khách đã hết lòng kiên nhẫn!' }
+    ],
+    core3000List: [
+      { word: 'feedback', ipa: '/ˈfiːdbæk/', vi: 'phản hồi', type: 'Noun', rank: 155 },
+      { word: 'service', ipa: '/ˈsɜːrvɪs/', vi: 'dịch vụ', type: 'Noun', rank: 80 },
+      { word: 'upgrade', ipa: '/ˈʌpɡreɪd/', vi: 'nâng cấp', type: 'Verb/Noun', rank: 220 },
+      { word: 'resolve', ipa: '/rɪˈzɑːlv/', vi: 'giải quyết', type: 'Verb', rank: 195 },
+      { word: 'apologize', ipa: '/əˈpɑːlədʒaɪz/', vi: 'xin lỗi', type: 'Verb', rank: 230 },
+      { word: 'patience', ipa: '/ˈpeɪʃns/', vi: 'sự kiên nhẫn', type: 'Noun', rank: 245 },
+      { word: 'fee', ipa: '/fiː/', vi: 'khoản phí', type: 'Noun', rank: 175 },
+      { word: 'offer', ipa: '/ˈɔːfər/', vi: 'đưa ra, đề nghị', type: 'Verb/Noun', rank: 95 },
+      { word: 'delay', ipa: '/dɪˈleɪ/', vi: 'trì hoãn, chậm trễ', type: 'Noun/Verb', rank: 210 },
+      { word: 'invoice', ipa: '/ˈɪnvɔɪs/', vi: 'hóa đơn dịch vụ', type: 'Noun', rank: 260 }
     ]
   }
 };
@@ -298,15 +367,16 @@ export function getDailyChunksData(dayNum, lang = 'zh') {
     if (ENGLISH_DAILY_CHUNKS[dayNum]) {
       return ENGLISH_DAILY_CHUNKS[dayNum];
     }
-    // Fallback rotation for English
-    const fallbackDay = ((dayNum - 1) % 3) + 1;
+    // Fallback rotation 5 ngày cho Tiếng Anh
+    const fallbackDay = ((dayNum - 1) % 5) + 1;
     return ENGLISH_DAILY_CHUNKS[fallbackDay] || ENGLISH_DAILY_CHUNKS[1];
   } else {
     if (CHINESE_DAILY_CHUNKS[dayNum]) {
       return CHINESE_DAILY_CHUNKS[dayNum];
     }
-    // Fallback rotation for Chinese
+    // Fallback rotation 5 ngày cho Tiếng Trung
     const fallbackDay = ((dayNum - 1) % 5) + 1;
     return CHINESE_DAILY_CHUNKS[fallbackDay] || CHINESE_DAILY_CHUNKS[1];
   }
 }
+
